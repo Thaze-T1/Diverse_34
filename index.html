@@ -548,8 +548,8 @@
     statusEl.textContent = 'Searching...';
 
     try {
-      const res    = await fetch(`${PROXY}/?q=${encodeURIComponent(query)}`);
-      const data   = await res.json();
+      const res     = await fetch(`${PROXY}/?q=${encodeURIComponent(query)}`);
+      const data    = await res.json();
       const records = data._aRecords || [];
 
       if (records.length === 0) {
@@ -574,7 +574,7 @@
     resultsEl.innerHTML = '';
     records.forEach(item => {
       const title     = item._sName       || 'Untitled';
-      const thumb     = item._sPreviewUrl || item._sThumbnailUrl || null;
+      const thumb     = item._sThumb      || null;
       const type      = item._sModelName  || 'Content';
       const sourceUrl = item._sProfileUrl || '#';
       const game      = item._aGame?._sName || '';
