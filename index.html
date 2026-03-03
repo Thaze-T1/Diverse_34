@@ -169,7 +169,6 @@
     .search-btn:hover { background: #4a7aee; }
     .search-btn:active { transform: scale(0.97); }
 
-    /* filter tabs */
     .filter-tabs { display: flex; gap: 0.5rem; }
 
     .filter-tab {
@@ -186,12 +185,7 @@
     }
 
     .filter-tab:hover { border-color: var(--accent); color: var(--accent); }
-
-    .filter-tab.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-    }
+    .filter-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
     .results {
       width: 100%;
@@ -269,7 +263,6 @@
       z-index: 1;
     }
 
-    /* ── bubble ── */
     .bubble {
       position: fixed;
       bottom: 2rem;
@@ -350,10 +343,7 @@
       max-height: 300px;
     }
 
-    .bubble.fullscreen .bubble-media img {
-      max-height: calc(100vh - 100px);
-    }
-
+    .bubble.fullscreen .bubble-media img { max-height: calc(100vh - 100px); }
     .bubble-media video { width: 100%; display: block; }
 
     .bubble-actions { padding: 0.6rem 0.8rem; display: flex; gap: 0.5rem; flex-shrink: 0; }
@@ -498,7 +488,6 @@
 
 <div class="footer">Diverse — content discovery gateway</div>
 
-<!-- Bubble Player -->
 <div class="bubble" id="bubble">
   <div class="bubble-header">
     <span class="bubble-title" id="bubbleTitle">Preview</span>
@@ -515,7 +504,6 @@
   </div>
 </div>
 
-<!-- Leave Warning -->
 <div class="modal-overlay" id="leaveModal">
   <div class="modal">
     <h2>⚠️ You're leaving Diverse</h2>
@@ -548,23 +536,20 @@
     activeFilter = filter;
     document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
-    // re-search if there's already a query
     if (searchInput.value.trim()) handleSearch();
   }
 
   async function handleSearch() {
     let query = searchInput.value.trim();
     if (!query) return;
-
-    // append filter to query if not 'all'
     if (activeFilter !== 'all') query = query + ' ' + activeFilter;
 
     resultsEl.innerHTML = '';
     statusEl.textContent = 'Searching...';
 
     try {
-      const res  = await fetch(`${PROXY}/?q=${encodeURIComponent(query)}`);
-      const data = await res.json();
+      const res    = await fetch(`${PROXY}/?q=${encodeURIComponent(query)}`);
+      const data   = await res.json();
       const records = data._aRecords || [];
 
       if (records.length === 0) {
@@ -581,6 +566,10 @@
     }
   }
 
+  function proxyImg(url) {
+    return `${PROXY}/?img=${encodeURIComponent(url)}`;
+  }
+
   function renderCards(records) {
     resultsEl.innerHTML = '';
     records.forEach(item => {
@@ -594,7 +583,7 @@
       card.className = 'card';
       card.innerHTML = `
         ${thumb
-          ? `<img class="card-thumb" src="${thumb}" alt="${title}" loading="lazy">`
+          ? `<img class="card-thumb" src="${proxyImg(thumb)}" alt="${title}" loading="lazy">`
           : `<div class="card-thumb-placeholder">🖼</div>`
         }
         <div class="card-body">
@@ -610,7 +599,6 @@
     });
   }
 
-  // ── Bubble ────────────────────────────────────────────────────────────────
   let isFullscreen = false;
 
   function openBubble(mediaUrl, title, sourceUrl) {
@@ -624,7 +612,7 @@
 
     if (mediaUrl) {
       const img = document.createElement('img');
-      img.src = mediaUrl;
+      img.src = proxyImg(mediaUrl);
       img.alt = title;
       mediaEl.appendChild(img);
     } else {
@@ -648,7 +636,6 @@
     isFullscreen = false;
   }
 
-  // close fullscreen on Escape
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       if (isFullscreen) toggleFullscreen();
@@ -656,7 +643,6 @@
     }
   });
 
-  // ── Leave Warning ─────────────────────────────────────────────────────────
   let pendingUrl = null;
 
   function warnLeave(e, url) {
