@@ -197,7 +197,6 @@
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 1rem;
-      animation: fadeUp 0.5s ease both;
     }
 
     .results:empty { display: none; }
@@ -209,6 +208,7 @@
       overflow: hidden;
       cursor: pointer;
       transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      animation: fadeUp 0.4s ease both;
     }
 
     .card:hover {
@@ -217,7 +217,13 @@
       box-shadow: 0 8px 32px rgba(0,0,0,0.4);
     }
 
-    .card-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; background: var(--surface); display: block; }
+    .card-thumb {
+      width: 100%;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      background: var(--surface);
+      display: block;
+    }
 
     .card-thumb-placeholder {
       width: 100%;
@@ -242,7 +248,16 @@
       text-overflow: ellipsis;
     }
 
+    .card-meta { display: flex; justify-content: space-between; align-items: center; }
     .card-source { font-size: 0.65rem; color: var(--muted); }
+    .card-type {
+      font-size: 0.62rem;
+      background: var(--surface);
+      border-radius: 4px;
+      padding: 0.15rem 0.45rem;
+      color: var(--accent);
+    }
+
     .card-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.2rem; }
 
     .card-tag {
@@ -253,7 +268,7 @@
       color: var(--accent2);
     }
 
-    .status { font-size: 0.75rem; color: var(--muted); text-align: center; animation: fadeUp 0.4s ease both; }
+    .status { font-size: 0.75rem; color: var(--muted); text-align: center; }
 
     .footer {
       position: fixed;
@@ -318,7 +333,28 @@
     }
 
     .bubble-close:hover { color: var(--text); }
-    .bubble video { width: 100%; display: block; background: #000; }
+
+    .bubble-media {
+      width: 100%;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 180px;
+    }
+
+    .bubble-media img {
+      width: 100%;
+      display: block;
+      object-fit: contain;
+      max-height: 240px;
+    }
+
+    .bubble-media video {
+      width: 100%;
+      display: block;
+    }
+
     .bubble-actions { padding: 0.6rem 0.8rem; display: flex; gap: 0.5rem; }
 
     .bubble-visit {
@@ -472,10 +508,10 @@
 
 <div class="bubble" id="bubble">
   <div class="bubble-header">
-    <span class="bubble-title" id="bubbleTitle">Now Playing</span>
+    <span class="bubble-title" id="bubbleTitle">Preview</span>
     <button class="bubble-close" onclick="closeBubble()">✕</button>
   </div>
-  <video id="bubbleVideo" controls controlsList="nodownload" oncontextmenu="return false;"></video>
+  <div class="bubble-media" id="bubbleMedia"></div>
   <div class="bubble-actions">
     <a class="bubble-visit" id="bubbleVisitBtn" href="#" onclick="warnLeave(event, this.href)">
       ↗ Visit Source Site
@@ -499,8 +535,9 @@
 </div>
 
 <script>
-  const SITE_NAME = "Diverse";
-  const SOURCES = [];
+  // ── Config ────────────────────────────────────────────────────────────────
+  const PROXY = 'https://diverse-proxy.alpc493.workers.dev';
+  // ─────────────────────────────────────────────────────────────────────────
 
   const searchInput = document.getElementById('searchInput');
   const resultsEl   = document.getElementById('results');
@@ -516,56 +553,88 @@
     searchInput.focus();
   }
 
-  function handleSearch() {
+  async function handleSearch() {
     const query = searchInput.value.trim();
     if (!query) return;
-    const tags = query.toLowerCase().split(/\s+/).filter(Boolean);
+
     resultsEl.innerHTML = '';
-    statusEl.textContent = `Searching for: ${tags.join(', ')} ...`;
-    setTimeout(() => {
-      statusEl.textContent = 'Proxy not connected yet — coming soon!';
-      showDemoCards(tags);
-    }, 800);
+    statusEl.textContent = 'Searching...';
+
+    try {
+      const res  = await fetch(`${PROXY}/?q=${encodeURIComponent(query)}`);
+      const data = await res.json();
+
+      // GameBanana returns results in _aRecords
+      const records = data._aRecords || [];
+
+      if (records.length === 0) {
+        statusEl.textContent = 'No results found. Try different tags.';
+        return;
+      }
+
+      statusEl.textContent = `Found ${records.length} results for "${query}"`;
+      renderCards(records);
+
+    } catch (err) {
+      statusEl.textContent = 'Something went wrong. Try again.';
+      console.error(err);
+    }
   }
 
-  function showDemoCards(tags) {
-    const demos = [
-      { title: 'Example Character Sprite', type: 'image', tags: ['sprite','character'], source: 'mugenarchive.com' },
-      { title: 'Stage Preview Video',      type: 'video', tags: ['video','stage'],     source: 'mugenarchive.com' },
-      { title: 'Character GIF Loop',       type: 'gif',   tags: ['gif','character'],   source: 'mugenarchive.com' },
-    ];
+  function renderCards(records) {
     resultsEl.innerHTML = '';
-    statusEl.textContent = 'Showing demo layout — real results coming once proxy is connected';
-    demos.forEach(item => {
+
+    records.forEach(item => {
+      // GameBanana result fields
+      const title     = item._sName        || 'Untitled';
+      const thumb     = item._sPreviewUrl  || item._sThumbnailUrl || null;
+      const type      = item._sModelName   || 'Content';
+      const sourceUrl = item._sProfileUrl  || '#';
+      const game      = item._aGame?._sName || '';
+
       const card = document.createElement('div');
       card.className = 'card';
       card.innerHTML = `
-        <div class="card-thumb-placeholder">${item.type === 'video' ? '▶' : item.type === 'gif' ? '⟳' : '🖼'}</div>
+        ${thumb
+          ? `<img class="card-thumb" src="${thumb}" alt="${title}" loading="lazy" onerror="this.parentElement.querySelector('.card-thumb-placeholder') && (this.style.display='none')">`
+          : `<div class="card-thumb-placeholder">🖼</div>`
+        }
         <div class="card-body">
-          <div class="card-title">${item.title}</div>
-          <div class="card-source">via ${item.source}</div>
-          <div class="card-tags">${item.tags.map(t => `<span class="card-tag">${t}</span>`).join('')}</div>
+          <div class="card-title">${title}</div>
+          <div class="card-meta">
+            <div class="card-source">GameBanana${game ? ' · ' + game : ''}</div>
+            <div class="card-type">${type}</div>
+          </div>
         </div>`;
-      card.onclick = () => openBubble(null, item.title, '#');
+
+      card.onclick = () => openBubble(thumb, title, sourceUrl);
       resultsEl.appendChild(card);
     });
   }
 
-  function openBubble(videoUrl, title, sourceUrl) {
-    const bubble   = document.getElementById('bubble');
-    const video    = document.getElementById('bubbleVideo');
+  function openBubble(mediaUrl, title, sourceUrl) {
+    const mediaEl  = document.getElementById('bubbleMedia');
     const titleEl  = document.getElementById('bubbleTitle');
     const visitBtn = document.getElementById('bubbleVisitBtn');
+
     titleEl.textContent = title;
     visitBtn.href = sourceUrl;
-    if (videoUrl) { video.src = videoUrl; video.style.display = 'block'; video.play(); }
-    else { video.style.display = 'none'; }
-    bubble.classList.add('active');
+    mediaEl.innerHTML = '';
+
+    if (mediaUrl) {
+      const img = document.createElement('img');
+      img.src = mediaUrl;
+      img.alt = title;
+      mediaEl.appendChild(img);
+    } else {
+      mediaEl.innerHTML = '<span style="color:var(--muted);font-size:0.75rem">No preview available</span>';
+    }
+
+    document.getElementById('bubble').classList.add('active');
   }
 
   function closeBubble() {
-    const video = document.getElementById('bubbleVideo');
-    video.pause(); video.src = '';
+    document.getElementById('bubbleMedia').innerHTML = '';
     document.getElementById('bubble').classList.remove('active');
   }
 
