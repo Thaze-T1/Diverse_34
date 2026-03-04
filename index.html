@@ -621,7 +621,7 @@
       paginationEl.style.display = 'flex';
       pageInfoEl.textContent     = `Page ${page} of ${totalPages}`;
       prevBtn.disabled           = page <= 1;
-      nextBtn.disabled           = page >= totalPages;
+      nextBtn.disabled = page >= totalPages || records.length === 0;
 
       resultsEl.scrollIntoView({ behavior: 'smooth' });
 
