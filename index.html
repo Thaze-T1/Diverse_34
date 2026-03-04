@@ -554,7 +554,8 @@
   // ── ADD NEW SITES HERE — just add a new line ──────────────────────────
   const SOURCES = [
     'gamebanana',
-    'Rule34', // <- replace with your new site's source name
+    // 'pinterest',  ← uncomment when we add pinterest
+    // 'sitename',   ← add more here
   ];
   // ─────────────────────────────────────────────────────────────────────
 
@@ -569,7 +570,7 @@
   let activeFilter = 'all';
   let currentPage  = 1;
   let currentQuery = '';
-  let allResults   = [];
+  let totalResults = 0;
 
   searchInput.addEventListener('keydown', e => {
     if (e.key === 'Enter') handleSearch();
@@ -592,32 +593,29 @@
 
     resultsEl.innerHTML = '';
     paginationEl.style.display = 'none';
-    statusEl.textContent = `Searching ${SOURCES.length} sources...`;
+    statusEl.textContent = `Searching...`;
 
     try {
       // search ALL sources at the same time
       const promises = SOURCES.map(source =>
         fetch(`${PROXY}/?q=${encodeURIComponent(query)}&source=${source}&page=${page}`)
           .then(r => r.json())
-          .catch(() => ({ _aRecords: [] }))
+          .catch(() => ({ _aRecords: [], _nTotal: 0 }))
       );
 
-      const results  = await Promise.all(promises);
-      allResults     = results.flatMap(r => r._aRecords || []);
-      const total    = allResults.length;
+      const responses = await Promise.all(promises);
+      const records   = responses.flatMap(r => r._aRecords || []);
+      totalResults    = responses.reduce((sum, r) => sum + (r._nTotal || 0), 0);
 
-      if (total === 0) {
+      if (records.length === 0) {
         statusEl.textContent = 'No results found. Try different tags.';
         return;
       }
 
-      const perPage    = 30;
-      const totalPages = Math.ceil(total / perPage);
-      const start      = (page - 1) * perPage;
-      const pageItems  = allResults.slice(start, start + perPage);
+      const totalPages = Math.ceil(totalResults / 30);
+      statusEl.textContent = `Found ${totalResults} results — Page ${page} of ${totalPages}`;
 
-      statusEl.textContent = `Found ${total} results across ${SOURCES.length} sources — Page ${page} of ${totalPages}`;
-      renderCards(pageItems);
+      renderCards(records);
 
       paginationEl.style.display = 'flex';
       pageInfoEl.textContent     = `Page ${page} of ${totalPages}`;
@@ -633,21 +631,7 @@
   }
 
   function changePage(direction) {
-    const perPage    = 30;
-    const totalPages = Math.ceil(allResults.length / perPage);
-    const newPage    = currentPage + direction;
-    if (newPage < 1 || newPage > totalPages) return;
-    currentPage = newPage;
-
-    const start     = (newPage - 1) * perPage;
-    const pageItems = allResults.slice(start, start + perPage);
-
-    pageInfoEl.textContent = `Page ${newPage} of ${totalPages}`;
-    prevBtn.disabled       = newPage <= 1;
-    nextBtn.disabled       = newPage >= totalPages;
-
-    renderCards(pageItems);
-    resultsEl.scrollIntoView({ behavior: 'smooth' });
+    handleSearch(currentPage + direction);
   }
 
   function proxyImg(url) {
