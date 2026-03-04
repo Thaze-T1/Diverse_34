@@ -250,7 +250,6 @@
 
     .status { font-size: 0.75rem; color: var(--muted); text-align: center; }
 
-    /* pagination */
     .pagination {
       display: flex;
       align-items: center;
@@ -273,10 +272,7 @@
     .page-btn:hover { border-color: var(--accent); color: var(--accent); }
     .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-    .page-info {
-      font-size: 0.72rem;
-      color: var(--muted);
-    }
+    .page-info { font-size: 0.72rem; color: var(--muted); }
 
     .footer {
       position: fixed;
@@ -555,18 +551,25 @@
 <script>
   const PROXY = 'https://diverse-proxy.alpc493.workers.dev';
 
-  const searchInput = document.getElementById('searchInput');
-  const resultsEl   = document.getElementById('results');
-  const statusEl    = document.getElementById('status');
-  const paginationEl= document.getElementById('pagination');
-  const prevBtn     = document.getElementById('prevBtn');
-  const nextBtn     = document.getElementById('nextBtn');
-  const pageInfoEl  = document.getElementById('pageInfo');
+  // ── ADD NEW SITES HERE — just add a new line ──────────────────────────
+  const SOURCES = [
+    'gamebanana',
+    'Rule34', // <- replace with your new site's source name
+  ];
+  // ─────────────────────────────────────────────────────────────────────
 
-  let activeFilter  = 'all';
-  let currentPage   = 1;
-  let totalResults  = 0;
-  let currentQuery  = '';
+  const searchInput  = document.getElementById('searchInput');
+  const resultsEl    = document.getElementById('results');
+  const statusEl     = document.getElementById('status');
+  const paginationEl = document.getElementById('pagination');
+  const prevBtn      = document.getElementById('prevBtn');
+  const nextBtn      = document.getElementById('nextBtn');
+  const pageInfoEl   = document.getElementById('pageInfo');
+
+  let activeFilter = 'all';
+  let currentPage  = 1;
+  let currentQuery = '';
+  let allResults   = [];
 
   searchInput.addEventListener('keydown', e => {
     if (e.key === 'Enter') handleSearch();
@@ -589,31 +592,38 @@
 
     resultsEl.innerHTML = '';
     paginationEl.style.display = 'none';
-    statusEl.textContent = 'Searching...';
+    statusEl.textContent = `Searching ${SOURCES.length} sources...`;
 
     try {
-      const res     = await fetch(`${PROXY}/?q=${encodeURIComponent(query)}&page=${page}`);
-      const data    = await res.json();
-      const records = data._aRecords || [];
-      totalResults  = data._nTotal   || 0;
+      // search ALL sources at the same time
+      const promises = SOURCES.map(source =>
+        fetch(`${PROXY}/?q=${encodeURIComponent(query)}&source=${source}&page=${page}`)
+          .then(r => r.json())
+          .catch(() => ({ _aRecords: [] }))
+      );
 
-      if (records.length === 0) {
+      const results  = await Promise.all(promises);
+      allResults     = results.flatMap(r => r._aRecords || []);
+      const total    = allResults.length;
+
+      if (total === 0) {
         statusEl.textContent = 'No results found. Try different tags.';
         return;
       }
 
-      const totalPages = Math.ceil(totalResults / 30);
-      statusEl.textContent = `Found ${totalResults} results — Page ${page} of ${totalPages}`;
+      const perPage    = 30;
+      const totalPages = Math.ceil(total / perPage);
+      const start      = (page - 1) * perPage;
+      const pageItems  = allResults.slice(start, start + perPage);
 
-      renderCards(records);
+      statusEl.textContent = `Found ${total} results across ${SOURCES.length} sources — Page ${page} of ${totalPages}`;
+      renderCards(pageItems);
 
-      // show pagination
       paginationEl.style.display = 'flex';
-      pageInfoEl.textContent = `Page ${page} of ${totalPages}`;
-      prevBtn.disabled = page <= 1;
-      nextBtn.disabled = page >= totalPages;
+      pageInfoEl.textContent     = `Page ${page} of ${totalPages}`;
+      prevBtn.disabled           = page <= 1;
+      nextBtn.disabled           = page >= totalPages;
 
-      // scroll to top of results
       resultsEl.scrollIntoView({ behavior: 'smooth' });
 
     } catch (err) {
@@ -623,7 +633,21 @@
   }
 
   function changePage(direction) {
-    handleSearch(currentPage + direction);
+    const perPage    = 30;
+    const totalPages = Math.ceil(allResults.length / perPage);
+    const newPage    = currentPage + direction;
+    if (newPage < 1 || newPage > totalPages) return;
+    currentPage = newPage;
+
+    const start     = (newPage - 1) * perPage;
+    const pageItems = allResults.slice(start, start + perPage);
+
+    pageInfoEl.textContent = `Page ${newPage} of ${totalPages}`;
+    prevBtn.disabled       = newPage <= 1;
+    nextBtn.disabled       = newPage >= totalPages;
+
+    renderCards(pageItems);
+    resultsEl.scrollIntoView({ behavior: 'smooth' });
   }
 
   function proxyImg(url) {
@@ -638,7 +662,7 @@
       const type      = item._sModelName  || 'Content';
       const sourceUrl = item._sProfileUrl || '#';
       const game      = item._aGame?._sName || '';
-      const source    = item._sSource     || 'GameBanana';
+      const source    = item._sSource     || '';
 
       const card = document.createElement('div');
       card.className = 'card';
@@ -668,13 +692,13 @@
     const visitBtn = document.getElementById('bubbleVisitBtn');
 
     titleEl.textContent = title;
-    visitBtn.href = sourceUrl;
-    mediaEl.innerHTML = '';
+    visitBtn.href       = sourceUrl;
+    mediaEl.innerHTML   = '';
 
     if (mediaUrl) {
       const img = document.createElement('img');
-      img.src = proxyImg(mediaUrl);
-      img.alt = title;
+      img.src   = proxyImg(mediaUrl);
+      img.alt   = title;
       mediaEl.appendChild(img);
     } else {
       mediaEl.innerHTML = '<span style="color:var(--muted);font-size:0.75rem">No preview available</span>';
