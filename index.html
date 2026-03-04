@@ -38,10 +38,8 @@
     .warning p { font-size: 0.68rem; line-height: 1.7; color: #b08040; }
     .warning strong { color: var(--warn-text); }
     .search-wrap {
-      position: relative;
-      z-index: 10;
-      margin-bottom: 1.25rem;
-      animation: fadeDown 0.5s 0.1s ease both;
+      position: relative; z-index: 10;
+      margin-bottom: 1.25rem; animation: fadeDown 0.5s 0.1s ease both;
     }
     .search-box {
       display: flex; align-items: center; background: var(--card);
@@ -66,8 +64,7 @@
     .autocomplete {
       position: absolute; top: calc(100% + 4px); left: 0; right: 0;
       background: var(--card); border: 1px solid var(--border);
-      border-radius: 10px; overflow: hidden;
-      z-index: 150;
+      border-radius: 10px; overflow: hidden; z-index: 150;
       display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.6);
     }
     .autocomplete.active { display: block; }
@@ -78,7 +75,7 @@
     }
     .autocomplete-item:hover, .autocomplete-item.selected { background: var(--surface); }
     .autocomplete-count { font-size: 0.65rem; color: var(--muted); }
-    .filter-tabs { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+    .filter-row { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
     .filter-tab {
       background: none; border: 1px solid var(--border); border-radius: 20px;
       color: var(--muted); font-family: 'DM Mono', monospace;
@@ -86,6 +83,19 @@
       transition: border-color 0.15s, color 0.15s;
     }
     .filter-tab.active { border-color: var(--accent); color: var(--accent); }
+    .source-toggles {
+      display: flex; gap: 0.5rem; margin-top: 0.6rem; flex-wrap: wrap; align-items: center;
+    }
+    .source-label { font-size: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+    .source-btn {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+      color: var(--muted); font-family: 'DM Mono', monospace;
+      font-size: 0.68rem; padding: 0.28rem 0.85rem; cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s, opacity 0.15s;
+      opacity: 0.45;
+    }
+    .source-btn.on { border-color: var(--accent); color: var(--accent); background: rgba(167,139,250,0.08); opacity: 1; }
+    .source-btn:hover { opacity: 1; }
     .main-tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; animation: fadeDown 0.5s 0.15s ease both; }
     .main-tab {
       background: none; border: 1px solid var(--border); border-radius: 20px;
@@ -108,8 +118,7 @@
     .card-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; background: var(--surface); display: block; }
     .card-thumb-placeholder {
       width: 100%; aspect-ratio: 16/9; background: var(--surface);
-      display: flex; align-items: center; justify-content: center;
-      color: var(--muted); font-size: 1.5rem;
+      display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 1.5rem;
     }
     .card-heart {
       position: absolute; top: 0.5rem; right: 0.5rem;
@@ -123,440 +132,4 @@
     @media (max-width: 768px) { .card-heart { opacity: 1; width: 2.8rem; height: 2.8rem; font-size: 1.1rem; } }
     .card-body { padding: 0.75rem; display: flex; flex-direction: column; gap: 0.4rem; }
     .card-title { font-family: 'Syne', sans-serif; font-size: 0.82rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .card-meta { display: flex; justify-content: space-between; align-items: center; }
-    .card-source { font-size: 0.65rem; color: var(--muted); }
-    .card-type { font-size: 0.62rem; background: var(--surface); border-radius: 4px; padding: 0.15rem 0.45rem; color: var(--accent); }
-    .status { font-size: 0.75rem; color: var(--muted); text-align: center; }
-    .empty-state {
-      text-align: center; color: var(--muted); font-size: 0.8rem;
-      padding: 3rem 1rem; display: flex; flex-direction: column;
-      align-items: center; gap: 0.5rem; grid-column: 1 / -1;
-    }
-    .empty-state span { font-size: 2rem; }
-    .pagination { display: flex; align-items: center; gap: 0.75rem; animation: fadeUp 0.4s ease both; }
-    .page-btn {
-      background: var(--card); border: 1px solid var(--border); border-radius: 8px;
-      color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.78rem;
-      padding: 0.5rem 1.2rem; cursor: pointer; transition: border-color 0.15s, color 0.15s;
-    }
-    .page-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-    .page-info { font-size: 0.72rem; color: var(--muted); }
-    .footer {
-      position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%);
-      font-size: 0.62rem; color: #3a3a45; letter-spacing: 0.1em;
-      text-transform: uppercase; white-space: nowrap; z-index: 1;
-    }
-    .bubble {
-      position: fixed; bottom: 2rem; right: 2rem; width: 340px;
-      min-width: 200px; min-height: 160px; background: var(--card);
-      border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
-      box-shadow: 0 16px 48px rgba(0,0,0,0.6); z-index: 100;
-      display: none; flex-direction: column;
-    }
-    .bubble.active { display: flex; }
-    .bubble.fullscreen {
-      top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
-      width: 100vw !important; height: 100vh !important; border-radius: 0;
-    }
-    .bubble-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0.6rem 0.8rem; background: var(--surface);
-      border-bottom: 1px solid var(--border); flex-shrink: 0;
-      cursor: grab; user-select: none; touch-action: none;
-      position: sticky; top: 0; z-index: 2;
-    }
-    .bubble-header:active { cursor: grabbing; }
-    .bubble-title {
-      font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 700;
-      color: var(--text); white-space: nowrap; overflow: hidden;
-      text-overflow: ellipsis; max-width: 180px;
-    }
-    .bubble-controls { display: flex; gap: 0.4rem; align-items: center; }
-    .bubble-btn {
-      background: none; border: none; color: var(--muted); cursor: pointer;
-      font-size: 0.95rem; min-width: 2rem; min-height: 2rem;
-      display: flex; align-items: center; justify-content: center;
-      transition: color 0.15s; border-radius: 4px;
-    }
-    .bubble-btn:hover { color: var(--text); background: var(--border); }
-    .bubble-media {
-      width: 100%; background: #000; flex: 1; min-height: 0;
-      overflow-y: auto; -webkit-overflow-scrolling: touch;
-      display: flex; align-items: flex-start; justify-content: center;
-    }
-    .bubble-media img { width: 100%; height: auto; display: block; object-fit: contain; }
-    .bubble-media video { width: 100%; height: 100%; display: block; object-fit: contain; }
-    .bubble-loading { color: var(--muted); font-size: 0.75rem; text-align: center; padding: 2rem; width: 100%; }
-    .bubble-actions { padding: 0.6rem 0.8rem; display: flex; gap: 0.5rem; flex-shrink: 0; background: var(--card); }
-    .bubble-visit {
-      flex: 1; background: none; border: 1px solid var(--border);
-      border-radius: 7px; color: var(--muted); font-family: 'DM Mono', monospace;
-      font-size: 0.68rem; padding: 0.45rem; cursor: pointer;
-      transition: border-color 0.15s, color 0.15s; text-align: center;
-      text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.3rem;
-    }
-    .bubble-visit:hover { border-color: var(--accent); color: var(--accent); }
-    .bubble-resize {
-      position: absolute; bottom: 0; right: 0; width: 28px; height: 28px;
-      cursor: se-resize; z-index: 10; display: flex;
-      align-items: flex-end; justify-content: flex-end; padding: 4px; touch-action: none;
-    }
-    .bubble-resize svg { width: 14px; height: 14px; opacity: 0.4; }
-    .bubble:hover .bubble-resize svg { opacity: 0.8; }
-    .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(4px); z-index: 200; display: none;
-      align-items: center; justify-content: center;
-    }
-    .modal-overlay.active { display: flex; }
-    .modal {
-      background: var(--card); border: 1px solid var(--warn-border);
-      border-radius: 16px; padding: 2rem; max-width: 380px; width: 90%;
-      display: flex; flex-direction: column; gap: 1rem;
-    }
-    .modal h2 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; color: var(--warn-text); }
-    .modal p { font-size: 0.75rem; line-height: 1.7; color: var(--muted); }
-    .modal-btns { display: flex; gap: 0.75rem; }
-    .modal-cancel {
-      flex: 1; background: var(--surface); border: 1px solid var(--border);
-      border-radius: 8px; color: var(--muted); font-family: 'DM Mono', monospace;
-      font-size: 0.78rem; padding: 0.65rem; cursor: pointer; transition: border-color 0.15s;
-    }
-    .modal-cancel:hover { border-color: var(--accent); }
-    .modal-confirm {
-      flex: 1; background: #4a3010; border: 1px solid var(--warn-border);
-      border-radius: 8px; color: var(--warn-text); font-family: 'DM Mono', monospace;
-      font-size: 0.78rem; padding: 0.65rem; cursor: pointer; transition: background 0.15s;
-    }
-    .modal-confirm:hover { background: #5a3f15; }
-    @keyframes fadeDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes fadeUp   { from { opacity: 0; transform: translateY(16px);  } to { opacity: 1; transform: translateY(0); } }
-  </style>
-</head>
-<body>
-<div class="page">
-  <div class="logo-wrap">
-    <div class="logo">Diverse</div>
-    <div class="tagline">Discover content across the web — safely</div>
-  </div>
-  <div class="warning">
-    <span class="warning-icon">⚠️</span>
-    <p>
-      <strong>Your IP and data are protected while you stay on Diverse.</strong>
-      All content is fetched through our servers — source sites never see you.
-      If you choose to visit a source site directly, you leave Diverse's protection.
-      We have no control over external sites once you leave.
-    </p>
-  </div>
-  <div class="search-wrap">
-    <div class="search-box">
-      <span class="search-icon">⌕</span>
-      <input type="text" id="searchInput" placeholder="search anything..." autocomplete="off" spellcheck="false"/>
-      <button class="search-btn" onclick="handleSearch()">Search</button>
-    </div>
-    <div class="autocomplete" id="autocomplete"></div>
-    <div class="filter-tabs">
-      <button class="filter-tab active" onclick="setFilter('all', this)">All</button>
-      <button class="filter-tab" onclick="setFilter('video', this)">Video</button>
-      <button class="filter-tab" onclick="setFilter('picture', this)">Picture</button>
-    </div>
-  </div>
-  <div class="main-tabs">
-    <button class="main-tab active" onclick="setMainTab('search', this)">🔍 Search</button>
-    <button class="main-tab" onclick="setMainTab('favorites', this)">❤️ Favorites</button>
-    <button class="main-tab" onclick="setMainTab('history', this)">🕒 History</button>
-  </div>
-  <div class="status" id="status"></div>
-  <div class="results" id="results"></div>
-  <div class="pagination" id="pagination" style="display:none;">
-    <button class="page-btn" id="prevBtn" onclick="changePage(-1)" disabled>← Prev</button>
-    <span class="page-info" id="pageInfo">Page 1</span>
-    <button class="page-btn" id="nextBtn" onclick="changePage(1)">Next →</button>
-  </div>
-</div>
-<div class="footer">Diverse — content discovery gateway</div>
-<div class="bubble" id="bubble">
-  <div class="bubble-header" id="bubbleHeader">
-    <span class="bubble-title" id="bubbleTitle">Preview</span>
-    <div class="bubble-controls">
-      <button class="bubble-btn" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
-      <button class="bubble-btn" onclick="closeBubble()" title="Close">✕</button>
-    </div>
-  </div>
-  <div class="bubble-media" id="bubbleMedia"></div>
-  <div class="bubble-actions">
-    <a class="bubble-visit" id="bubbleVisitBtn" href="#" onclick="warnLeave(event, this.href)">↗ Visit Source Site</a>
-  </div>
-  <div class="bubble-resize" id="bubbleResize">
-    <svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.5">
-      <line x1="9" y1="1" x2="1" y2="9"/>
-      <line x1="9" y1="5" x2="5" y2="9"/>
-    </svg>
-  </div>
-</div>
-<div class="modal-overlay" id="leaveModal">
-  <div class="modal">
-    <h2>⚠️ You're leaving Diverse</h2>
-    <p>You're about to visit an external site. Once you leave Diverse, your <strong style="color:#e0a44a">IP address and browsing data will be visible</strong> to that site. We cannot protect you outside of Diverse.</p>
-    <div class="modal-btns">
-      <button class="modal-cancel" onclick="closeModal()">Stay on Diverse</button>
-      <button class="modal-confirm" id="modalConfirm">Leave anyway →</button>
-    </div>
-  </div>
-</div>
-<script>
-  const PROXY = 'https://diverse-proxy.alpc493.workers.dev';
-  const SOURCES = [
-    'gelbooru',
-    'danbooru',
-    'e621',
-    'rule34us',
-    // 'safebooru',
-    // 'gamebanana',
-  ];
-
-  const searchInput    = document.getElementById('searchInput');
-  const resultsEl      = document.getElementById('results');
-  const statusEl       = document.getElementById('status');
-  const paginationEl   = document.getElementById('pagination');
-  const prevBtn        = document.getElementById('prevBtn');
-  const nextBtn        = document.getElementById('nextBtn');
-  const pageInfoEl     = document.getElementById('pageInfo');
-  const bubble         = document.getElementById('bubble');
-  const bubbleHeader   = document.getElementById('bubbleHeader');
-  const bubbleResize   = document.getElementById('bubbleResize');
-  const autocompleteEl = document.getElementById('autocomplete');
-
-  let activeFilter = 'all', currentPage = 1, currentQuery = '';
-  let isFullscreen = false, activeMainTab = 'search';
-  let acSelected = -1, acItems = [], acTimer = null, lastRecords = [];
-
-  function getStorage(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; } }
-  function setStorage(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
-  function getFavs() { return getStorage('diverse_favs'); }
-  function isFaved(url) { return getFavs().some(f => f._sProfileUrl === url); }
-  function toggleFav(item) {
-    const favs = getFavs();
-    const idx  = favs.findIndex(f => f._sProfileUrl === item._sProfileUrl);
-    if (idx === -1) favs.unshift(item); else favs.splice(idx, 1);
-    setStorage('diverse_favs', favs.slice(0, 200));
-    document.querySelectorAll(`.card-heart[data-url="${CSS.escape(item._sProfileUrl)}"]`).forEach(btn => {
-      const nowFaved = idx === -1;
-      btn.classList.toggle('faved', nowFaved);
-      btn.textContent = nowFaved ? '❤️' : '🤍';
-    });
-    if (activeMainTab === 'favorites') renderFavorites();
-  }
-  function getHistory() { return getStorage('diverse_history'); }
-  function addHistory(item) {
-    const hist = getHistory().filter(h => h._sProfileUrl !== item._sProfileUrl);
-    hist.unshift(item); setStorage('diverse_history', hist.slice(0, 50));
-  }
-  function getSearchHistory() { return getStorage('diverse_searches'); }
-  function addSearchHistory(q) {
-    const hist = getSearchHistory().filter(h => h !== q);
-    hist.unshift(q); setStorage('diverse_searches', hist.slice(0, 20));
-  }
-
-  searchInput.addEventListener('input', () => {
-    clearTimeout(acTimer);
-    const val = searchInput.value.trim();
-    if (!val) { hideAc(); return; }
-    acTimer = setTimeout(() => fetchAc(val), 300);
-  });
-  async function fetchAc(val) {
-    acSelected = -1; acItems = [];
-    const searches = getSearchHistory().filter(s => s.toLowerCase().includes(val.toLowerCase())).slice(0, 3);
-    let tags = [];
-    try { const res = await fetch(`${PROXY}/?tag=${encodeURIComponent(val)}`); tags = await res.json(); } catch {}
-    const tagNames = Array.isArray(tags) ? tags.map(t => typeof t === 'object' ? t.name : t) : [];
-    acItems = [...searches, ...tagNames.filter(t => !searches.includes(t))];
-    renderAc(searches, Array.isArray(tags) ? tags.filter(t => !searches.includes(typeof t === 'object' ? t.name : t)) : []);
-  }
-  function renderAc(searches, tags) {
-    if (!searches.length && !tags.length) { hideAc(); return; }
-    let html = '';
-    if (searches.length) {
-      html += `<div class="autocomplete-section">Recent searches</div>`;
-      searches.forEach((s, i) => { html += `<div class="autocomplete-item" onclick="pickAc(${i})"><span>${s}</span></div>`; });
-    }
-    if (tags.length) {
-      html += `<div class="autocomplete-section">Tags</div>`;
-      tags.forEach((t, i) => {
-        const idx   = searches.length + i;
-        const name  = typeof t === 'object' ? t.name : t;
-        const count = typeof t === 'object' && t.count > 0 ? `<span class="autocomplete-count">${t.count.toLocaleString()}</span>` : '';
-        html += `<div class="autocomplete-item" onclick="pickAc(${idx})"><span>${name}</span>${count}</div>`;
-      });
-    }
-    autocompleteEl.innerHTML = html;
-    autocompleteEl.classList.add('active');
-  }
-  function hideAc() { autocompleteEl.classList.remove('active'); acSelected = -1; }
-  function pickAc(idx) { searchInput.value = acItems[idx]; hideAc(); handleSearch(); }
-  searchInput.addEventListener('keydown', e => {
-    const items = autocompleteEl.querySelectorAll('.autocomplete-item');
-    if (e.key === 'ArrowDown') { e.preventDefault(); acSelected = Math.min(acSelected + 1, items.length - 1); items.forEach((el, i) => el.classList.toggle('selected', i === acSelected)); }
-    else if (e.key === 'ArrowUp') { e.preventDefault(); acSelected = Math.max(acSelected - 1, -1); items.forEach((el, i) => el.classList.toggle('selected', i === acSelected)); }
-    else if (e.key === 'Enter') { if (acSelected >= 0 && acItems[acSelected]) { e.preventDefault(); pickAc(acSelected); } else { hideAc(); handleSearch(); } }
-    else if (e.key === 'Escape') { hideAc(); }
-  });
-  document.addEventListener('click', e => { if (!autocompleteEl.contains(e.target) && e.target !== searchInput) hideAc(); });
-
-  resultsEl.addEventListener('click', e => {
-    const heart = e.target.closest('.card-heart');
-    if (heart) { e.stopPropagation(); toggleFav(JSON.parse(decodeURIComponent(heart.dataset.item))); return; }
-    const card = e.target.closest('.card');
-    if (card) { const item = JSON.parse(decodeURIComponent(card.dataset.item)); addHistory(item); openBubble(item._sThumb, item._sName || 'Untitled', item._sProfileUrl); }
-  });
-
-  function setMainTab(tab, el) {
-    activeMainTab = tab;
-    document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    paginationEl.style.display = 'none'; statusEl.textContent = '';
-    if (tab === 'search') { if (lastRecords.length) { statusEl.textContent = `Page ${currentPage} — ${lastRecords.length} results`; renderCards(lastRecords); paginationEl.style.display = 'flex'; } }
-    else if (tab === 'favorites') renderFavorites();
-    else if (tab === 'history') renderHistoryTab();
-  }
-  function renderFavorites() {
-    const favs = getFavs(); resultsEl.innerHTML = '';
-    if (!favs.length) { resultsEl.innerHTML = `<div class="empty-state"><span>❤️</span>No favorites yet!</div>`; return; }
-    statusEl.textContent = `${favs.length} favorites`; renderCards(favs);
-  }
-  function renderHistoryTab() {
-    const hist = getHistory(); resultsEl.innerHTML = '';
-    if (!hist.length) { resultsEl.innerHTML = `<div class="empty-state"><span>🕒</span>No history yet!</div>`; return; }
-    statusEl.textContent = `${hist.length} viewed posts`; renderCards(hist);
-  }
-  function setFilter(filter, el) {
-    activeFilter = filter;
-    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    if (searchInput.value.trim()) handleSearch();
-  }
-
-  async function handleSearch(page = 1) {
-    let query = searchInput.value.trim();
-    if (!query) return;
-    if (activeFilter !== 'all') query = query + ' ' + activeFilter;
-    currentQuery = query; currentPage = page;
-    addSearchHistory(searchInput.value.trim());
-    document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
-    document.querySelector('.main-tab').classList.add('active');
-    activeMainTab = 'search';
-    resultsEl.innerHTML = ''; paginationEl.style.display = 'none';
-    statusEl.textContent = 'Searching...';
-    try {
-      const responses = await Promise.all(
-        SOURCES.map(source =>
-          fetch(`${PROXY}/?q=${encodeURIComponent(query)}&source=${source}&page=${page}`)
-            .then(r => r.json()).catch(() => ({ _aRecords: [] }))
-        )
-      );
-      const records = responses.flatMap(r => r._aRecords || []);
-      lastRecords = records;
-      if (records.length === 0) {
-        statusEl.textContent = page > 1 ? 'No more results!' : 'No results found.';
-        if (page > 1) { paginationEl.style.display = 'flex'; prevBtn.disabled = false; nextBtn.disabled = true; pageInfoEl.textContent = `Page ${page}`; }
-        return;
-      }
-      statusEl.textContent = `Page ${page} — ${records.length} results`;
-      renderCards(records);
-      paginationEl.style.display = 'flex'; pageInfoEl.textContent = `Page ${page}`;
-      prevBtn.disabled = page <= 1; nextBtn.disabled = false;
-      resultsEl.scrollIntoView({ behavior: 'smooth' });
-    } catch { statusEl.textContent = 'Something went wrong.'; }
-  }
-  function changePage(direction) { handleSearch(currentPage + direction); }
-  function proxyImg(url) { return `${PROXY}/?img=${encodeURIComponent(url)}`; }
-
-  function renderCards(records) {
-    resultsEl.innerHTML = '';
-    const seen = new Set();
-    records.forEach(item => {
-      const thumb    = item._sThumb || '';
-      const filename = thumb.split('/').pop().replace(/\.[^.]+$/, '').replace(/^thumbnail_/, '');
-      if (filename && filename.length > 8) {
-        if (seen.has(filename)) return;
-        seen.add(filename);
-      }
-      const title     = item._sName       || 'Untitled';
-      const type      = item._sModelName  || 'Image';
-      const sourceUrl = item._sProfileUrl || '#';
-      const game      = item._aGame?._sName || '';
-      const source    = item._sSource     || '';
-      const faved     = isFaved(sourceUrl);
-      const card      = document.createElement('div');
-      card.className    = 'card';
-      card.dataset.item = encodeURIComponent(JSON.stringify(item));
-      card.innerHTML = `
-        <button class="card-heart ${faved ? 'faved' : ''}" data-url="${sourceUrl}" data-item="${encodeURIComponent(JSON.stringify(item))}">${faved ? '❤️' : '🤍'}</button>
-        ${thumb ? `<img class="card-thumb" src="${proxyImg(thumb)}" alt="${title}" loading="lazy">` : `<div class="card-thumb-placeholder">🖼</div>`}
-        <div class="card-body">
-          <div class="card-title">${title}</div>
-          <div class="card-meta">
-            <div class="card-source">${source}${game ? ' · ' + game : ''}</div>
-            <div class="card-type">${type}</div>
-          </div>
-        </div>`;
-      resultsEl.appendChild(card);
-    });
-  }
-
-  let dragging = false, dragOffX = 0, dragOffY = 0;
-  let resizing = false, resizeStartX = 0, resizeStartY = 0, resizeStartW = 0, resizeStartH = 0;
-  function startDrag(cx, cy) { if (isFullscreen) return; dragging = true; const r = bubble.getBoundingClientRect(); dragOffX = cx - r.left; dragOffY = cy - r.top; bubble.style.transition = 'none'; }
-  function moveDrag(cx, cy) { if (!dragging) return; const mx = window.innerWidth - bubble.offsetWidth, my = window.innerHeight - bubble.offsetHeight; bubble.style.left = `${Math.max(0, Math.min(mx, cx - dragOffX))}px`; bubble.style.top = `${Math.max(0, Math.min(my, cy - dragOffY))}px`; bubble.style.right = 'auto'; bubble.style.bottom = 'auto'; }
-  function startResize(cx, cy) { if (isFullscreen) return; resizing = true; resizeStartX = cx; resizeStartY = cy; resizeStartW = bubble.offsetWidth; resizeStartH = bubble.offsetHeight; }
-  function moveResize(cx, cy) { if (!resizing) return; bubble.style.width = `${Math.max(200, resizeStartW + (cx - resizeStartX))}px`; bubble.style.height = `${Math.max(160, resizeStartH + (cy - resizeStartY))}px`; }
-  function endInteraction() { dragging = false; resizing = false; }
-
-  bubbleHeader.addEventListener('mousedown', e => { startDrag(e.clientX, e.clientY); e.preventDefault(); });
-  bubbleResize.addEventListener('mousedown', e => { startResize(e.clientX, e.clientY); e.preventDefault(); });
-  document.addEventListener('mousemove', e => { moveDrag(e.clientX, e.clientY); moveResize(e.clientX, e.clientY); });
-  document.addEventListener('mouseup', endInteraction);
-  bubbleHeader.addEventListener('touchstart', e => { startDrag(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
-  bubbleResize.addEventListener('touchstart', e => { startResize(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }, { passive: false });
-  document.addEventListener('touchmove', e => { if (dragging || resizing) { moveDrag(e.touches[0].clientX, e.touches[0].clientY); moveResize(e.touches[0].clientX, e.touches[0].clientY); } }, { passive: true });
-  document.addEventListener('touchend', endInteraction, { passive: true });
-
-  async function openBubble(thumbUrl, title, sourceUrl) {
-    const mediaEl  = document.getElementById('bubbleMedia');
-    const titleEl  = document.getElementById('bubbleTitle');
-    const visitBtn = document.getElementById('bubbleVisitBtn');
-    titleEl.textContent = title; visitBtn.href = sourceUrl;
-    mediaEl.innerHTML = '<div class="bubble-loading">Loading...</div>';
-    bubble.classList.add('active'); bubble.classList.remove('fullscreen');
-    isFullscreen = false; bubble.style.cssText = 'bottom:2rem;right:2rem;width:340px;';
-    try {
-      const res  = await fetch(`${PROXY}/?post=${encodeURIComponent(sourceUrl)}`);
-      const data = await res.json();
-      mediaEl.innerHTML = '';
-      if (data.type === 'video') {
-        const video = document.createElement('video');
-        video.src = proxyImg(data.url); video.controls = true; video.autoplay = true; video.loop = true;
-        mediaEl.appendChild(video);
-      } else {
-        const img = document.createElement('img');
-        img.src = proxyImg(data.type === 'image' ? data.url : thumbUrl); img.alt = title;
-        mediaEl.appendChild(img);
-      }
-    } catch {
-      mediaEl.innerHTML = '';
-      const img = document.createElement('img');
-      img.src = proxyImg(thumbUrl); img.alt = title; mediaEl.appendChild(img);
-    }
-  }
-  function toggleFullscreen() { isFullscreen = !isFullscreen; bubble.classList.toggle('fullscreen', isFullscreen); if (!isFullscreen) bubble.style.cssText = 'bottom:2rem;right:2rem;width:340px;'; }
-  function closeBubble() { const v = document.getElementById('bubbleMedia').querySelector('video'); if (v) v.pause(); document.getElementById('bubbleMedia').innerHTML = ''; bubble.classList.remove('active', 'fullscreen'); bubble.style.cssText = 'bottom:2rem;right:2rem;width:340px;'; isFullscreen = false; }
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (isFullscreen) toggleFullscreen(); else closeBubble(); } });
-
-  let pendingUrl = null;
-  function warnLeave(e, url) { e.preventDefault(); pendingUrl = url; document.getElementById('leaveModal').classList.add('active'); document.getElementById('modalConfirm').onclick = () => { window.open(pendingUrl, '_blank'); closeModal(); }; }
-  function closeModal() { document.getElementById('leaveModal').classList.remove('active'); pendingUrl = null; }
-  document.getElementById('leaveModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
-</script>
-</body>
-</html>
+    .card-meta { display: flex; justify-content: space-between
