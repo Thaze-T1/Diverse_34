@@ -419,79 +419,21 @@
       border-radius: 0; resize: none;
     }
 
-    .bubble.mobile-full {
-      top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
-      width: 100vw !important; height: 100vh !important;
-      border-radius: 0; resize: none;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* header always on top on mobile */
-    .bubble.mobile-full .bubble-header {
-      flex-shrink: 0;
-      position: relative;
-      z-index: 10;
-    }
-
-    /* media scrollable on mobile */
-    .bubble.mobile-full .bubble-media {
-      flex: 1;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      display: block;
-    }
-
-    .bubble.mobile-full .bubble-media img,
-    .bubble.mobile-full .bubble-media video {
-      width: 100%;
-      height: auto;
-      display: block;
-      object-fit: contain;
-    }
-
-    .bubble.mobile-full .bubble-actions {
-      flex-shrink: 0;
-    }
-
-    .bubble.mobile-mini {
-      top: auto !important; left: auto !important;
-      bottom: 1rem !important; right: 1rem !important;
-      width: 160px !important; height: 120px !important;
-      border-radius: 12px; resize: none; cursor: pointer;
-    }
-
-    .bubble.mobile-mini .bubble-header,
-    .bubble.mobile-mini .bubble-actions { display: none; }
-    .bubble.mobile-mini .bubble-media { overflow: hidden; }
-    .bubble.mobile-mini .bubble-media img,
-    .bubble.mobile-mini .bubble-media video { width: 100%; height: 100%; object-fit: cover; }
-
-    .swipe-indicator {
-      position: absolute;
-      top: 8px; left: 50%;
-      transform: translateX(-50%);
-      width: 36px; height: 4px;
-      background: rgba(255,255,255,0.2);
-      border-radius: 2px;
-      display: none;
-      z-index: 11;
-    }
-
-    @media (max-width: 768px) { .swipe-indicator { display: block; } }
-
     .bubble-header {
       position: relative;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.6rem 0.8rem;
+      padding: 0.75rem 0.8rem;
       background: var(--surface);
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
       cursor: grab;
       user-select: none;
       z-index: 2;
+      /* always visible — never let content push it off screen */
+      position: sticky;
+      top: 0;
     }
 
     .bubble-header:active { cursor: grabbing; }
@@ -514,11 +456,17 @@
       border: none;
       color: var(--muted);
       cursor: pointer;
-      font-size: 0.85rem;
-      padding: 0.25rem 0.4rem;
+      font-size: 0.95rem;
+      padding: 0.3rem 0.45rem;
       line-height: 1;
       transition: color 0.15s;
       border-radius: 4px;
+      /* bigger tap target on mobile */
+      min-width: 2rem;
+      min-height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .bubble-btn:hover { color: var(--text); background: var(--border); }
@@ -526,17 +474,30 @@
     .bubble-media {
       width: 100%;
       background: #000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       flex: 1;
       min-height: 0;
-      overflow: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
     }
 
-    .bubble-media img { width: 100%; height: 100%; display: block; object-fit: contain; }
-    .bubble-media video { width: 100%; height: 100%; display: block; object-fit: contain; }
-    .bubble-loading { color: var(--muted); font-size: 0.75rem; text-align: center; padding: 2rem; }
+    .bubble-media img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: contain;
+    }
+
+    .bubble-media video {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+    }
+
+    .bubble-loading { color: var(--muted); font-size: 0.75rem; text-align: center; padding: 2rem; width: 100%; }
 
     .bubble-actions {
       padding: 0.6rem 0.8rem;
@@ -566,6 +527,25 @@
     }
 
     .bubble-visit:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* mobile bubble takes full width at top */
+    @media (max-width: 768px) {
+      .bubble {
+        left: 0 !important;
+        top: 0 !important;
+        right: 0 !important;
+        bottom: auto !important;
+        width: 100vw !important;
+        height: 70vh !important;
+        border-radius: 0 0 14px 14px;
+        resize: none;
+      }
+
+      .bubble.fullscreen {
+        height: 100vh !important;
+        border-radius: 0;
+      }
+    }
 
     .modal-overlay {
       position: fixed;
@@ -681,7 +661,6 @@
 <div class="footer">Diverse — content discovery gateway</div>
 
 <div class="bubble" id="bubble">
-  <div class="swipe-indicator"></div>
   <div class="bubble-header" id="bubbleHeader">
     <span class="bubble-title" id="bubbleTitle">Preview</span>
     <div class="bubble-controls">
@@ -737,7 +716,6 @@
   let currentPage   = 1;
   let currentQuery  = '';
   let isFullscreen  = false;
-  let isMobileMini  = false;
   let activeMainTab = 'search';
   let acSelected    = -1;
   let acItems       = [];
@@ -1048,89 +1026,46 @@
     });
   }
 
-  // ── Bubble desktop drag ───────────────────────────────────────────────
+  // ── Bubble drag (desktop + mobile) ───────────────────────────────────
   let dragging = false, dragOffX = 0, dragOffY = 0;
 
-  bubbleHeader.addEventListener('mousedown', e => {
-    if (isFullscreen || isMobile()) return;
+  function startDrag(clientX, clientY) {
+    if (isFullscreen) return;
+    if (isMobile()) return; // mobile uses fixed top position, no drag needed
     dragging = true;
     const rect = bubble.getBoundingClientRect();
-    dragOffX = e.clientX - rect.left;
-    dragOffY = e.clientY - rect.top;
+    dragOffX = clientX - rect.left;
+    dragOffY = clientY - rect.top;
     bubble.style.transition = 'none';
-    e.preventDefault();
-  });
+  }
 
-  document.addEventListener('mousemove', e => {
+  function moveDrag(clientX, clientY) {
     if (!dragging) return;
-    bubble.style.left   = `${Math.max(0, Math.min(window.innerWidth  - bubble.offsetWidth,  e.clientX - dragOffX))}px`;
-    bubble.style.top    = `${Math.max(0, Math.min(window.innerHeight - bubble.offsetHeight, e.clientY - dragOffY))}px`;
+    const maxX = window.innerWidth  - bubble.offsetWidth;
+    const maxY = window.innerHeight - bubble.offsetHeight;
+    bubble.style.left   = `${Math.max(0, Math.min(maxX, clientX - dragOffX))}px`;
+    bubble.style.top    = `${Math.max(0, Math.min(maxY, clientY - dragOffY))}px`;
     bubble.style.right  = 'auto';
     bubble.style.bottom = 'auto';
-  });
+  }
 
-  document.addEventListener('mouseup', () => { dragging = false; });
+  function endDrag() { dragging = false; }
 
-  // ── Bubble mobile swipe ───────────────────────────────────────────────
-  let touchStartY = 0, touchStartX = 0;
-  let mobileDragging = false, mobileDragOffY = 0, mobileDragOffX = 0;
+  bubbleHeader.addEventListener('mousedown', e => { startDrag(e.clientX, e.clientY); e.preventDefault(); });
+  document.addEventListener('mousemove', e => moveDrag(e.clientX, e.clientY));
+  document.addEventListener('mouseup', endDrag);
 
   bubbleHeader.addEventListener('touchstart', e => {
-    touchStartY = e.touches[0].clientY;
-    touchStartX = e.touches[0].clientX;
-    if (isMobileMini) return;
-    // on mobile-full, only detect swipe down — no drag
-  }, { passive: true });
-
-  bubble.addEventListener('touchstart', e => {
-    if (!isMobileMini) return;
-    // mini bubble can be dragged
-    mobileDragging = true;
-    const rect = bubble.getBoundingClientRect();
-    mobileDragOffX = e.touches[0].clientX - rect.left;
-    mobileDragOffY = e.touches[0].clientY - rect.top;
+    startDrag(e.touches[0].clientX, e.touches[0].clientY);
   }, { passive: true });
 
   document.addEventListener('touchmove', e => {
-    if (!mobileDragging) return;
-    const x = e.touches[0].clientX - mobileDragOffX;
-    const y = e.touches[0].clientY - mobileDragOffY;
-    bubble.style.left   = `${Math.max(0, Math.min(window.innerWidth  - bubble.offsetWidth,  x))}px`;
-    bubble.style.top    = `${Math.max(0, Math.min(window.innerHeight - bubble.offsetHeight, y))}px`;
-    bubble.style.right  = 'auto';
-    bubble.style.bottom = 'auto';
+    if (dragging) moveDrag(e.touches[0].clientX, e.touches[0].clientY);
   }, { passive: true });
 
-  document.addEventListener('touchend', e => {
-    mobileDragging = false;
-    if (isMobileMini) return;
-    const dy = e.changedTouches[0].clientY - touchStartY;
-    const dx = Math.abs(e.changedTouches[0].clientX - touchStartX);
-    if (dy > 80 && dx < 60) minimiseMobile();
-  }, { passive: true });
+  document.addEventListener('touchend', endDrag, { passive: true });
 
-  bubble.addEventListener('click', e => {
-    if (isMobileMini) { restoreMobile(); e.stopPropagation(); }
-  });
-
-  function minimiseMobile() {
-    isMobileMini = true;
-    bubble.classList.remove('mobile-full');
-    bubble.classList.add('mobile-mini');
-    const video = document.getElementById('bubbleMedia').querySelector('video');
-    if (video) video.pause();
-  }
-
-  function restoreMobile() {
-    isMobileMini = false;
-    bubble.classList.remove('mobile-mini');
-    bubble.classList.add('mobile-full');
-    bubble.style.left = '';
-    bubble.style.top  = '';
-    const video = document.getElementById('bubbleMedia').querySelector('video');
-    if (video) video.play();
-  }
-
+  // ── Open bubble ───────────────────────────────────────────────────────
   async function openBubble(thumbUrl, title, sourceUrl) {
     const mediaEl  = document.getElementById('bubbleMedia');
     const titleEl  = document.getElementById('bubbleTitle');
@@ -1141,11 +1076,11 @@
     mediaEl.innerHTML   = '<div class="bubble-loading">Loading...</div>';
 
     bubble.classList.add('active');
-    bubble.classList.remove('fullscreen', 'mobile-full', 'mobile-mini');
+    bubble.classList.remove('fullscreen');
     isFullscreen = false;
-    isMobileMini = false;
 
-    if (isMobile()) bubble.classList.add('mobile-full');
+    // reset position
+    bubble.style.cssText = '';
 
     try {
       const res  = await fetch(`${PROXY}/?post=${encodeURIComponent(sourceUrl)}`);
@@ -1180,22 +1115,18 @@
   }
 
   function toggleFullscreen() {
-    if (isMobile()) return;
     isFullscreen = !isFullscreen;
     bubble.classList.toggle('fullscreen', isFullscreen);
-    if (!isFullscreen) {
-      bubble.style.cssText = 'right:2rem;bottom:2rem;width:340px;';
-    }
+    if (!isFullscreen) bubble.style.cssText = '';
   }
 
   function closeBubble() {
     const video = document.getElementById('bubbleMedia').querySelector('video');
     if (video) video.pause();
     document.getElementById('bubbleMedia').innerHTML = '';
-    bubble.classList.remove('active', 'fullscreen', 'mobile-full', 'mobile-mini');
-    bubble.style.cssText = 'right:2rem;bottom:2rem;width:340px;';
+    bubble.classList.remove('active', 'fullscreen');
+    bubble.style.cssText = '';
     isFullscreen = false;
-    isMobileMini = false;
   }
 
   document.addEventListener('keydown', e => {
