@@ -323,19 +323,15 @@
 </div>
 <script>
   const PROXY = 'https://diverse-proxy.alpc493.workers.dev';
-
   const ALL_SOURCES = [
-    { id: 'gelbooru',  label: 'Gelbooru',   paid: false },
-    { id: 'danbooru',  label: 'Danbooru',   paid: false },
-    { id: 'e621',      label: 'E621',        paid: false },
-    { id: 'rule34us',  label: 'Rule34.us',  paid: false },
-    { id: 'paheal',    label: 'Paheal',      paid: false },
-    // { id: 'safebooru', label: 'Safebooru', paid: false },
-    // { id: 'gamebanana', label: 'GameBanana', paid: false },
+    { id: 'gelbooru',  label: 'Gelbooru',  paid: false },
+    { id: 'danbooru',  label: 'Danbooru',  paid: false },
+    { id: 'e621',      label: 'E621',       paid: false },
+    { id: 'rule34us',  label: 'Rule34.us', paid: false },
+    { id: 'paheal',    label: 'Paheal',     paid: false },
+    { id: 'yandere',   label: 'Yande.re',  paid: false },
   ];
-
   const enabledSources = new Set(ALL_SOURCES.map(s => s.id));
-
   const togglesEl = document.getElementById('sourceToggles');
   ALL_SOURCES.forEach(src => {
     const btn = document.createElement('button');
@@ -356,7 +352,6 @@
     };
     togglesEl.appendChild(btn);
   });
-
   const searchInput    = document.getElementById('searchInput');
   const resultsEl      = document.getElementById('results');
   const statusEl       = document.getElementById('status');
@@ -368,11 +363,9 @@
   const bubbleHeader   = document.getElementById('bubbleHeader');
   const bubbleResize   = document.getElementById('bubbleResize');
   const autocompleteEl = document.getElementById('autocomplete');
-
   let activeFilter = 'all', currentPage = 1, currentQuery = '';
   let isFullscreen = false, activeMainTab = 'search';
   let acSelected = -1, acItems = [], acTimer = null, lastRecords = [];
-
   function getStorage(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; } }
   function setStorage(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
   function getFavs() { return getStorage('diverse_favs'); }
@@ -399,7 +392,6 @@
     const hist = getSearchHistory().filter(h => h !== q);
     hist.unshift(q); setStorage('diverse_searches', hist.slice(0, 20));
   }
-
   searchInput.addEventListener('input', () => {
     clearTimeout(acTimer);
     const val = searchInput.value.trim();
@@ -444,7 +436,6 @@
     else if (e.key === 'Escape') { hideAc(); }
   });
   document.addEventListener('click', e => { if (!autocompleteEl.contains(e.target) && e.target !== searchInput) hideAc(); });
-
   resultsEl.addEventListener('click', e => {
     const heart = e.target.closest('.card-heart');
     if (heart) { e.stopPropagation(); toggleFav(JSON.parse(decodeURIComponent(heart.dataset.item))); return; }
@@ -452,10 +443,9 @@
     if (card) {
       const item = JSON.parse(decodeURIComponent(card.dataset.item));
       addHistory(item);
-      openBubble(item._sThumb, item._sName || 'Untitled', item._sProfileUrl, item._bPaid || false);
+      openBubble(item._sThumb, item._sName || 'Untitled', item._sProfileUrl, item._bPaid || false, item._sFullUrl || null);
     }
   });
-
   function setMainTab(tab, el) {
     activeMainTab = tab;
     document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
@@ -481,7 +471,6 @@
     el.classList.add('active');
     if (currentQuery) handleSearch(1);
   }
-
   async function handleSearch(page = 1) {
     let query = searchInput.value.trim();
     if (!query) return;
@@ -518,7 +507,6 @@
   }
   function changePage(direction) { handleSearch(currentPage + direction); }
   function proxyImg(url) { return `${PROXY}/?img=${encodeURIComponent(url)}`; }
-
   function renderCards(records) {
     resultsEl.innerHTML = '';
     const seen = new Set();
@@ -532,7 +520,6 @@
       const title     = item._sName       || 'Untitled';
       const type      = item._sModelName  || 'Image';
       const sourceUrl = item._sProfileUrl || '#';
-      const game      = item._aGame?._sName || '';
       const source    = item._sSource     || '';
       const paid      = item._bPaid       || false;
       const faved     = isFaved(sourceUrl);
@@ -545,14 +532,13 @@
         <div class="card-body">
           <div class="card-title">${title}</div>
           <div class="card-meta">
-            <div class="card-source">${source}${game ? ' · ' + game : ''}${paid ? ' · <span style="color:var(--warn-text)">paid</span>' : ''}</div>
+            <div class="card-source">${source}${paid ? ' · <span style="color:var(--warn-text)">paid</span>' : ''}</div>
             <div class="card-type">${type}</div>
           </div>
         </div>`;
       resultsEl.appendChild(card);
     });
   }
-
   let dragging = false, dragOffX = 0, dragOffY = 0;
   let resizing = false, resizeStartX = 0, resizeStartY = 0, resizeStartW = 0, resizeStartH = 0;
   function startDrag(cx, cy) { if (isFullscreen) return; dragging = true; const r = bubble.getBoundingClientRect(); dragOffX = cx - r.left; dragOffY = cy - r.top; bubble.style.transition = 'none'; }
@@ -560,7 +546,6 @@
   function startResize(cx, cy) { if (isFullscreen) return; resizing = true; resizeStartX = cx; resizeStartY = cy; resizeStartW = bubble.offsetWidth; resizeStartH = bubble.offsetHeight; }
   function moveResize(cx, cy) { if (!resizing) return; bubble.style.width = `${Math.max(200, resizeStartW + (cx - resizeStartX))}px`; bubble.style.height = `${Math.max(160, resizeStartH + (cy - resizeStartY))}px`; }
   function endInteraction() { dragging = false; resizing = false; }
-
   bubbleHeader.addEventListener('mousedown', e => { startDrag(e.clientX, e.clientY); e.preventDefault(); });
   bubbleResize.addEventListener('mousedown', e => { startResize(e.clientX, e.clientY); e.preventDefault(); });
   document.addEventListener('mousemove', e => { moveDrag(e.clientX, e.clientY); moveResize(e.clientX, e.clientY); });
@@ -569,25 +554,30 @@
   bubbleResize.addEventListener('touchstart', e => { startResize(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }, { passive: false });
   document.addEventListener('touchmove', e => { if (dragging || resizing) { moveDrag(e.touches[0].clientX, e.touches[0].clientY); moveResize(e.touches[0].clientX, e.touches[0].clientY); } }, { passive: true });
   document.addEventListener('touchend', endInteraction, { passive: true });
-
-  async function openBubble(thumbUrl, title, sourceUrl, paid) {
+  async function openBubble(thumbUrl, title, sourceUrl, paid, fullUrl) {
     const mediaEl  = document.getElementById('bubbleMedia');
     const titleEl  = document.getElementById('bubbleTitle');
     const visitBtn = document.getElementById('bubbleVisitBtn');
     titleEl.textContent = title; visitBtn.href = sourceUrl;
     bubble.classList.add('active'); bubble.classList.remove('fullscreen');
     isFullscreen = false; bubble.style.cssText = 'bottom:2rem;right:2rem;width:340px;';
-
     if (paid) {
       mediaEl.innerHTML = `
         <div class="bubble-paid">
           <div class="bubble-paid-icon">🔒</div>
           <div class="bubble-paid-tag">Paid content</div>
-          <div class="bubble-paid-msg">Full content requires a subscription on the source site. You can still visit to learn more.</div>
+          <div class="bubble-paid-msg">Full content requires a subscription on the source site.</div>
         </div>`;
       return;
     }
-
+    // yande.re (and any future source) passes fullUrl directly — skip the post fetch entirely
+    if (fullUrl) {
+      mediaEl.innerHTML = '';
+      const img = document.createElement('img');
+      img.src = proxyImg(fullUrl); img.alt = title;
+      mediaEl.appendChild(img);
+      return;
+    }
     mediaEl.innerHTML = '<div class="bubble-loading">Loading...</div>';
     try {
       const res  = await fetch(`${PROXY}/?post=${encodeURIComponent(sourceUrl)}`);
@@ -611,7 +601,6 @@
   function toggleFullscreen() { isFullscreen = !isFullscreen; bubble.classList.toggle('fullscreen', isFullscreen); if (!isFullscreen) bubble.style.cssText = 'bottom:2rem;right:2rem;width:340px;'; }
   function closeBubble() { const v = document.getElementById('bubbleMedia').querySelector('video'); if (v) v.pause(); document.getElementById('bubbleMedia').innerHTML = ''; bubble.classList.remove('active', 'fullscreen'); bubble.style.cssText = 'bottom:2rem;right:2rem;width:340px;'; isFullscreen = false; }
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (isFullscreen) toggleFullscreen(); else closeBubble(); } });
-
   let pendingUrl = null;
   function warnLeave(e, url) { e.preventDefault(); pendingUrl = url; document.getElementById('leaveModal').classList.add('active'); document.getElementById('modalConfirm').onclick = () => { window.open(pendingUrl, '_blank'); closeModal(); }; }
   function closeModal() { document.getElementById('leaveModal').classList.remove('active'); pendingUrl = null; }
