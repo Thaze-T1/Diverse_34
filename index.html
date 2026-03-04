@@ -9,49 +9,29 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg:          #0e0e12;
-      --card:        #16161c;
-      --surface:     #1e1e26;
-      --border:      #2a2a35;
-      --text:        #f0f0f5;
-      --muted:       #6b6b80;
-      --accent:      #a78bfa;
-      --warn-border: #7a5520;
-      --warn-text:   #e0a44a;
+      --bg: #0e0e12; --card: #16161c; --surface: #1e1e26;
+      --border: #2a2a35; --text: #f0f0f5; --muted: #6b6b80;
+      --accent: #a78bfa; --warn-border: #7a5520; --warn-text: #e0a44a;
     }
     html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Mono', monospace; }
     body::before {
-      content: '';
-      position: fixed; inset: 0;
+      content: ''; position: fixed; inset: 0;
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-      background-size: 200px;
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.4;
+      background-size: 200px; pointer-events: none; z-index: 0; opacity: 0.4;
     }
     .page { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 6rem; }
     .logo-wrap { text-align: center; margin-bottom: 2rem; animation: fadeDown 0.5s ease both; }
     .logo {
-      font-family: 'Syne', sans-serif;
-      font-size: 3rem;
-      font-weight: 800;
+      font-family: 'Syne', sans-serif; font-size: 3rem; font-weight: 800;
       background: linear-gradient(135deg, #a78bfa 0%, #60a5fa 50%, #34d399 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      letter-spacing: -0.02em;
-      line-height: 1;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; letter-spacing: -0.02em; line-height: 1;
     }
     .tagline { font-size: 0.72rem; color: var(--muted); margin-top: 0.5rem; letter-spacing: 0.08em; }
     .warning {
-      display: flex;
-      gap: 0.75rem;
-      align-items: flex-start;
-      background: #1a1508;
-      border: 1px solid var(--warn-border);
-      border-radius: 10px;
-      padding: 0.85rem 1rem;
-      margin-bottom: 1.5rem;
+      display: flex; gap: 0.75rem; align-items: flex-start;
+      background: #1a1508; border: 1px solid var(--warn-border);
+      border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 1.5rem;
       animation: fadeDown 0.5s 0.05s ease both;
     }
     .warning-icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.05rem; }
@@ -59,113 +39,63 @@
     .warning strong { color: var(--warn-text); }
     .search-wrap { position: relative; margin-bottom: 1.25rem; animation: fadeDown 0.5s 0.1s ease both; }
     .search-box {
-      display: flex;
-      align-items: center;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 0 1rem;
-      gap: 0.75rem;
-      transition: border-color 0.2s;
+      display: flex; align-items: center; background: var(--card);
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: 0 1rem; gap: 0.75rem; transition: border-color 0.2s;
     }
     .search-box:focus-within { border-color: var(--accent); }
     .search-icon { color: var(--muted); font-size: 1.1rem; flex-shrink: 0; }
     .search-box input {
-      flex: 1;
-      background: none;
-      border: none;
-      outline: none;
-      color: var(--text);
-      font-family: 'DM Mono', monospace;
-      font-size: 0.85rem;
-      padding: 0.85rem 0;
+      flex: 1; background: none; border: none; outline: none;
+      color: var(--text); font-family: 'DM Mono', monospace;
+      font-size: 0.85rem; padding: 0.85rem 0;
     }
     .search-box input::placeholder { color: var(--muted); }
     .search-btn {
-      background: var(--accent);
-      border: none;
-      border-radius: 8px;
-      color: #0e0e12;
-      font-family: 'DM Mono', monospace;
-      font-size: 0.78rem;
-      font-weight: 500;
-      padding: 0.5rem 1.1rem;
-      cursor: pointer;
-      transition: opacity 0.15s;
-      flex-shrink: 0;
+      background: var(--accent); border: none; border-radius: 8px;
+      color: #0e0e12; font-family: 'DM Mono', monospace;
+      font-size: 0.78rem; font-weight: 500; padding: 0.5rem 1.1rem;
+      cursor: pointer; transition: opacity 0.15s; flex-shrink: 0;
     }
     .search-btn:hover { opacity: 0.85; }
     .autocomplete {
-      position: absolute;
-      top: calc(100% + 4px);
-      left: 0; right: 0;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-      z-index: 50;
-      display: none;
+      position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden; z-index: 150; display: none;
       box-shadow: 0 8px 24px rgba(0,0,0,0.4);
     }
     .autocomplete.active { display: block; }
     .autocomplete-section { font-size: 0.6rem; color: var(--muted); padding: 0.5rem 1rem 0.25rem; text-transform: uppercase; letter-spacing: 0.1em; }
     .autocomplete-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.55rem 1rem;
-      font-size: 0.78rem;
-      cursor: pointer;
-      transition: background 0.1s;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.55rem 1rem; font-size: 0.78rem; cursor: pointer; transition: background 0.1s;
     }
     .autocomplete-item:hover, .autocomplete-item.selected { background: var(--surface); }
     .autocomplete-count { font-size: 0.65rem; color: var(--muted); }
     .filter-tabs { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
     .filter-tab {
-      background: none;
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      color: var(--muted);
-      font-family: 'DM Mono', monospace;
-      font-size: 0.7rem;
-      padding: 0.3rem 0.9rem;
-      cursor: pointer;
+      background: none; border: 1px solid var(--border); border-radius: 20px;
+      color: var(--muted); font-family: 'DM Mono', monospace;
+      font-size: 0.7rem; padding: 0.3rem 0.9rem; cursor: pointer;
       transition: border-color 0.15s, color 0.15s;
     }
     .filter-tab.active { border-color: var(--accent); color: var(--accent); }
-    .main-tabs {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
-      animation: fadeDown 0.5s 0.15s ease both;
-    }
+    .main-tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; animation: fadeDown 0.5s 0.15s ease both; }
     .main-tab {
-      background: none;
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      color: var(--muted);
-      font-family: 'DM Mono', monospace;
-      font-size: 0.7rem;
-      padding: 0.35rem 1rem;
-      cursor: pointer;
+      background: none; border: 1px solid var(--border); border-radius: 20px;
+      color: var(--muted); font-family: 'DM Mono', monospace;
+      font-size: 0.7rem; padding: 0.35rem 1rem; cursor: pointer;
       transition: border-color 0.15s, color 0.15s;
     }
     .main-tab.active { border-color: var(--accent); color: var(--accent); }
     .results {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-      animation: fadeUp 0.4s ease both;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem; margin-bottom: 1.5rem; animation: fadeUp 0.4s ease both;
     }
     .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-      cursor: pointer;
-      transition: border-color 0.15s, transform 0.15s;
-      position: relative;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden; cursor: pointer;
+      transition: border-color 0.15s, transform 0.15s; position: relative;
     }
     .card:hover { border-color: var(--accent); transform: translateY(-2px); }
     .card:hover .card-heart { opacity: 1; }
@@ -178,16 +108,13 @@
     .card-heart {
       position: absolute; top: 0.5rem; right: 0.5rem;
       background: rgba(0,0,0,0.6); border: none; border-radius: 50%;
-      width: 2.2rem; height: 2.2rem;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; font-size: 0.9rem; opacity: 0;
+      width: 2.2rem; height: 2.2rem; display: flex; align-items: center;
+      justify-content: center; cursor: pointer; font-size: 0.9rem; opacity: 0;
       transition: opacity 0.15s, transform 0.15s; z-index: 2;
     }
     .card-heart:hover { transform: scale(1.2); }
     .card-heart.faved { opacity: 1; }
-    @media (max-width: 768px) {
-      .card-heart { opacity: 1; width: 2.8rem; height: 2.8rem; font-size: 1.1rem; }
-    }
+    @media (max-width: 768px) { .card-heart { opacity: 1; width: 2.8rem; height: 2.8rem; font-size: 1.1rem; } }
     .card-body { padding: 0.75rem; display: flex; flex-direction: column; gap: 0.4rem; }
     .card-title { font-family: 'Syne', sans-serif; font-size: 0.82rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .card-meta { display: flex; justify-content: space-between; align-items: center; }
@@ -214,27 +141,23 @@
       font-size: 0.62rem; color: #3a3a45; letter-spacing: 0.1em;
       text-transform: uppercase; white-space: nowrap; z-index: 1;
     }
-    /* ── BUBBLE ── */
     .bubble {
-      position: fixed; bottom: 2rem; right: 2rem;
-      width: 340px; min-width: 200px; min-height: 160px;
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 14px; overflow: hidden;
-      box-shadow: 0 16px 48px rgba(0,0,0,0.6);
-      z-index: 100; display: none; flex-direction: column;
+      position: fixed; bottom: 2rem; right: 2rem; width: 340px;
+      min-width: 200px; min-height: 160px; background: var(--card);
+      border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.6); z-index: 100;
+      display: none; flex-direction: column;
     }
     .bubble.active { display: flex; }
     .bubble.fullscreen {
-      top: 0 !important; left: 0 !important;
-      right: 0 !important; bottom: 0 !important;
-      width: 100vw !important; height: 100vh !important;
-      border-radius: 0;
+      top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+      width: 100vw !important; height: 100vh !important; border-radius: 0;
     }
     .bubble-header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0.6rem 0.8rem;
-      background: var(--surface); border-bottom: 1px solid var(--border);
-      flex-shrink: 0; cursor: grab; user-select: none; touch-action: none;
+      padding: 0.6rem 0.8rem; background: var(--surface);
+      border-bottom: 1px solid var(--border); flex-shrink: 0;
+      cursor: grab; user-select: none; touch-action: none;
       position: sticky; top: 0; z-index: 2;
     }
     .bubble-header:active { cursor: grabbing; }
@@ -259,24 +182,19 @@
     .bubble-media img { width: 100%; height: auto; display: block; object-fit: contain; }
     .bubble-media video { width: 100%; height: 100%; display: block; object-fit: contain; }
     .bubble-loading { color: var(--muted); font-size: 0.75rem; text-align: center; padding: 2rem; width: 100%; }
-    .bubble-actions {
-      padding: 0.6rem 0.8rem; display: flex; gap: 0.5rem;
-      flex-shrink: 0; background: var(--card);
-    }
+    .bubble-actions { padding: 0.6rem 0.8rem; display: flex; gap: 0.5rem; flex-shrink: 0; background: var(--card); }
     .bubble-visit {
       flex: 1; background: none; border: 1px solid var(--border);
       border-radius: 7px; color: var(--muted); font-family: 'DM Mono', monospace;
       font-size: 0.68rem; padding: 0.45rem; cursor: pointer;
       transition: border-color 0.15s, color 0.15s; text-align: center;
-      text-decoration: none; display: flex; align-items: center;
-      justify-content: center; gap: 0.3rem;
+      text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.3rem;
     }
     .bubble-visit:hover { border-color: var(--accent); color: var(--accent); }
     .bubble-resize {
       position: absolute; bottom: 0; right: 0; width: 28px; height: 28px;
       cursor: se-resize; z-index: 10; display: flex;
-      align-items: flex-end; justify-content: flex-end;
-      padding: 4px; touch-action: none;
+      align-items: flex-end; justify-content: flex-end; padding: 4px; touch-action: none;
     }
     .bubble-resize svg { width: 14px; height: 14px; opacity: 0.4; }
     .bubble:hover .bubble-resize svg { opacity: 0.8; }
@@ -404,20 +322,13 @@
   const bubbleResize   = document.getElementById('bubbleResize');
   const autocompleteEl = document.getElementById('autocomplete');
 
-  let activeFilter  = 'all';
-  let currentPage   = 1;
-  let currentQuery  = '';
-  let isFullscreen  = false;
-  let activeMainTab = 'search';
-  let acSelected    = -1;
-  let acItems       = [];
-  let acTimer       = null;
-  let lastRecords   = [];
+  let activeFilter = 'all', currentPage = 1, currentQuery = '';
+  let isFullscreen = false, activeMainTab = 'search';
+  let acSelected = -1, acItems = [], acTimer = null, lastRecords = [];
 
   function getStorage(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; } }
   function setStorage(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
-
-  function getFavs()    { return getStorage('diverse_favs'); }
+  function getFavs() { return getStorage('diverse_favs'); }
   function isFaved(url) { return getFavs().some(f => f._sProfileUrl === url); }
   function toggleFav(item) {
     const favs = getFavs();
@@ -431,19 +342,15 @@
     });
     if (activeMainTab === 'favorites') renderFavorites();
   }
-
   function getHistory() { return getStorage('diverse_history'); }
   function addHistory(item) {
     const hist = getHistory().filter(h => h._sProfileUrl !== item._sProfileUrl);
-    hist.unshift(item);
-    setStorage('diverse_history', hist.slice(0, 50));
+    hist.unshift(item); setStorage('diverse_history', hist.slice(0, 50));
   }
-
   function getSearchHistory() { return getStorage('diverse_searches'); }
   function addSearchHistory(q) {
     const hist = getSearchHistory().filter(h => h !== q);
-    hist.unshift(q);
-    setStorage('diverse_searches', hist.slice(0, 20));
+    hist.unshift(q); setStorage('diverse_searches', hist.slice(0, 20));
   }
 
   searchInput.addEventListener('input', () => {
@@ -502,11 +409,10 @@
     activeMainTab = tab;
     document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
-    paginationEl.style.display = 'none';
-    statusEl.textContent = '';
+    paginationEl.style.display = 'none'; statusEl.textContent = '';
     if (tab === 'search') { if (lastRecords.length) { statusEl.textContent = `Page ${currentPage} — ${lastRecords.length} results`; renderCards(lastRecords); paginationEl.style.display = 'flex'; } }
     else if (tab === 'favorites') renderFavorites();
-    else if (tab === 'history')   renderHistoryTab();
+    else if (tab === 'history') renderHistoryTab();
   }
   function renderFavorites() {
     const favs = getFavs(); resultsEl.innerHTML = '';
@@ -563,15 +469,12 @@
   function renderCards(records) {
     resultsEl.innerHTML = '';
     records.forEach(item => {
-      const title     = item._sName       || 'Untitled';
-      const thumb     = item._sThumb      || null;
-      const type      = item._sModelName  || 'Image';
-      const sourceUrl = item._sProfileUrl || '#';
-      const game      = item._aGame?._sName || '';
-      const source    = item._sSource     || '';
-      const faved     = isFaved(sourceUrl);
-      const card      = document.createElement('div');
-      card.className    = 'card';
+      const title = item._sName || 'Untitled', thumb = item._sThumb || null;
+      const type = item._sModelName || 'Image', sourceUrl = item._sProfileUrl || '#';
+      const game = item._aGame?._sName || '', source = item._sSource || '';
+      const faved = isFaved(sourceUrl);
+      const card = document.createElement('div');
+      card.className = 'card';
       card.dataset.item = encodeURIComponent(JSON.stringify(item));
       card.innerHTML = `
         <button class="card-heart ${faved ? 'faved' : ''}" data-url="${sourceUrl}" data-item="${encodeURIComponent(JSON.stringify(item))}">${faved ? '❤️' : '🤍'}</button>
@@ -589,10 +492,10 @@
 
   let dragging = false, dragOffX = 0, dragOffY = 0;
   let resizing = false, resizeStartX = 0, resizeStartY = 0, resizeStartW = 0, resizeStartH = 0;
-  function startDrag(clientX, clientY) { if (isFullscreen) return; dragging = true; const rect = bubble.getBoundingClientRect(); dragOffX = clientX - rect.left; dragOffY = clientY - rect.top; bubble.style.transition = 'none'; }
-  function moveDrag(clientX, clientY) { if (!dragging) return; const maxX = window.innerWidth - bubble.offsetWidth; const maxY = window.innerHeight - bubble.offsetHeight; bubble.style.left = `${Math.max(0, Math.min(maxX, clientX - dragOffX))}px`; bubble.style.top = `${Math.max(0, Math.min(maxY, clientY - dragOffY))}px`; bubble.style.right = 'auto'; bubble.style.bottom = 'auto'; }
-  function startResize(clientX, clientY) { if (isFullscreen) return; resizing = true; resizeStartX = clientX; resizeStartY = clientY; resizeStartW = bubble.offsetWidth; resizeStartH = bubble.offsetHeight; }
-  function moveResize(clientX, clientY) { if (!resizing) return; const newW = Math.max(200, resizeStartW + (clientX - resizeStartX)); const newH = Math.max(160, resizeStartH + (clientY - resizeStartY)); bubble.style.width = `${newW}px`; bubble.style.height = `${newH}px`; }
+  function startDrag(cx, cy) { if (isFullscreen) return; dragging = true; const r = bubble.getBoundingClientRect(); dragOffX = cx - r.left; dragOffY = cy - r.top; bubble.style.transition = 'none'; }
+  function moveDrag(cx, cy) { if (!dragging) return; const mx = window.innerWidth - bubble.offsetWidth, my = window.innerHeight - bubble.offsetHeight; bubble.style.left = `${Math.max(0, Math.min(mx, cx - dragOffX))}px`; bubble.style.top = `${Math.max(0, Math.min(my, cy - dragOffY))}px`; bubble.style.right = 'auto'; bubble.style.bottom = 'auto'; }
+  function startResize(cx, cy) { if (isFullscreen) return; resizing = true; resizeStartX = cx; resizeStartY = cy; resizeStartW = bubble.offsetWidth; resizeStartH = bubble.offsetHeight; }
+  function moveResize(cx, cy) { if (!resizing) return; bubble.style.width = `${Math.max(200, resizeStartW + (cx - resizeStartX))}px`; bubble.style.height = `${Math.max(160, resizeStartH + (cy - resizeStartY))}px`; }
   function endInteraction() { dragging = false; resizing = false; }
 
   bubbleHeader.addEventListener('mousedown', e => { startDrag(e.clientX, e.clientY); e.preventDefault(); });
@@ -605,18 +508,15 @@
   document.addEventListener('touchend', endInteraction, { passive: true });
 
   async function openBubble(thumbUrl, title, sourceUrl) {
-    const mediaEl  = document.getElementById('bubbleMedia');
-    const titleEl  = document.getElementById('bubbleTitle');
+    const mediaEl = document.getElementById('bubbleMedia');
+    const titleEl = document.getElementById('bubbleTitle');
     const visitBtn = document.getElementById('bubbleVisitBtn');
-    titleEl.textContent = title;
-    visitBtn.href       = sourceUrl;
-    mediaEl.innerHTML   = '<div class="bubble-loading">Loading...</div>';
-    bubble.classList.add('active');
-    bubble.classList.remove('fullscreen');
-    isFullscreen = false;
-    bubble.style.cssText = 'bottom:2rem;right:2rem;width:340px;';
+    titleEl.textContent = title; visitBtn.href = sourceUrl;
+    mediaEl.innerHTML = '<div class="bubble-loading">Loading...</div>';
+    bubble.classList.add('active'); bubble.classList.remove('fullscreen');
+    isFullscreen = false; bubble.style.cssText = 'bottom:2rem;right:2rem;width:340px;';
     try {
-      const res  = await fetch(`${PROXY}/?post=${encodeURIComponent(sourceUrl)}`);
+      const res = await fetch(`${PROXY}/?post=${encodeURIComponent(sourceUrl)}`);
       const data = await res.json();
       mediaEl.innerHTML = '';
       if (data.type === 'video') {
@@ -625,19 +525,17 @@
         mediaEl.appendChild(video);
       } else {
         const img = document.createElement('img');
-        img.src = proxyImg(data.type === 'image' ? data.url : thumbUrl);
-        img.alt = title;
+        img.src = proxyImg(data.type === 'image' ? data.url : thumbUrl); img.alt = title;
         mediaEl.appendChild(img);
       }
     } catch {
       mediaEl.innerHTML = '';
       const img = document.createElement('img');
-      img.src = proxyImg(thumbUrl); img.alt = title;
-      mediaEl.appendChild(img);
+      img.src = proxyImg(thumbUrl); img.alt = title; mediaEl.appendChild(img);
     }
   }
   function toggleFullscreen() { isFullscreen = !isFullscreen; bubble.classList.toggle('fullscreen', isFullscreen); if (!isFullscreen) bubble.style.cssText = 'bottom:2rem;right:2rem;width:340px;'; }
-  function closeBubble() { const video = document.getElementById('bubbleMedia').querySelector('video'); if (video) video.pause(); document.getElementById('bubbleMedia').innerHTML = ''; bubble.classList.remove('active', 'fullscreen'); bubble.style.cssText = 'bottom:2rem;right:2rem;width:340px;'; isFullscreen = false; }
+  function closeBubble() { const v = document.getElementById('bubbleMedia').querySelector('video'); if (v) v.pause(); document.getElementById('bubbleMedia').innerHTML = ''; bubble.classList.remove('active', 'fullscreen'); bubble.style.cssText = 'bottom:2rem;right:2rem;width:340px;'; isFullscreen = false; }
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (isFullscreen) toggleFullscreen(); else closeBubble(); } });
 
   let pendingUrl = null;
