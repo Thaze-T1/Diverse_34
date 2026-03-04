@@ -368,7 +368,8 @@
     }
 
     .bubble.fullscreen .bubble-media img { max-height: calc(100vh - 100px); }
-    .bubble-media video { width: 100%; display: block; }
+    .bubble-media video { width: 100%; display: block; max-height: 300px; }
+    .bubble.fullscreen .bubble-media video { max-height: calc(100vh - 100px); }
 
     .bubble-actions { padding: 0.6rem 0.8rem; display: flex; gap: 0.5rem; flex-shrink: 0; }
 
@@ -551,12 +552,12 @@
 <script>
   const PROXY = 'https://diverse-proxy.alpc493.workers.dev';
 
-  // ── ADD NEW SITES HERE — just add a new line ──────────────────────────
+  // ── ADD NEW SITES HERE ────────────────────────────────────────────────
   const SOURCES = [
     'gelbooru',
     'danbooru',
-    // 'pinterest',  ← uncomment when we add pinterest
-    // 'sitename',   ← add more here
+    // 'safebooru',
+    // 'gamebanana',
   ];
   // ─────────────────────────────────────────────────────────────────────
 
@@ -571,7 +572,7 @@
   let activeFilter = 'all';
   let currentPage  = 1;
   let currentQuery = '';
-  let totalResults = 0;
+  let lastCount    = 0;
 
   searchInput.addEventListener('keydown', e => {
     if (e.key === 'Enter') handleSearch();
@@ -597,31 +598,34 @@
     statusEl.textContent = `Searching...`;
 
     try {
-      // search ALL sources at the same time
       const promises = SOURCES.map(source =>
         fetch(`${PROXY}/?q=${encodeURIComponent(query)}&source=${source}&page=${page}`)
           .then(r => r.json())
-          .catch(() => ({ _aRecords: [], _nTotal: 0 }))
+          .catch(() => ({ _aRecords: [] }))
       );
 
       const responses = await Promise.all(promises);
       const records   = responses.flatMap(r => r._aRecords || []);
-      totalResults    = responses.reduce((sum, r) => sum + (r._nTotal || 0), 0);
+      lastCount       = records.length;
 
       if (records.length === 0) {
-        statusEl.textContent = 'No results found. Try different tags.';
+        statusEl.textContent = page > 1 ? 'No more results!' : 'No results found. Try different tags.';
+        if (page > 1) {
+          paginationEl.style.display = 'flex';
+          prevBtn.disabled = false;
+          nextBtn.disabled = true;
+          pageInfoEl.textContent = `Page ${page}`;
+        }
         return;
       }
 
-      const totalPages = Math.ceil(totalResults / 30);
-      statusEl.textContent = `Found ${totalResults} results — Page ${page} of ${totalPages}`;
-
+      statusEl.textContent = `Page ${page} — ${records.length} results`;
       renderCards(records);
 
       paginationEl.style.display = 'flex';
-      pageInfoEl.textContent     = `Page ${page} of ${totalPages}`;
+      pageInfoEl.textContent     = `Page ${page}`;
       prevBtn.disabled           = page <= 1;
-      nextBtn.disabled = page >= totalPages || records.length === 0;
+      nextBtn.disabled           = records.length === 0;
 
       resultsEl.scrollIntoView({ behavior: 'smooth' });
 
@@ -644,17 +648,18 @@
     records.forEach(item => {
       const title     = item._sName       || 'Untitled';
       const thumb     = item._sThumb      || null;
-      const type      = item._sModelName  || 'Content';
+      const type      = item._sModelName  || 'Image';
       const sourceUrl = item._sProfileUrl || '#';
       const game      = item._aGame?._sName || '';
       const source    = item._sSource     || '';
+      const videoUrl  = item._sVideoUrl   || null;
 
       const card = document.createElement('div');
       card.className = 'card';
       card.innerHTML = `
         ${thumb
           ? `<img class="card-thumb" src="${proxyImg(thumb)}" alt="${title}" loading="lazy">`
-          : `<div class="card-thumb-placeholder">🖼</div>`
+          : `<div class="card-thumb-placeholder">${videoUrl ? '▶' : '🖼'}</div>`
         }
         <div class="card-body">
           <div class="card-title">${title}</div>
@@ -664,14 +669,14 @@
           </div>
         </div>`;
 
-      card.onclick = () => openBubble(thumb, title, sourceUrl);
+      card.onclick = () => openBubble(thumb, videoUrl, title, sourceUrl);
       resultsEl.appendChild(card);
     });
   }
 
   let isFullscreen = false;
 
-  function openBubble(mediaUrl, title, sourceUrl) {
+  function openBubble(mediaUrl, videoUrl, title, sourceUrl) {
     const mediaEl  = document.getElementById('bubbleMedia');
     const titleEl  = document.getElementById('bubbleTitle');
     const visitBtn = document.getElementById('bubbleVisitBtn');
@@ -680,7 +685,14 @@
     visitBtn.href       = sourceUrl;
     mediaEl.innerHTML   = '';
 
-    if (mediaUrl) {
+    if (videoUrl) {
+      const video = document.createElement('video');
+      video.src      = proxyImg(videoUrl);
+      video.controls = true;
+      video.autoplay = true;
+      video.loop     = true;
+      mediaEl.appendChild(video);
+    } else if (mediaUrl) {
       const img = document.createElement('img');
       img.src   = proxyImg(mediaUrl);
       img.alt   = title;
@@ -701,7 +713,10 @@
   }
 
   function closeBubble() {
-    document.getElementById('bubbleMedia').innerHTML = '';
+    const mediaEl = document.getElementById('bubbleMedia');
+    const video   = mediaEl.querySelector('video');
+    if (video) video.pause();
+    mediaEl.innerHTML = '';
     document.getElementById('bubble').classList.remove('active', 'fullscreen');
     isFullscreen = false;
   }
