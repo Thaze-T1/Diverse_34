@@ -21,6 +21,7 @@
       --warn-bg:   #1a1510;
       --warn-border:#4a3520;
       --warn-text: #c8922a;
+      --heart:     #ff4d6d;
     }
 
     html, body {
@@ -117,6 +118,7 @@
       flex-direction: column;
       gap: 0.75rem;
       animation: fadeDown 0.7s 0.2s ease both;
+      position: relative;
     }
 
     .search-box {
@@ -169,6 +171,44 @@
     .search-btn:hover { background: #4a7aee; }
     .search-btn:active { transform: scale(0.97); }
 
+    /* autocomplete dropdown */
+    .autocomplete {
+      position: absolute;
+      top: calc(100% - 0.75rem);
+      left: 0;
+      right: 0;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 0 0 12px 12px;
+      overflow: hidden;
+      z-index: 50;
+      display: none;
+    }
+
+    .autocomplete.active { display: block; }
+
+    .autocomplete-item {
+      padding: 0.6rem 1.1rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      cursor: pointer;
+      transition: background 0.1s, color 0.1s;
+    }
+
+    .autocomplete-item:hover,
+    .autocomplete-item.selected {
+      background: var(--surface);
+      color: var(--accent);
+    }
+
+    .autocomplete-section {
+      font-size: 0.62rem;
+      color: #3a3a45;
+      padding: 0.4rem 1.1rem 0.2rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
     .filter-tabs { display: flex; gap: 0.5rem; }
 
     .filter-tab {
@@ -186,6 +226,29 @@
 
     .filter-tab:hover { border-color: var(--accent); color: var(--accent); }
     .filter-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    /* main tabs */
+    .main-tabs {
+      display: flex;
+      gap: 0.5rem;
+      width: 100%;
+      max-width: 960px;
+    }
+
+    .main-tab {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem 1.2rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .main-tab:hover { border-color: var(--accent); color: var(--accent); }
+    .main-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
     .results {
       width: 100%;
@@ -205,13 +268,11 @@
       cursor: pointer;
       transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
       animation: fadeUp 0.4s ease both;
+      position: relative;
     }
 
-    .card:hover {
-      border-color: #3a4a7a;
-      transform: translateY(-3px);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    }
+    .card:hover { border-color: #3a4a7a; transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+    .card:hover .card-heart { opacity: 1; }
 
     .card-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; background: var(--surface); display: block; }
 
@@ -225,6 +286,28 @@
       color: var(--muted);
       font-size: 1.5rem;
     }
+
+    .card-heart {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: rgba(0,0,0,0.6);
+      border: none;
+      border-radius: 50%;
+      width: 2rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.9rem;
+      opacity: 0;
+      transition: opacity 0.15s, transform 0.15s;
+      z-index: 2;
+    }
+
+    .card-heart:hover { transform: scale(1.2); }
+    .card-heart.faved { opacity: 1; color: var(--heart); }
 
     .card-body { padding: 0.75rem; display: flex; flex-direction: column; gap: 0.4rem; }
 
@@ -250,6 +333,19 @@
 
     .status { font-size: 0.75rem; color: var(--muted); text-align: center; }
 
+    .empty-state {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.8rem;
+      padding: 3rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .empty-state span { font-size: 2rem; }
+
     .pagination {
       display: flex;
       align-items: center;
@@ -271,7 +367,6 @@
 
     .page-btn:hover { border-color: var(--accent); color: var(--accent); }
     .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
     .page-info { font-size: 0.72rem; color: var(--muted); }
 
     .footer {
@@ -287,6 +382,7 @@
       z-index: 1;
     }
 
+    /* ── BUBBLE ───────────────────────────────────────────────────────── */
     .bubble {
       position: fixed;
       bottom: 2rem;
@@ -308,17 +404,44 @@
     .bubble.active { display: flex; }
 
     .bubble.fullscreen {
-      top: 0 !important;
-      left: 0 !important;
-      right: 0 !important;
-      bottom: 0 !important;
-      width: 100vw !important;
-      height: 100vh !important;
-      border-radius: 0;
-      resize: none;
+      top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+      width: 100vw !important; height: 100vh !important;
+      border-radius: 0; resize: none;
     }
 
+    .bubble.mobile-full {
+      top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+      width: 100vw !important; height: 100vh !important;
+      border-radius: 0; resize: none;
+    }
+
+    .bubble.mobile-mini {
+      top: auto !important; left: auto !important;
+      bottom: 1rem !important; right: 1rem !important;
+      width: 160px !important; height: 120px !important;
+      border-radius: 12px; resize: none; cursor: pointer;
+    }
+
+    .bubble.mobile-mini .bubble-header,
+    .bubble.mobile-mini .bubble-actions { display: none; }
+
+    .bubble.mobile-mini .bubble-media img,
+    .bubble.mobile-mini .bubble-media video { width: 100%; height: 100%; object-fit: cover; }
+
+    .swipe-indicator {
+      position: absolute;
+      top: 8px; left: 50%;
+      transform: translateX(-50%);
+      width: 36px; height: 4px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 2px;
+      display: none;
+    }
+
+    @media (max-width: 768px) { .swipe-indicator { display: block; } }
+
     .bubble-header {
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -370,26 +493,10 @@
       overflow: hidden;
     }
 
-    .bubble-media img {
-      width: 100%;
-      height: 100%;
-      display: block;
-      object-fit: contain;
-    }
+    .bubble-media img { width: 100%; height: 100%; display: block; object-fit: contain; }
+    .bubble-media video { width: 100%; height: 100%; display: block; object-fit: contain; }
 
-    .bubble-media video {
-      width: 100%;
-      height: 100%;
-      display: block;
-      object-fit: contain;
-    }
-
-    .bubble-loading {
-      color: var(--muted);
-      font-size: 0.75rem;
-      text-align: center;
-      padding: 2rem;
-    }
+    .bubble-loading { color: var(--muted); font-size: 0.75rem; text-align: center; padding: 2rem; }
 
     .bubble-actions { padding: 0.6rem 0.8rem; display: flex; gap: 0.5rem; flex-shrink: 0; }
 
@@ -444,31 +551,17 @@
     .modal-btns { display: flex; gap: 0.75rem; }
 
     .modal-cancel {
-      flex: 1;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--muted);
-      font-family: 'DM Mono', monospace;
-      font-size: 0.78rem;
-      padding: 0.65rem;
-      cursor: pointer;
-      transition: border-color 0.15s;
+      flex: 1; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--muted); font-family: 'DM Mono', monospace;
+      font-size: 0.78rem; padding: 0.65rem; cursor: pointer; transition: border-color 0.15s;
     }
 
     .modal-cancel:hover { border-color: var(--accent); }
 
     .modal-confirm {
-      flex: 1;
-      background: #4a3010;
-      border: 1px solid var(--warn-border);
-      border-radius: 8px;
-      color: var(--warn-text);
-      font-family: 'DM Mono', monospace;
-      font-size: 0.78rem;
-      padding: 0.65rem;
-      cursor: pointer;
-      transition: background 0.15s;
+      flex: 1; background: #4a3010; border: 1px solid var(--warn-border);
+      border-radius: 8px; color: var(--warn-text); font-family: 'DM Mono', monospace;
+      font-size: 0.78rem; padding: 0.65rem; cursor: pointer; transition: background 0.15s;
     }
 
     .modal-confirm:hover { background: #5a3f15; }
@@ -481,10 +574,6 @@
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(16px); }
       to   { opacity: 1; transform: translateY(0); }
-    }
-
-    @media (max-width: 480px) {
-      .bubble { width: calc(100vw - 2rem); right: 1rem; bottom: 1rem; }
     }
   </style>
 </head>
@@ -519,11 +608,18 @@
       />
       <button class="search-btn" onclick="handleSearch()">Search</button>
     </div>
+    <div class="autocomplete" id="autocomplete"></div>
     <div class="filter-tabs">
       <button class="filter-tab active" onclick="setFilter('all', this)">All</button>
       <button class="filter-tab" onclick="setFilter('video', this)">Video</button>
       <button class="filter-tab" onclick="setFilter('picture', this)">Picture</button>
     </div>
+  </div>
+
+  <div class="main-tabs">
+    <button class="main-tab active" onclick="setMainTab('search', this)">🔍 Search</button>
+    <button class="main-tab" onclick="setMainTab('favorites', this)">❤️ Favorites</button>
+    <button class="main-tab" onclick="setMainTab('history', this)">🕒 History</button>
   </div>
 
   <div class="status" id="status"></div>
@@ -539,6 +635,7 @@
 <div class="footer">Diverse — content discovery gateway</div>
 
 <div class="bubble" id="bubble">
+  <div class="swipe-indicator"></div>
   <div class="bubble-header" id="bubbleHeader">
     <span class="bubble-title" id="bubbleTitle">Preview</span>
     <div class="bubble-controls">
@@ -579,77 +676,208 @@
     // 'gamebanana',
   ];
 
-  const searchInput  = document.getElementById('searchInput');
-  const resultsEl    = document.getElementById('results');
-  const statusEl     = document.getElementById('status');
-  const paginationEl = document.getElementById('pagination');
-  const prevBtn      = document.getElementById('prevBtn');
-  const nextBtn      = document.getElementById('nextBtn');
-  const pageInfoEl   = document.getElementById('pageInfo');
-  const bubble       = document.getElementById('bubble');
-  const bubbleHeader = document.getElementById('bubbleHeader');
+  const searchInput   = document.getElementById('searchInput');
+  const resultsEl     = document.getElementById('results');
+  const statusEl      = document.getElementById('status');
+  const paginationEl  = document.getElementById('pagination');
+  const prevBtn       = document.getElementById('prevBtn');
+  const nextBtn       = document.getElementById('nextBtn');
+  const pageInfoEl    = document.getElementById('pageInfo');
+  const bubble        = document.getElementById('bubble');
+  const bubbleHeader  = document.getElementById('bubbleHeader');
+  const autocompleteEl = document.getElementById('autocomplete');
 
-  let activeFilter = 'all';
-  let currentPage  = 1;
-  let currentQuery = '';
-  let isFullscreen = false;
+  let activeFilter  = 'all';
+  let currentPage   = 1;
+  let currentQuery  = '';
+  let isFullscreen  = false;
+  let isMobileMini  = false;
+  let activeMainTab = 'search';
+  let acSelected    = -1;
+  let acItems       = [];
+  let acTimer       = null;
 
-  // ── Drag ─────────────────────────────────────────────────────────────
-  let dragging = false;
-  let dragOffX = 0;
-  let dragOffY = 0;
+  const isMobile = () => window.innerWidth <= 768;
 
-  bubbleHeader.addEventListener('mousedown', e => {
-    if (isFullscreen) return;
-    dragging = true;
-    const rect = bubble.getBoundingClientRect();
-    dragOffX = e.clientX - rect.left;
-    dragOffY = e.clientY - rect.top;
-    bubble.style.transition = 'none';
-    e.preventDefault();
+  // ── Storage helpers ───────────────────────────────────────────────────
+  function getStorage(key) {
+    try { return JSON.parse(localStorage.getItem(key)) || []; }
+    catch { return []; }
+  }
+
+  function setStorage(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); }
+    catch {}
+  }
+
+  // ── Favorites ─────────────────────────────────────────────────────────
+  function getFavs()       { return getStorage('diverse_favs'); }
+  function isFaved(url)    { return getFavs().some(f => f._sProfileUrl === url); }
+
+  function toggleFav(item, e) {
+    e.stopPropagation();
+    const favs = getFavs();
+    const idx  = favs.findIndex(f => f._sProfileUrl === item._sProfileUrl);
+    if (idx === -1) favs.unshift(item);
+    else favs.splice(idx, 1);
+    setStorage('diverse_favs', favs.slice(0, 200));
+    document.querySelectorAll(`.card-heart[data-url="${CSS.escape(item._sProfileUrl)}"]`).forEach(btn => {
+      btn.classList.toggle('faved', idx === -1);
+      btn.textContent = idx === -1 ? '❤️' : '🤍';
+    });
+    if (activeMainTab === 'favorites') renderFavorites();
+  }
+
+  // ── History ───────────────────────────────────────────────────────────
+  function getHistory()    { return getStorage('diverse_history'); }
+
+  function addHistory(item) {
+    const hist = getHistory().filter(h => h._sProfileUrl !== item._sProfileUrl);
+    hist.unshift(item);
+    setStorage('diverse_history', hist.slice(0, 50));
+  }
+
+  // ── Search history ────────────────────────────────────────────────────
+  function getSearchHistory() { return getStorage('diverse_searches'); }
+
+  function addSearchHistory(q) {
+    const hist = getSearchHistory().filter(h => h !== q);
+    hist.unshift(q);
+    setStorage('diverse_searches', hist.slice(0, 20));
+  }
+
+  // ── Autocomplete ──────────────────────────────────────────────────────
+  searchInput.addEventListener('input', () => {
+    clearTimeout(acTimer);
+    const val = searchInput.value.trim();
+    if (!val) { hideAc(); return; }
+    acTimer = setTimeout(() => fetchAc(val), 300);
   });
 
-  document.addEventListener('mousemove', e => {
-    if (!dragging) return;
-    const x = e.clientX - dragOffX;
-    const y = e.clientY - dragOffY;
-    bubble.style.left   = `${Math.max(0, Math.min(window.innerWidth  - bubble.offsetWidth,  x))}px`;
-    bubble.style.top    = `${Math.max(0, Math.min(window.innerHeight - bubble.offsetHeight, y))}px`;
-    bubble.style.right  = 'auto';
-    bubble.style.bottom = 'auto';
-  });
+  async function fetchAc(val) {
+    acSelected = -1;
+    acItems    = [];
 
-  document.addEventListener('mouseup', () => { dragging = false; });
+    const searches = getSearchHistory().filter(s => s.toLowerCase().includes(val.toLowerCase())).slice(0, 3);
 
-  // touch drag
-  bubbleHeader.addEventListener('touchstart', e => {
-    if (isFullscreen) return;
-    const t = e.touches[0];
-    dragging = true;
-    const rect = bubble.getBoundingClientRect();
-    dragOffX = t.clientX - rect.left;
-    dragOffY = t.clientY - rect.top;
-    bubble.style.transition = 'none';
-  }, { passive: true });
+    let tags = [];
+    try {
+      const res = await fetch(`${PROXY}/?tag=${encodeURIComponent(val)}`);
+      tags = await res.json();
+    } catch {}
 
-  document.addEventListener('touchmove', e => {
-    if (!dragging) return;
-    const t = e.touches[0];
-    const x = t.clientX - dragOffX;
-    const y = t.clientY - dragOffY;
-    bubble.style.left   = `${Math.max(0, Math.min(window.innerWidth  - bubble.offsetWidth,  x))}px`;
-    bubble.style.top    = `${Math.max(0, Math.min(window.innerHeight - bubble.offsetHeight, y))}px`;
-    bubble.style.right  = 'auto';
-    bubble.style.bottom = 'auto';
-  }, { passive: true });
+    acItems = [...searches, ...tags.filter(t => !searches.includes(t))];
+    renderAc(searches, tags.filter(t => !searches.includes(t)));
+  }
 
-  document.addEventListener('touchend', () => { dragging = false; });
+  function renderAc(searches, tags) {
+    if (!searches.length && !tags.length) { hideAc(); return; }
 
-  // ── Search ────────────────────────────────────────────────────────────
+    let html = '';
+    if (searches.length) {
+      html += `<div class="autocomplete-section">Recent searches</div>`;
+      searches.forEach((s, i) => {
+        html += `<div class="autocomplete-item" data-idx="${i}" onclick="pickAc(${i})">${s}</div>`;
+      });
+    }
+    if (tags.length) {
+      html += `<div class="autocomplete-section">Tags</div>`;
+      tags.forEach((t, i) => {
+        const idx = searches.length + i;
+        html += `<div class="autocomplete-item" data-idx="${idx}" onclick="pickAc(${idx})">${t}</div>`;
+      });
+    }
+
+    autocompleteEl.innerHTML = html;
+    autocompleteEl.classList.add('active');
+  }
+
+  function hideAc() {
+    autocompleteEl.classList.remove('active');
+    acSelected = -1;
+  }
+
+  function pickAc(idx) {
+    searchInput.value = acItems[idx];
+    hideAc();
+    handleSearch();
+  }
+
   searchInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter') handleSearch();
+    const items = autocompleteEl.querySelectorAll('.autocomplete-item');
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      acSelected = Math.min(acSelected + 1, items.length - 1);
+      items.forEach((el, i) => el.classList.toggle('selected', i === acSelected));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      acSelected = Math.max(acSelected - 1, -1);
+      items.forEach((el, i) => el.classList.toggle('selected', i === acSelected));
+    } else if (e.key === 'Enter') {
+      if (acSelected >= 0 && acItems[acSelected]) {
+        e.preventDefault();
+        pickAc(acSelected);
+      } else {
+        hideAc();
+        handleSearch();
+      }
+    } else if (e.key === 'Escape') {
+      hideAc();
+    }
   });
 
+  document.addEventListener('click', e => {
+    if (!autocompleteEl.contains(e.target) && e.target !== searchInput) hideAc();
+  });
+
+  // ── Main tabs ─────────────────────────────────────────────────────────
+  function setMainTab(tab, el) {
+    activeMainTab = tab;
+    document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    paginationEl.style.display = 'none';
+    statusEl.textContent = '';
+
+    if (tab === 'search') {
+      statusEl.textContent = currentQuery ? `Page ${currentPage} — results` : '';
+      renderCurrentResults();
+    } else if (tab === 'favorites') {
+      renderFavorites();
+    } else if (tab === 'history') {
+      renderHistoryTab();
+    }
+  }
+
+  let lastRecords = [];
+
+  function renderCurrentResults() {
+    renderCards(lastRecords);
+    if (lastRecords.length) paginationEl.style.display = 'flex';
+  }
+
+  function renderFavorites() {
+    const favs = getFavs();
+    resultsEl.innerHTML = '';
+    if (!favs.length) {
+      resultsEl.innerHTML = `<div class="empty-state"><span>❤️</span>No favorites yet — heart a post to save it!</div>`;
+      return;
+    }
+    statusEl.textContent = `${favs.length} favorites`;
+    renderCards(favs);
+  }
+
+  function renderHistoryTab() {
+    const hist = getHistory();
+    resultsEl.innerHTML = '';
+    if (!hist.length) {
+      resultsEl.innerHTML = `<div class="empty-state"><span>🕒</span>No history yet — click a post to view it!</div>`;
+      return;
+    }
+    statusEl.textContent = `${hist.length} viewed posts`;
+    renderCards(hist);
+  }
+
+  // ── Filter tabs ───────────────────────────────────────────────────────
   function setFilter(filter, el) {
     activeFilter = filter;
     document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
@@ -657,6 +885,7 @@
     if (searchInput.value.trim()) handleSearch();
   }
 
+  // ── Search ────────────────────────────────────────────────────────────
   async function handleSearch(page = 1) {
     let query = searchInput.value.trim();
     if (!query) return;
@@ -664,6 +893,9 @@
 
     currentQuery = query;
     currentPage  = page;
+
+    addSearchHistory(searchInput.value.trim());
+    setMainTab('search', document.querySelector('.main-tab'));
 
     resultsEl.innerHTML = '';
     paginationEl.style.display = 'none';
@@ -678,6 +910,7 @@
 
       const responses = await Promise.all(promises);
       const records   = responses.flatMap(r => r._aRecords || []);
+      lastRecords     = records;
 
       if (records.length === 0) {
         statusEl.textContent = page > 1 ? 'No more results!' : 'No results found. Try different tags.';
@@ -702,18 +935,14 @@
 
     } catch (err) {
       statusEl.textContent = 'Something went wrong. Try again.';
-      console.error(err);
     }
   }
 
-  function changePage(direction) {
-    handleSearch(currentPage + direction);
-  }
+  function changePage(direction) { handleSearch(currentPage + direction); }
 
-  function proxyImg(url) {
-    return `${PROXY}/?img=${encodeURIComponent(url)}`;
-  }
+  function proxyImg(url) { return `${PROXY}/?img=${encodeURIComponent(url)}`; }
 
+  // ── Render cards ──────────────────────────────────────────────────────
   function renderCards(records) {
     resultsEl.innerHTML = '';
     records.forEach(item => {
@@ -723,10 +952,12 @@
       const sourceUrl = item._sProfileUrl || '#';
       const game      = item._aGame?._sName || '';
       const source    = item._sSource     || '';
+      const faved     = isFaved(sourceUrl);
 
       const card = document.createElement('div');
       card.className = 'card';
       card.innerHTML = `
+        <button class="card-heart ${faved ? 'faved' : ''}" data-url="${sourceUrl}" onclick="toggleFav(${JSON.stringify(JSON.stringify(item))}, event)">${faved ? '❤️' : '🤍'}</button>
         ${thumb
           ? `<img class="card-thumb" src="${proxyImg(thumb)}" alt="${title}" loading="lazy">`
           : `<div class="card-thumb-placeholder">🖼</div>`
@@ -739,9 +970,69 @@
           </div>
         </div>`;
 
-      card.onclick = () => openBubble(thumb, title, sourceUrl);
+      card.onclick = () => {
+        addHistory(item);
+        openBubble(thumb, title, sourceUrl);
+      };
       resultsEl.appendChild(card);
     });
+  }
+
+  // ── Bubble ────────────────────────────────────────────────────────────
+  let dragging = false, dragOffX = 0, dragOffY = 0;
+
+  bubbleHeader.addEventListener('mousedown', e => {
+    if (isFullscreen || isMobile()) return;
+    dragging = true;
+    const rect = bubble.getBoundingClientRect();
+    dragOffX = e.clientX - rect.left;
+    dragOffY = e.clientY - rect.top;
+    bubble.style.transition = 'none';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    bubble.style.left   = `${Math.max(0, Math.min(window.innerWidth  - bubble.offsetWidth,  e.clientX - dragOffX))}px`;
+    bubble.style.top    = `${Math.max(0, Math.min(window.innerHeight - bubble.offsetHeight, e.clientY - dragOffY))}px`;
+    bubble.style.right  = 'auto';
+    bubble.style.bottom = 'auto';
+  });
+
+  document.addEventListener('mouseup', () => { dragging = false; });
+
+  let touchStartY = 0, touchStartX = 0;
+
+  bubble.addEventListener('touchstart', e => {
+    touchStartY = e.touches[0].clientY;
+    touchStartX = e.touches[0].clientX;
+  }, { passive: true });
+
+  bubble.addEventListener('touchend', e => {
+    if (isMobileMini) return;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    const dx = Math.abs(e.changedTouches[0].clientX - touchStartX);
+    if (dy > 80 && dx < 60) minimiseMobile();
+  }, { passive: true });
+
+  bubble.addEventListener('click', e => {
+    if (isMobileMini) { restoreMobile(); e.stopPropagation(); }
+  });
+
+  function minimiseMobile() {
+    isMobileMini = true;
+    bubble.classList.remove('mobile-full');
+    bubble.classList.add('mobile-mini');
+    const video = document.getElementById('bubbleMedia').querySelector('video');
+    if (video) video.pause();
+  }
+
+  function restoreMobile() {
+    isMobileMini = false;
+    bubble.classList.remove('mobile-mini');
+    bubble.classList.add('mobile-full');
+    const video = document.getElementById('bubbleMedia').querySelector('video');
+    if (video) video.play();
   }
 
   async function openBubble(thumbUrl, title, sourceUrl) {
@@ -754,13 +1045,15 @@
     mediaEl.innerHTML   = '<div class="bubble-loading">Loading...</div>';
 
     bubble.classList.add('active');
+    bubble.classList.remove('fullscreen', 'mobile-full', 'mobile-mini');
     isFullscreen = false;
-    bubble.classList.remove('fullscreen');
+    isMobileMini = false;
+
+    if (isMobile()) bubble.classList.add('mobile-full');
 
     try {
       const res  = await fetch(`${PROXY}/?post=${encodeURIComponent(sourceUrl)}`);
       const data = await res.json();
-
       mediaEl.innerHTML = '';
 
       if (data.type === 'video') {
@@ -781,8 +1074,7 @@
         img.alt   = title;
         mediaEl.appendChild(img);
       }
-
-    } catch (err) {
+    } catch {
       mediaEl.innerHTML = '';
       const img = document.createElement('img');
       img.src   = proxyImg(thumbUrl);
@@ -792,38 +1084,26 @@
   }
 
   function toggleFullscreen() {
+    if (isMobile()) return;
     isFullscreen = !isFullscreen;
     bubble.classList.toggle('fullscreen', isFullscreen);
     if (!isFullscreen) {
-      bubble.style.left   = '';
-      bubble.style.top    = '';
-      bubble.style.right  = '2rem';
-      bubble.style.bottom = '2rem';
-      bubble.style.width  = '340px';
-      bubble.style.height = '';
+      bubble.style.cssText = 'right:2rem;bottom:2rem;width:340px;';
     }
   }
 
   function closeBubble() {
-    const mediaEl = document.getElementById('bubbleMedia');
-    const video   = mediaEl.querySelector('video');
+    const video = document.getElementById('bubbleMedia').querySelector('video');
     if (video) video.pause();
-    mediaEl.innerHTML = '';
-    bubble.classList.remove('active', 'fullscreen');
-    bubble.style.left   = '';
-    bubble.style.top    = '';
-    bubble.style.right  = '2rem';
-    bubble.style.bottom = '2rem';
-    bubble.style.width  = '340px';
-    bubble.style.height = '';
+    document.getElementById('bubbleMedia').innerHTML = '';
+    bubble.classList.remove('active', 'fullscreen', 'mobile-full', 'mobile-mini');
+    bubble.style.cssText = 'right:2rem;bottom:2rem;width:340px;';
     isFullscreen = false;
+    isMobileMini = false;
   }
 
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-      if (isFullscreen) toggleFullscreen();
-      else closeBubble();
-    }
+    if (e.key === 'Escape') { if (isFullscreen) toggleFullscreen(); else closeBubble(); }
   });
 
   let pendingUrl = null;
@@ -832,10 +1112,7 @@
     e.preventDefault();
     pendingUrl = url;
     document.getElementById('leaveModal').classList.add('active');
-    document.getElementById('modalConfirm').onclick = () => {
-      window.open(pendingUrl, '_blank');
-      closeModal();
-    };
+    document.getElementById('modalConfirm').onclick = () => { window.open(pendingUrl, '_blank'); closeModal(); };
   }
 
   function closeModal() {
