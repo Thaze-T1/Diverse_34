@@ -171,7 +171,6 @@
     .search-btn:hover { background: #4a7aee; }
     .search-btn:active { transform: scale(0.97); }
 
-    /* autocomplete dropdown */
     .autocomplete {
       position: absolute;
       top: calc(100% - 0.75rem);
@@ -193,12 +192,19 @@
       color: var(--muted);
       cursor: pointer;
       transition: background 0.1s, color 0.1s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
     .autocomplete-item:hover,
-    .autocomplete-item.selected {
-      background: var(--surface);
-      color: var(--accent);
+    .autocomplete-item.selected { background: var(--surface); color: var(--accent); }
+
+    .autocomplete-count {
+      margin-left: auto;
+      font-size: 0.65rem;
+      color: var(--muted);
+      flex-shrink: 0;
     }
 
     .autocomplete-section {
@@ -227,7 +233,6 @@
     .filter-tab:hover { border-color: var(--accent); color: var(--accent); }
     .filter-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-    /* main tabs */
     .main-tabs {
       display: flex;
       gap: 0.5rem;
@@ -294,8 +299,8 @@
       background: rgba(0,0,0,0.6);
       border: none;
       border-radius: 50%;
-      width: 2rem;
-      height: 2rem;
+      width: 2.2rem;
+      height: 2.2rem;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -307,7 +312,11 @@
     }
 
     .card-heart:hover { transform: scale(1.2); }
-    .card-heart.faved { opacity: 1; color: var(--heart); }
+    .card-heart.faved { opacity: 1; }
+
+    @media (max-width: 768px) {
+      .card-heart { opacity: 1; width: 2.8rem; height: 2.8rem; font-size: 1.1rem; }
+    }
 
     .card-body { padding: 0.75rem; display: flex; flex-direction: column; gap: 0.4rem; }
 
@@ -342,6 +351,7 @@
       flex-direction: column;
       align-items: center;
       gap: 0.5rem;
+      grid-column: 1 / -1;
     }
 
     .empty-state span { font-size: 2rem; }
@@ -382,7 +392,6 @@
       z-index: 1;
     }
 
-    /* ── BUBBLE ───────────────────────────────────────────────────────── */
     .bubble {
       position: fixed;
       bottom: 2rem;
@@ -424,7 +433,6 @@
 
     .bubble.mobile-mini .bubble-header,
     .bubble.mobile-mini .bubble-actions { display: none; }
-
     .bubble.mobile-mini .bubble-media img,
     .bubble.mobile-mini .bubble-media video { width: 100%; height: 100%; object-fit: cover; }
 
@@ -436,6 +444,7 @@
       background: rgba(255,255,255,0.2);
       border-radius: 2px;
       display: none;
+      z-index: 2;
     }
 
     @media (max-width: 768px) { .swipe-indicator { display: block; } }
@@ -451,6 +460,7 @@
       flex-shrink: 0;
       cursor: grab;
       user-select: none;
+      z-index: 2;
     }
 
     .bubble-header:active { cursor: grabbing; }
@@ -474,7 +484,7 @@
       color: var(--muted);
       cursor: pointer;
       font-size: 0.85rem;
-      padding: 0.1rem 0.3rem;
+      padding: 0.25rem 0.4rem;
       line-height: 1;
       transition: color 0.15s;
       border-radius: 4px;
@@ -495,10 +505,15 @@
 
     .bubble-media img { width: 100%; height: 100%; display: block; object-fit: contain; }
     .bubble-media video { width: 100%; height: 100%; display: block; object-fit: contain; }
-
     .bubble-loading { color: var(--muted); font-size: 0.75rem; text-align: center; padding: 2rem; }
 
-    .bubble-actions { padding: 0.6rem 0.8rem; display: flex; gap: 0.5rem; flex-shrink: 0; }
+    .bubble-actions {
+      padding: 0.6rem 0.8rem;
+      display: flex;
+      gap: 0.5rem;
+      flex-shrink: 0;
+      background: var(--card);
+    }
 
     .bubble-visit {
       flex: 1;
@@ -676,15 +691,15 @@
     // 'gamebanana',
   ];
 
-  const searchInput   = document.getElementById('searchInput');
-  const resultsEl     = document.getElementById('results');
-  const statusEl      = document.getElementById('status');
-  const paginationEl  = document.getElementById('pagination');
-  const prevBtn       = document.getElementById('prevBtn');
-  const nextBtn       = document.getElementById('nextBtn');
-  const pageInfoEl    = document.getElementById('pageInfo');
-  const bubble        = document.getElementById('bubble');
-  const bubbleHeader  = document.getElementById('bubbleHeader');
+  const searchInput    = document.getElementById('searchInput');
+  const resultsEl      = document.getElementById('results');
+  const statusEl       = document.getElementById('status');
+  const paginationEl   = document.getElementById('pagination');
+  const prevBtn        = document.getElementById('prevBtn');
+  const nextBtn        = document.getElementById('nextBtn');
+  const pageInfoEl     = document.getElementById('pageInfo');
+  const bubble         = document.getElementById('bubble');
+  const bubbleHeader   = document.getElementById('bubbleHeader');
   const autocompleteEl = document.getElementById('autocomplete');
 
   let activeFilter  = 'all';
@@ -696,6 +711,7 @@
   let acSelected    = -1;
   let acItems       = [];
   let acTimer       = null;
+  let lastRecords   = [];
 
   const isMobile = () => window.innerWidth <= 768;
 
@@ -711,25 +727,28 @@
   }
 
   // ── Favorites ─────────────────────────────────────────────────────────
-  function getFavs()       { return getStorage('diverse_favs'); }
-  function isFaved(url)    { return getFavs().some(f => f._sProfileUrl === url); }
+  function getFavs()    { return getStorage('diverse_favs'); }
+  function isFaved(url) { return getFavs().some(f => f._sProfileUrl === url); }
 
-  function toggleFav(item, e) {
-    e.stopPropagation();
+  function toggleFav(item) {
     const favs = getFavs();
     const idx  = favs.findIndex(f => f._sProfileUrl === item._sProfileUrl);
     if (idx === -1) favs.unshift(item);
     else favs.splice(idx, 1);
     setStorage('diverse_favs', favs.slice(0, 200));
+
+    // update all heart buttons for this item
     document.querySelectorAll(`.card-heart[data-url="${CSS.escape(item._sProfileUrl)}"]`).forEach(btn => {
-      btn.classList.toggle('faved', idx === -1);
-      btn.textContent = idx === -1 ? '❤️' : '🤍';
+      const nowFaved = idx === -1;
+      btn.classList.toggle('faved', nowFaved);
+      btn.textContent = nowFaved ? '❤️' : '🤍';
     });
+
     if (activeMainTab === 'favorites') renderFavorites();
   }
 
   // ── History ───────────────────────────────────────────────────────────
-  function getHistory()    { return getStorage('diverse_history'); }
+  function getHistory() { return getStorage('diverse_history'); }
 
   function addHistory(item) {
     const hist = getHistory().filter(h => h._sProfileUrl !== item._sProfileUrl);
@@ -758,7 +777,9 @@
     acSelected = -1;
     acItems    = [];
 
-    const searches = getSearchHistory().filter(s => s.toLowerCase().includes(val.toLowerCase())).slice(0, 3);
+    const searches = getSearchHistory()
+      .filter(s => s.toLowerCase().includes(val.toLowerCase()))
+      .slice(0, 3);
 
     let tags = [];
     try {
@@ -766,25 +787,32 @@
       tags = await res.json();
     } catch {}
 
-    acItems = [...searches, ...tags.filter(t => !searches.includes(t))];
-    renderAc(searches, tags.filter(t => !searches.includes(t)));
+    const tagNames = Array.isArray(tags) ? tags.map(t => typeof t === 'object' ? t.name : t) : [];
+    acItems = [...searches, ...tagNames.filter(t => !searches.includes(t))];
+    renderAc(searches, Array.isArray(tags) ? tags.filter(t => !searches.includes(typeof t === 'object' ? t.name : t)) : []);
   }
 
   function renderAc(searches, tags) {
     if (!searches.length && !tags.length) { hideAc(); return; }
 
     let html = '';
+
     if (searches.length) {
       html += `<div class="autocomplete-section">Recent searches</div>`;
       searches.forEach((s, i) => {
-        html += `<div class="autocomplete-item" data-idx="${i}" onclick="pickAc(${i})">${s}</div>`;
+        html += `<div class="autocomplete-item" data-idx="${i}" onclick="pickAc(${i})"><span>${s}</span></div>`;
       });
     }
+
     if (tags.length) {
       html += `<div class="autocomplete-section">Tags</div>`;
       tags.forEach((t, i) => {
-        const idx = searches.length + i;
-        html += `<div class="autocomplete-item" data-idx="${idx}" onclick="pickAc(${idx})">${t}</div>`;
+        const idx   = searches.length + i;
+        const name  = typeof t === 'object' ? t.name  : t;
+        const count = typeof t === 'object' && t.count > 0
+          ? `<span class="autocomplete-count">${t.count.toLocaleString()}</span>`
+          : '';
+        html += `<div class="autocomplete-item" data-idx="${idx}" onclick="pickAc(${idx})"><span>${name}</span>${count}</div>`;
       });
     }
 
@@ -830,6 +858,23 @@
     if (!autocompleteEl.contains(e.target) && e.target !== searchInput) hideAc();
   });
 
+  // ── Global card click handler ─────────────────────────────────────────
+  resultsEl.addEventListener('click', e => {
+    const heart = e.target.closest('.card-heart');
+    if (heart) {
+      e.stopPropagation();
+      const item = JSON.parse(decodeURIComponent(heart.dataset.item));
+      toggleFav(item);
+      return;
+    }
+    const card = e.target.closest('.card');
+    if (card) {
+      const item = JSON.parse(decodeURIComponent(card.dataset.item));
+      addHistory(item);
+      openBubble(item._sThumb, item._sName || 'Untitled', item._sProfileUrl);
+    }
+  });
+
   // ── Main tabs ─────────────────────────────────────────────────────────
   function setMainTab(tab, el) {
     activeMainTab = tab;
@@ -839,20 +884,16 @@
     statusEl.textContent = '';
 
     if (tab === 'search') {
-      statusEl.textContent = currentQuery ? `Page ${currentPage} — results` : '';
-      renderCurrentResults();
+      if (lastRecords.length) {
+        statusEl.textContent = `Page ${currentPage} — ${lastRecords.length} results`;
+        renderCards(lastRecords);
+        paginationEl.style.display = 'flex';
+      }
     } else if (tab === 'favorites') {
       renderFavorites();
     } else if (tab === 'history') {
       renderHistoryTab();
     }
-  }
-
-  let lastRecords = [];
-
-  function renderCurrentResults() {
-    renderCards(lastRecords);
-    if (lastRecords.length) paginationEl.style.display = 'flex';
   }
 
   function renderFavorites() {
@@ -895,7 +936,11 @@
     currentPage  = page;
 
     addSearchHistory(searchInput.value.trim());
-    setMainTab('search', document.querySelector('.main-tab'));
+
+    // switch to search tab
+    document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector('.main-tab').classList.add('active');
+    activeMainTab = 'search';
 
     resultsEl.innerHTML = '';
     paginationEl.style.display = 'none';
@@ -955,9 +1000,11 @@
       const faved     = isFaved(sourceUrl);
 
       const card = document.createElement('div');
-      card.className = 'card';
+      card.className      = 'card';
+      card.dataset.item   = encodeURIComponent(JSON.stringify(item));
+
       card.innerHTML = `
-        <button class="card-heart ${faved ? 'faved' : ''}" data-url="${sourceUrl}" onclick="toggleFav(${JSON.stringify(JSON.stringify(item))}, event)">${faved ? '❤️' : '🤍'}</button>
+        <button class="card-heart ${faved ? 'faved' : ''}" data-url="${sourceUrl}" data-item="${encodeURIComponent(JSON.stringify(item))}">${faved ? '❤️' : '🤍'}</button>
         ${thumb
           ? `<img class="card-thumb" src="${proxyImg(thumb)}" alt="${title}" loading="lazy">`
           : `<div class="card-thumb-placeholder">🖼</div>`
@@ -970,10 +1017,6 @@
           </div>
         </div>`;
 
-      card.onclick = () => {
-        addHistory(item);
-        openBubble(thumb, title, sourceUrl);
-      };
       resultsEl.appendChild(card);
     });
   }
