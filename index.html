@@ -371,6 +371,13 @@
     .bubble-media video { width: 100%; display: block; max-height: 300px; }
     .bubble.fullscreen .bubble-media video { max-height: calc(100vh - 100px); }
 
+    .bubble-loading {
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-align: center;
+      padding: 2rem;
+    }
+
     .bubble-actions { padding: 0.6rem 0.8rem; display: flex; gap: 0.5rem; flex-shrink: 0; }
 
     .bubble-visit {
@@ -572,7 +579,6 @@
   let activeFilter = 'all';
   let currentPage  = 1;
   let currentQuery = '';
-  let lastCount    = 0;
 
   searchInput.addEventListener('keydown', e => {
     if (e.key === 'Enter') handleSearch();
@@ -595,7 +601,7 @@
 
     resultsEl.innerHTML = '';
     paginationEl.style.display = 'none';
-    statusEl.textContent = `Searching...`;
+    statusEl.textContent = 'Searching...';
 
     try {
       const promises = SOURCES.map(source =>
@@ -606,7 +612,6 @@
 
       const responses = await Promise.all(promises);
       const records   = responses.flatMap(r => r._aRecords || []);
-      lastCount       = records.length;
 
       if (records.length === 0) {
         statusEl.textContent = page > 1 ? 'No more results!' : 'No results found. Try different tags.';
@@ -652,14 +657,13 @@
       const sourceUrl = item._sProfileUrl || '#';
       const game      = item._aGame?._sName || '';
       const source    = item._sSource     || '';
-      const videoUrl  = item._sVideoUrl   || null;
 
       const card = document.createElement('div');
       card.className = 'card';
       card.innerHTML = `
         ${thumb
           ? `<img class="card-thumb" src="${proxyImg(thumb)}" alt="${title}" loading="lazy">`
-          : `<div class="card-thumb-placeholder">${videoUrl ? '▶' : '🖼'}</div>`
+          : `<div class="card-thumb-placeholder">🖼</div>`
         }
         <div class="card-body">
           <div class="card-title">${title}</div>
@@ -669,41 +673,63 @@
           </div>
         </div>`;
 
-      card.onclick = () => openBubble(thumb, videoUrl, title, sourceUrl);
+      card.onclick = () => openBubble(thumb, title, sourceUrl);
       resultsEl.appendChild(card);
     });
   }
 
   let isFullscreen = false;
 
-  function openBubble(mediaUrl, videoUrl, title, sourceUrl) {
+  async function openBubble(thumbUrl, title, sourceUrl) {
     const mediaEl  = document.getElementById('bubbleMedia');
     const titleEl  = document.getElementById('bubbleTitle');
     const visitBtn = document.getElementById('bubbleVisitBtn');
 
     titleEl.textContent = title;
     visitBtn.href       = sourceUrl;
-    mediaEl.innerHTML   = '';
-
-    if (videoUrl) {
-      const video = document.createElement('video');
-      video.src      = proxyImg(videoUrl);
-      video.controls = true;
-      video.autoplay = true;
-      video.loop     = true;
-      mediaEl.appendChild(video);
-    } else if (mediaUrl) {
-      const img = document.createElement('img');
-      img.src   = proxyImg(mediaUrl);
-      img.alt   = title;
-      mediaEl.appendChild(img);
-    } else {
-      mediaEl.innerHTML = '<span style="color:var(--muted);font-size:0.75rem">No preview available</span>';
-    }
+    mediaEl.innerHTML   = '<div class="bubble-loading">Loading...</div>';
 
     document.getElementById('bubble').classList.add('active');
     isFullscreen = false;
     document.getElementById('bubble').classList.remove('fullscreen');
+
+    try {
+      // fetch the actual post page to get full res image or video
+      const res  = await fetch(`${PROXY}/?post=${encodeURIComponent(sourceUrl)}`);
+      const data = await res.json();
+
+      mediaEl.innerHTML = '';
+
+      if (data.type === 'video') {
+        const video    = document.createElement('video');
+        video.src      = proxyImg(data.url);
+        video.controls = true;
+        video.autoplay = true;
+        video.loop     = true;
+        mediaEl.appendChild(video);
+
+      } else if (data.type === 'image') {
+        const img = document.createElement('img');
+        img.src   = proxyImg(data.url);
+        img.alt   = title;
+        mediaEl.appendChild(img);
+
+      } else {
+        // fallback to thumbnail
+        const img = document.createElement('img');
+        img.src   = proxyImg(thumbUrl);
+        img.alt   = title;
+        mediaEl.appendChild(img);
+      }
+
+    } catch (err) {
+      // fallback to thumbnail on error
+      mediaEl.innerHTML = '';
+      const img = document.createElement('img');
+      img.src   = proxyImg(thumbUrl);
+      img.alt   = title;
+      mediaEl.appendChild(img);
+    }
   }
 
   function toggleFullscreen() {
