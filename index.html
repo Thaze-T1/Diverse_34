@@ -392,6 +392,7 @@
       z-index: 1;
     }
 
+    /* ── BUBBLE ───────────────────────────────────────────────────────── */
     .bubble {
       position: fixed;
       bottom: 2rem;
@@ -422,6 +423,35 @@
       top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
       width: 100vw !important; height: 100vh !important;
       border-radius: 0; resize: none;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* header always on top on mobile */
+    .bubble.mobile-full .bubble-header {
+      flex-shrink: 0;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* media scrollable on mobile */
+    .bubble.mobile-full .bubble-media {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      display: block;
+    }
+
+    .bubble.mobile-full .bubble-media img,
+    .bubble.mobile-full .bubble-media video {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: contain;
+    }
+
+    .bubble.mobile-full .bubble-actions {
+      flex-shrink: 0;
     }
 
     .bubble.mobile-mini {
@@ -433,6 +463,7 @@
 
     .bubble.mobile-mini .bubble-header,
     .bubble.mobile-mini .bubble-actions { display: none; }
+    .bubble.mobile-mini .bubble-media { overflow: hidden; }
     .bubble.mobile-mini .bubble-media img,
     .bubble.mobile-mini .bubble-media video { width: 100%; height: 100%; object-fit: cover; }
 
@@ -444,7 +475,7 @@
       background: rgba(255,255,255,0.2);
       border-radius: 2px;
       display: none;
-      z-index: 2;
+      z-index: 11;
     }
 
     @media (max-width: 768px) { .swipe-indicator { display: block; } }
@@ -736,14 +767,11 @@
     if (idx === -1) favs.unshift(item);
     else favs.splice(idx, 1);
     setStorage('diverse_favs', favs.slice(0, 200));
-
-    // update all heart buttons for this item
     document.querySelectorAll(`.card-heart[data-url="${CSS.escape(item._sProfileUrl)}"]`).forEach(btn => {
       const nowFaved = idx === -1;
       btn.classList.toggle('faved', nowFaved);
       btn.textContent = nowFaved ? '❤️' : '🤍';
     });
-
     if (activeMainTab === 'favorites') renderFavorites();
   }
 
@@ -937,7 +965,6 @@
 
     addSearchHistory(searchInput.value.trim());
 
-    // switch to search tab
     document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
     document.querySelector('.main-tab').classList.add('active');
     activeMainTab = 'search';
@@ -1000,8 +1027,8 @@
       const faved     = isFaved(sourceUrl);
 
       const card = document.createElement('div');
-      card.className      = 'card';
-      card.dataset.item   = encodeURIComponent(JSON.stringify(item));
+      card.className    = 'card';
+      card.dataset.item = encodeURIComponent(JSON.stringify(item));
 
       card.innerHTML = `
         <button class="card-heart ${faved ? 'faved' : ''}" data-url="${sourceUrl}" data-item="${encodeURIComponent(JSON.stringify(item))}">${faved ? '❤️' : '🤍'}</button>
@@ -1021,7 +1048,7 @@
     });
   }
 
-  // ── Bubble ────────────────────────────────────────────────────────────
+  // ── Bubble desktop drag ───────────────────────────────────────────────
   let dragging = false, dragOffX = 0, dragOffY = 0;
 
   bubbleHeader.addEventListener('mousedown', e => {
@@ -1044,14 +1071,38 @@
 
   document.addEventListener('mouseup', () => { dragging = false; });
 
+  // ── Bubble mobile swipe ───────────────────────────────────────────────
   let touchStartY = 0, touchStartX = 0;
+  let mobileDragging = false, mobileDragOffY = 0, mobileDragOffX = 0;
 
-  bubble.addEventListener('touchstart', e => {
+  bubbleHeader.addEventListener('touchstart', e => {
     touchStartY = e.touches[0].clientY;
     touchStartX = e.touches[0].clientX;
+    if (isMobileMini) return;
+    // on mobile-full, only detect swipe down — no drag
   }, { passive: true });
 
-  bubble.addEventListener('touchend', e => {
+  bubble.addEventListener('touchstart', e => {
+    if (!isMobileMini) return;
+    // mini bubble can be dragged
+    mobileDragging = true;
+    const rect = bubble.getBoundingClientRect();
+    mobileDragOffX = e.touches[0].clientX - rect.left;
+    mobileDragOffY = e.touches[0].clientY - rect.top;
+  }, { passive: true });
+
+  document.addEventListener('touchmove', e => {
+    if (!mobileDragging) return;
+    const x = e.touches[0].clientX - mobileDragOffX;
+    const y = e.touches[0].clientY - mobileDragOffY;
+    bubble.style.left   = `${Math.max(0, Math.min(window.innerWidth  - bubble.offsetWidth,  x))}px`;
+    bubble.style.top    = `${Math.max(0, Math.min(window.innerHeight - bubble.offsetHeight, y))}px`;
+    bubble.style.right  = 'auto';
+    bubble.style.bottom = 'auto';
+  }, { passive: true });
+
+  document.addEventListener('touchend', e => {
+    mobileDragging = false;
     if (isMobileMini) return;
     const dy = e.changedTouches[0].clientY - touchStartY;
     const dx = Math.abs(e.changedTouches[0].clientX - touchStartX);
@@ -1074,6 +1125,8 @@
     isMobileMini = false;
     bubble.classList.remove('mobile-mini');
     bubble.classList.add('mobile-full');
+    bubble.style.left = '';
+    bubble.style.top  = '';
     const video = document.getElementById('bubbleMedia').querySelector('video');
     if (video) video.play();
   }
