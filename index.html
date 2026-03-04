@@ -250,6 +250,34 @@
 
     .status { font-size: 0.75rem; color: var(--muted); text-align: center; }
 
+    /* pagination */
+    .pagination {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .page-btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      padding: 0.5rem 1.2rem;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .page-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .page-info {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
     .footer {
       position: fixed;
       bottom: 1rem;
@@ -483,6 +511,11 @@
 
   <div class="status" id="status"></div>
   <div class="results" id="results"></div>
+  <div class="pagination" id="pagination" style="display:none;">
+    <button class="page-btn" id="prevBtn" onclick="changePage(-1)" disabled>← Prev</button>
+    <span class="page-info" id="pageInfo">Page 1</span>
+    <button class="page-btn" id="nextBtn" onclick="changePage(1)">Next →</button>
+  </div>
 
 </div>
 
@@ -525,8 +558,15 @@
   const searchInput = document.getElementById('searchInput');
   const resultsEl   = document.getElementById('results');
   const statusEl    = document.getElementById('status');
+  const paginationEl= document.getElementById('pagination');
+  const prevBtn     = document.getElementById('prevBtn');
+  const nextBtn     = document.getElementById('nextBtn');
+  const pageInfoEl  = document.getElementById('pageInfo');
 
-  let activeFilter = 'all';
+  let activeFilter  = 'all';
+  let currentPage   = 1;
+  let totalResults  = 0;
+  let currentQuery  = '';
 
   searchInput.addEventListener('keydown', e => {
     if (e.key === 'Enter') handleSearch();
@@ -539,31 +579,51 @@
     if (searchInput.value.trim()) handleSearch();
   }
 
-  async function handleSearch() {
+  async function handleSearch(page = 1) {
     let query = searchInput.value.trim();
     if (!query) return;
     if (activeFilter !== 'all') query = query + ' ' + activeFilter;
 
+    currentQuery = query;
+    currentPage  = page;
+
     resultsEl.innerHTML = '';
+    paginationEl.style.display = 'none';
     statusEl.textContent = 'Searching...';
 
     try {
-      const res     = await fetch(`${PROXY}/?q=${encodeURIComponent(query)}`);
+      const res     = await fetch(`${PROXY}/?q=${encodeURIComponent(query)}&page=${page}`);
       const data    = await res.json();
       const records = data._aRecords || [];
+      totalResults  = data._nTotal   || 0;
 
       if (records.length === 0) {
         statusEl.textContent = 'No results found. Try different tags.';
         return;
       }
 
-      statusEl.textContent = `Found ${records.length} results`;
+      const totalPages = Math.ceil(totalResults / 30);
+      statusEl.textContent = `Found ${totalResults} results — Page ${page} of ${totalPages}`;
+
       renderCards(records);
+
+      // show pagination
+      paginationEl.style.display = 'flex';
+      pageInfoEl.textContent = `Page ${page} of ${totalPages}`;
+      prevBtn.disabled = page <= 1;
+      nextBtn.disabled = page >= totalPages;
+
+      // scroll to top of results
+      resultsEl.scrollIntoView({ behavior: 'smooth' });
 
     } catch (err) {
       statusEl.textContent = 'Something went wrong. Try again.';
       console.error(err);
     }
+  }
+
+  function changePage(direction) {
+    handleSearch(currentPage + direction);
   }
 
   function proxyImg(url) {
@@ -578,6 +638,7 @@
       const type      = item._sModelName  || 'Content';
       const sourceUrl = item._sProfileUrl || '#';
       const game      = item._aGame?._sName || '';
+      const source    = item._sSource     || 'GameBanana';
 
       const card = document.createElement('div');
       card.className = 'card';
@@ -589,7 +650,7 @@
         <div class="card-body">
           <div class="card-title">${title}</div>
           <div class="card-meta">
-            <div class="card-source">GameBanana${game ? ' · ' + game : ''}</div>
+            <div class="card-source">${source}${game ? ' · ' + game : ''}</div>
             <div class="card-type">${type}</div>
           </div>
         </div>`;
