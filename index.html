@@ -215,7 +215,7 @@
       letter-spacing: 0.1em;
     }
 
-    .filter-tabs { display: flex; gap: 0.5rem; }
+    .filter-tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 
     .filter-tab {
       background: var(--card);
@@ -238,6 +238,7 @@
       gap: 0.5rem;
       width: 100%;
       max-width: 960px;
+      flex-wrap: wrap;
     }
 
     .main-tab {
@@ -259,7 +260,7 @@
       width: 100%;
       max-width: 960px;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
       gap: 1rem;
     }
 
@@ -398,8 +399,8 @@
       bottom: 2rem;
       right: 2rem;
       width: 340px;
-      min-width: 240px;
-      min-height: 200px;
+      min-width: 200px;
+      min-height: 160px;
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 14px;
@@ -408,32 +409,28 @@
       z-index: 100;
       display: none;
       flex-direction: column;
-      resize: both;
     }
 
     .bubble.active { display: flex; }
 
     .bubble.fullscreen {
-      top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+      top: 0 !important; left: 0 !important;
+      right: 0 !important; bottom: 0 !important;
       width: 100vw !important; height: 100vh !important;
-      border-radius: 0; resize: none;
+      border-radius: 0;
     }
 
     .bubble-header {
-      position: relative;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.75rem 0.8rem;
+      padding: 0.6rem 0.8rem;
       background: var(--surface);
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
       cursor: grab;
       user-select: none;
-      z-index: 2;
-      /* always visible — never let content push it off screen */
-      position: sticky;
-      top: 0;
+      touch-action: none;
     }
 
     .bubble-header:active { cursor: grabbing; }
@@ -446,7 +443,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 200px;
+      max-width: 180px;
     }
 
     .bubble-controls { display: flex; gap: 0.4rem; align-items: center; }
@@ -457,16 +454,13 @@
       color: var(--muted);
       cursor: pointer;
       font-size: 0.95rem;
-      padding: 0.3rem 0.45rem;
-      line-height: 1;
-      transition: color 0.15s;
-      border-radius: 4px;
-      /* bigger tap target on mobile */
       min-width: 2rem;
       min-height: 2rem;
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: color 0.15s;
+      border-radius: 4px;
     }
 
     .bubble-btn:hover { color: var(--text); background: var(--border); }
@@ -483,20 +477,8 @@
       justify-content: center;
     }
 
-    .bubble-media img {
-      width: 100%;
-      height: auto;
-      display: block;
-      object-fit: contain;
-    }
-
-    .bubble-media video {
-      width: 100%;
-      height: 100%;
-      display: block;
-      object-fit: contain;
-    }
-
+    .bubble-media img { width: 100%; height: auto; display: block; object-fit: contain; }
+    .bubble-media video { width: 100%; height: 100%; display: block; object-fit: contain; }
     .bubble-loading { color: var(--muted); font-size: 0.75rem; text-align: center; padding: 2rem; width: 100%; }
 
     .bubble-actions {
@@ -528,24 +510,29 @@
 
     .bubble-visit:hover { border-color: var(--accent); color: var(--accent); }
 
-    /* mobile bubble takes full width at top */
-    @media (max-width: 768px) {
-      .bubble {
-        left: 0 !important;
-        top: 0 !important;
-        right: 0 !important;
-        bottom: auto !important;
-        width: 100vw !important;
-        height: 70vh !important;
-        border-radius: 0 0 14px 14px;
-        resize: none;
-      }
-
-      .bubble.fullscreen {
-        height: 100vh !important;
-        border-radius: 0;
-      }
+    /* custom resize handle — big enough for fingers */
+    .bubble-resize {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 28px;
+      height: 28px;
+      cursor: se-resize;
+      z-index: 10;
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-end;
+      padding: 4px;
+      touch-action: none;
     }
+
+    .bubble-resize svg {
+      width: 14px;
+      height: 14px;
+      opacity: 0.4;
+    }
+
+    .bubble:hover .bubble-resize svg { opacity: 0.8; }
 
     .modal-overlay {
       position: fixed;
@@ -674,6 +661,12 @@
       ↗ Visit Source Site
     </a>
   </div>
+  <div class="bubble-resize" id="bubbleResize">
+    <svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.5">
+      <line x1="9" y1="1" x2="1" y2="9"/>
+      <line x1="9" y1="5" x2="5" y2="9"/>
+    </svg>
+  </div>
 </div>
 
 <div class="modal-overlay" id="leaveModal">
@@ -710,6 +703,7 @@
   const pageInfoEl     = document.getElementById('pageInfo');
   const bubble         = document.getElementById('bubble');
   const bubbleHeader   = document.getElementById('bubbleHeader');
+  const bubbleResize   = document.getElementById('bubbleResize');
   const autocompleteEl = document.getElementById('autocomplete');
 
   let activeFilter  = 'all';
@@ -721,8 +715,6 @@
   let acItems       = [];
   let acTimer       = null;
   let lastRecords   = [];
-
-  const isMobile = () => window.innerWidth <= 768;
 
   // ── Storage helpers ───────────────────────────────────────────────────
   function getStorage(key) {
@@ -782,17 +774,12 @@
   async function fetchAc(val) {
     acSelected = -1;
     acItems    = [];
-
-    const searches = getSearchHistory()
-      .filter(s => s.toLowerCase().includes(val.toLowerCase()))
-      .slice(0, 3);
-
+    const searches = getSearchHistory().filter(s => s.toLowerCase().includes(val.toLowerCase())).slice(0, 3);
     let tags = [];
     try {
       const res = await fetch(`${PROXY}/?tag=${encodeURIComponent(val)}`);
       tags = await res.json();
     } catch {}
-
     const tagNames = Array.isArray(tags) ? tags.map(t => typeof t === 'object' ? t.name : t) : [];
     acItems = [...searches, ...tagNames.filter(t => !searches.includes(t))];
     renderAc(searches, Array.isArray(tags) ? tags.filter(t => !searches.includes(typeof t === 'object' ? t.name : t)) : []);
@@ -800,36 +787,28 @@
 
   function renderAc(searches, tags) {
     if (!searches.length && !tags.length) { hideAc(); return; }
-
     let html = '';
-
     if (searches.length) {
       html += `<div class="autocomplete-section">Recent searches</div>`;
       searches.forEach((s, i) => {
-        html += `<div class="autocomplete-item" data-idx="${i}" onclick="pickAc(${i})"><span>${s}</span></div>`;
+        html += `<div class="autocomplete-item" onclick="pickAc(${i})"><span>${s}</span></div>`;
       });
     }
-
     if (tags.length) {
       html += `<div class="autocomplete-section">Tags</div>`;
       tags.forEach((t, i) => {
         const idx   = searches.length + i;
-        const name  = typeof t === 'object' ? t.name  : t;
+        const name  = typeof t === 'object' ? t.name : t;
         const count = typeof t === 'object' && t.count > 0
-          ? `<span class="autocomplete-count">${t.count.toLocaleString()}</span>`
-          : '';
-        html += `<div class="autocomplete-item" data-idx="${idx}" onclick="pickAc(${idx})"><span>${name}</span>${count}</div>`;
+          ? `<span class="autocomplete-count">${t.count.toLocaleString()}</span>` : '';
+        html += `<div class="autocomplete-item" onclick="pickAc(${idx})"><span>${name}</span>${count}</div>`;
       });
     }
-
     autocompleteEl.innerHTML = html;
     autocompleteEl.classList.add('active');
   }
 
-  function hideAc() {
-    autocompleteEl.classList.remove('active');
-    acSelected = -1;
-  }
+  function hideAc() { autocompleteEl.classList.remove('active'); acSelected = -1; }
 
   function pickAc(idx) {
     searchInput.value = acItems[idx];
@@ -848,29 +827,21 @@
       acSelected = Math.max(acSelected - 1, -1);
       items.forEach((el, i) => el.classList.toggle('selected', i === acSelected));
     } else if (e.key === 'Enter') {
-      if (acSelected >= 0 && acItems[acSelected]) {
-        e.preventDefault();
-        pickAc(acSelected);
-      } else {
-        hideAc();
-        handleSearch();
-      }
-    } else if (e.key === 'Escape') {
-      hideAc();
-    }
+      if (acSelected >= 0 && acItems[acSelected]) { e.preventDefault(); pickAc(acSelected); }
+      else { hideAc(); handleSearch(); }
+    } else if (e.key === 'Escape') { hideAc(); }
   });
 
   document.addEventListener('click', e => {
     if (!autocompleteEl.contains(e.target) && e.target !== searchInput) hideAc();
   });
 
-  // ── Global card click handler ─────────────────────────────────────────
+  // ── Card clicks ───────────────────────────────────────────────────────
   resultsEl.addEventListener('click', e => {
     const heart = e.target.closest('.card-heart');
     if (heart) {
       e.stopPropagation();
-      const item = JSON.parse(decodeURIComponent(heart.dataset.item));
-      toggleFav(item);
+      toggleFav(JSON.parse(decodeURIComponent(heart.dataset.item)));
       return;
     }
     const card = e.target.closest('.card');
@@ -888,27 +859,16 @@
     el.classList.add('active');
     paginationEl.style.display = 'none';
     statusEl.textContent = '';
-
     if (tab === 'search') {
-      if (lastRecords.length) {
-        statusEl.textContent = `Page ${currentPage} — ${lastRecords.length} results`;
-        renderCards(lastRecords);
-        paginationEl.style.display = 'flex';
-      }
-    } else if (tab === 'favorites') {
-      renderFavorites();
-    } else if (tab === 'history') {
-      renderHistoryTab();
-    }
+      if (lastRecords.length) { statusEl.textContent = `Page ${currentPage} — ${lastRecords.length} results`; renderCards(lastRecords); paginationEl.style.display = 'flex'; }
+    } else if (tab === 'favorites') { renderFavorites(); }
+    else if (tab === 'history')   { renderHistoryTab(); }
   }
 
   function renderFavorites() {
     const favs = getFavs();
     resultsEl.innerHTML = '';
-    if (!favs.length) {
-      resultsEl.innerHTML = `<div class="empty-state"><span>❤️</span>No favorites yet — heart a post to save it!</div>`;
-      return;
-    }
+    if (!favs.length) { resultsEl.innerHTML = `<div class="empty-state"><span>❤️</span>No favorites yet!</div>`; return; }
     statusEl.textContent = `${favs.length} favorites`;
     renderCards(favs);
   }
@@ -916,15 +876,11 @@
   function renderHistoryTab() {
     const hist = getHistory();
     resultsEl.innerHTML = '';
-    if (!hist.length) {
-      resultsEl.innerHTML = `<div class="empty-state"><span>🕒</span>No history yet — click a post to view it!</div>`;
-      return;
-    }
+    if (!hist.length) { resultsEl.innerHTML = `<div class="empty-state"><span>🕒</span>No history yet!</div>`; return; }
     statusEl.textContent = `${hist.length} viewed posts`;
     renderCards(hist);
   }
 
-  // ── Filter tabs ───────────────────────────────────────────────────────
   function setFilter(filter, el) {
     activeFilter = filter;
     document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
@@ -937,59 +893,40 @@
     let query = searchInput.value.trim();
     if (!query) return;
     if (activeFilter !== 'all') query = query + ' ' + activeFilter;
-
     currentQuery = query;
     currentPage  = page;
-
     addSearchHistory(searchInput.value.trim());
-
     document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
     document.querySelector('.main-tab').classList.add('active');
     activeMainTab = 'search';
-
     resultsEl.innerHTML = '';
     paginationEl.style.display = 'none';
     statusEl.textContent = 'Searching...';
-
     try {
-      const promises = SOURCES.map(source =>
-        fetch(`${PROXY}/?q=${encodeURIComponent(query)}&source=${source}&page=${page}`)
-          .then(r => r.json())
-          .catch(() => ({ _aRecords: [] }))
+      const responses = await Promise.all(
+        SOURCES.map(source =>
+          fetch(`${PROXY}/?q=${encodeURIComponent(query)}&source=${source}&page=${page}`)
+            .then(r => r.json()).catch(() => ({ _aRecords: [] }))
+        )
       );
-
-      const responses = await Promise.all(promises);
-      const records   = responses.flatMap(r => r._aRecords || []);
-      lastRecords     = records;
-
+      const records = responses.flatMap(r => r._aRecords || []);
+      lastRecords   = records;
       if (records.length === 0) {
-        statusEl.textContent = page > 1 ? 'No more results!' : 'No results found. Try different tags.';
-        if (page > 1) {
-          paginationEl.style.display = 'flex';
-          prevBtn.disabled = false;
-          nextBtn.disabled = true;
-          pageInfoEl.textContent = `Page ${page}`;
-        }
+        statusEl.textContent = page > 1 ? 'No more results!' : 'No results found.';
+        if (page > 1) { paginationEl.style.display = 'flex'; prevBtn.disabled = false; nextBtn.disabled = true; pageInfoEl.textContent = `Page ${page}`; }
         return;
       }
-
       statusEl.textContent = `Page ${page} — ${records.length} results`;
       renderCards(records);
-
       paginationEl.style.display = 'flex';
       pageInfoEl.textContent     = `Page ${page}`;
       prevBtn.disabled           = page <= 1;
-      nextBtn.disabled           = records.length === 0;
-
+      nextBtn.disabled           = false;
       resultsEl.scrollIntoView({ behavior: 'smooth' });
-
-    } catch (err) {
-      statusEl.textContent = 'Something went wrong. Try again.';
-    }
+    } catch { statusEl.textContent = 'Something went wrong.'; }
   }
 
   function changePage(direction) { handleSearch(currentPage + direction); }
-
   function proxyImg(url) { return `${PROXY}/?img=${encodeURIComponent(url)}`; }
 
   // ── Render cards ──────────────────────────────────────────────────────
@@ -1003,17 +940,12 @@
       const game      = item._aGame?._sName || '';
       const source    = item._sSource     || '';
       const faved     = isFaved(sourceUrl);
-
-      const card = document.createElement('div');
+      const card      = document.createElement('div');
       card.className    = 'card';
       card.dataset.item = encodeURIComponent(JSON.stringify(item));
-
       card.innerHTML = `
         <button class="card-heart ${faved ? 'faved' : ''}" data-url="${sourceUrl}" data-item="${encodeURIComponent(JSON.stringify(item))}">${faved ? '❤️' : '🤍'}</button>
-        ${thumb
-          ? `<img class="card-thumb" src="${proxyImg(thumb)}" alt="${title}" loading="lazy">`
-          : `<div class="card-thumb-placeholder">🖼</div>`
-        }
+        ${thumb ? `<img class="card-thumb" src="${proxyImg(thumb)}" alt="${title}" loading="lazy">` : `<div class="card-thumb-placeholder">🖼</div>`}
         <div class="card-body">
           <div class="card-title">${title}</div>
           <div class="card-meta">
@@ -1021,17 +953,16 @@
             <div class="card-type">${type}</div>
           </div>
         </div>`;
-
       resultsEl.appendChild(card);
     });
   }
 
-  // ── Bubble drag (desktop + mobile) ───────────────────────────────────
+  // ── Bubble drag ───────────────────────────────────────────────────────
   let dragging = false, dragOffX = 0, dragOffY = 0;
+  let resizing = false, resizeStartX = 0, resizeStartY = 0, resizeStartW = 0, resizeStartH = 0;
 
   function startDrag(clientX, clientY) {
     if (isFullscreen) return;
-    if (isMobile()) return; // mobile uses fixed top position, no drag needed
     dragging = true;
     const rect = bubble.getBoundingClientRect();
     dragOffX = clientX - rect.left;
@@ -1049,21 +980,38 @@
     bubble.style.bottom = 'auto';
   }
 
-  function endDrag() { dragging = false; }
+  function startResize(clientX, clientY) {
+    if (isFullscreen) return;
+    resizing     = true;
+    resizeStartX = clientX;
+    resizeStartY = clientY;
+    resizeStartW = bubble.offsetWidth;
+    resizeStartH = bubble.offsetHeight;
+  }
 
+  function moveResize(clientX, clientY) {
+    if (!resizing) return;
+    const newW = Math.max(200, resizeStartW + (clientX - resizeStartX));
+    const newH = Math.max(160, resizeStartH + (clientY - resizeStartY));
+    bubble.style.width  = `${newW}px`;
+    bubble.style.height = `${newH}px`;
+  }
+
+  function endInteraction() { dragging = false; resizing = false; }
+
+  // mouse
   bubbleHeader.addEventListener('mousedown', e => { startDrag(e.clientX, e.clientY); e.preventDefault(); });
-  document.addEventListener('mousemove', e => moveDrag(e.clientX, e.clientY));
-  document.addEventListener('mouseup', endDrag);
+  bubbleResize.addEventListener('mousedown', e => { startResize(e.clientX, e.clientY); e.preventDefault(); });
+  document.addEventListener('mousemove', e => { moveDrag(e.clientX, e.clientY); moveResize(e.clientX, e.clientY); });
+  document.addEventListener('mouseup', endInteraction);
 
-  bubbleHeader.addEventListener('touchstart', e => {
-    startDrag(e.touches[0].clientX, e.touches[0].clientY);
-  }, { passive: true });
-
+  // touch
+  bubbleHeader.addEventListener('touchstart', e => { startDrag(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+  bubbleResize.addEventListener('touchstart', e => { startResize(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }, { passive: false });
   document.addEventListener('touchmove', e => {
-    if (dragging) moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+    if (dragging || resizing) { moveDrag(e.touches[0].clientX, e.touches[0].clientY); moveResize(e.touches[0].clientX, e.touches[0].clientY); }
   }, { passive: true });
-
-  document.addEventListener('touchend', endDrag, { passive: true });
+  document.addEventListener('touchend', endInteraction, { passive: true });
 
   // ── Open bubble ───────────────────────────────────────────────────────
   async function openBubble(thumbUrl, title, sourceUrl) {
@@ -1078,15 +1026,12 @@
     bubble.classList.add('active');
     bubble.classList.remove('fullscreen');
     isFullscreen = false;
-
-    // reset position
-    bubble.style.cssText = '';
+    bubble.style.cssText = 'bottom:2rem;right:2rem;width:340px;';
 
     try {
       const res  = await fetch(`${PROXY}/?post=${encodeURIComponent(sourceUrl)}`);
       const data = await res.json();
       mediaEl.innerHTML = '';
-
       if (data.type === 'video') {
         const video    = document.createElement('video');
         video.src      = proxyImg(data.url);
@@ -1094,14 +1039,9 @@
         video.autoplay = true;
         video.loop     = true;
         mediaEl.appendChild(video);
-      } else if (data.type === 'image') {
-        const img = document.createElement('img');
-        img.src   = proxyImg(data.url);
-        img.alt   = title;
-        mediaEl.appendChild(img);
       } else {
         const img = document.createElement('img');
-        img.src   = proxyImg(thumbUrl);
+        img.src   = proxyImg(data.type === 'image' ? data.url : thumbUrl);
         img.alt   = title;
         mediaEl.appendChild(img);
       }
@@ -1117,7 +1057,7 @@
   function toggleFullscreen() {
     isFullscreen = !isFullscreen;
     bubble.classList.toggle('fullscreen', isFullscreen);
-    if (!isFullscreen) bubble.style.cssText = '';
+    if (!isFullscreen) bubble.style.cssText = 'bottom:2rem;right:2rem;width:340px;';
   }
 
   function closeBubble() {
@@ -1125,7 +1065,7 @@
     if (video) video.pause();
     document.getElementById('bubbleMedia').innerHTML = '';
     bubble.classList.remove('active', 'fullscreen');
-    bubble.style.cssText = '';
+    bubble.style.cssText = 'bottom:2rem;right:2rem;width:340px;';
     isFullscreen = false;
   }
 
