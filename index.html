@@ -37,7 +37,12 @@
     .warning-icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.05rem; }
     .warning p { font-size: 0.68rem; line-height: 1.7; color: #b08040; }
     .warning strong { color: var(--warn-text); }
-    .search-wrap { position: relative; margin-bottom: 1.25rem; animation: fadeDown 0.5s 0.1s ease both; }
+    .search-wrap {
+      position: relative;
+      z-index: 10;
+      margin-bottom: 1.25rem;
+      animation: fadeDown 0.5s 0.1s ease both;
+    }
     .search-box {
       display: flex; align-items: center; background: var(--card);
       border: 1px solid var(--border); border-radius: 12px;
@@ -61,8 +66,9 @@
     .autocomplete {
       position: absolute; top: calc(100% + 4px); left: 0; right: 0;
       background: var(--card); border: 1px solid var(--border);
-      border-radius: 10px; overflow: hidden; z-index: 150; display: none;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      border-radius: 10px; overflow: hidden;
+      z-index: 150;
+      display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.6);
     }
     .autocomplete.active { display: block; }
     .autocomplete-section { font-size: 0.6rem; color: var(--muted); padding: 0.5rem 1rem 0.25rem; text-transform: uppercase; letter-spacing: 0.1em; }
@@ -468,13 +474,22 @@
 
   function renderCards(records) {
     resultsEl.innerHTML = '';
+    const seen = new Set();
     records.forEach(item => {
-      const title = item._sName || 'Untitled', thumb = item._sThumb || null;
-      const type = item._sModelName || 'Image', sourceUrl = item._sProfileUrl || '#';
-      const game = item._aGame?._sName || '', source = item._sSource || '';
-      const faved = isFaved(sourceUrl);
-      const card = document.createElement('div');
-      card.className = 'card';
+      const thumb    = item._sThumb || '';
+      const filename = thumb.split('/').pop().replace(/\.[^.]+$/, '').replace(/^thumbnail_/, '');
+      if (filename && filename.length > 8) {
+        if (seen.has(filename)) return;
+        seen.add(filename);
+      }
+      const title     = item._sName       || 'Untitled';
+      const type      = item._sModelName  || 'Image';
+      const sourceUrl = item._sProfileUrl || '#';
+      const game      = item._aGame?._sName || '';
+      const source    = item._sSource     || '';
+      const faved     = isFaved(sourceUrl);
+      const card      = document.createElement('div');
+      card.className    = 'card';
       card.dataset.item = encodeURIComponent(JSON.stringify(item));
       card.innerHTML = `
         <button class="card-heart ${faved ? 'faved' : ''}" data-url="${sourceUrl}" data-item="${encodeURIComponent(JSON.stringify(item))}">${faved ? '❤️' : '🤍'}</button>
@@ -508,15 +523,15 @@
   document.addEventListener('touchend', endInteraction, { passive: true });
 
   async function openBubble(thumbUrl, title, sourceUrl) {
-    const mediaEl = document.getElementById('bubbleMedia');
-    const titleEl = document.getElementById('bubbleTitle');
+    const mediaEl  = document.getElementById('bubbleMedia');
+    const titleEl  = document.getElementById('bubbleTitle');
     const visitBtn = document.getElementById('bubbleVisitBtn');
     titleEl.textContent = title; visitBtn.href = sourceUrl;
     mediaEl.innerHTML = '<div class="bubble-loading">Loading...</div>';
     bubble.classList.add('active'); bubble.classList.remove('fullscreen');
     isFullscreen = false; bubble.style.cssText = 'bottom:2rem;right:2rem;width:340px;';
     try {
-      const res = await fetch(`${PROXY}/?post=${encodeURIComponent(sourceUrl)}`);
+      const res  = await fetch(`${PROXY}/?post=${encodeURIComponent(sourceUrl)}`);
       const data = await res.json();
       mediaEl.innerHTML = '';
       if (data.type === 'video') {
