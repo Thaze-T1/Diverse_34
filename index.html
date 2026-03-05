@@ -19,7 +19,7 @@
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
       background-size: 200px; pointer-events: none; z-index: 0; opacity: 0.4;
     }
-    .page { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 6rem; }
+    .page { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem 6rem; }
     .logo-wrap { text-align: center; margin-bottom: 2rem; animation: fadeDown 0.5s ease both; }
     .logo { font-family: 'Syne', sans-serif; font-size: 3rem; font-weight: 800; background: linear-gradient(135deg, #a78bfa 0%, #60a5fa 50%, #34d399 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -0.02em; line-height: 1; }
     .tagline { font-size: 0.72rem; color: var(--muted); margin-top: 0.5rem; letter-spacing: 0.08em; }
@@ -55,21 +55,24 @@
     .hero { text-align: center; padding: 4rem 1rem; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 1rem; }
     .hero-hint { font-size: 0.72rem; line-height: 2; }
     .hero-hint code { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.1rem 0.4rem; color: var(--accent); font-size: 0.7rem; }
-    .results { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; animation: fadeUp 0.4s ease both; }
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; cursor: pointer; transition: border-color 0.15s, transform 0.15s; position: relative; }
+    .results { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; animation: fadeUp 0.4s ease both; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; cursor: pointer; transition: border-color 0.15s, transform 0.15s; position: relative; }
     .card:hover { border-color: var(--accent); transform: translateY(-2px); }
     .card:hover .card-heart { opacity: 1; }
-    .card-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; background: var(--surface); display: block; }
-    .card-thumb-placeholder { width: 100%; aspect-ratio: 16/9; background: var(--surface); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 1.5rem; }
-    .card-heart { position: absolute; top: 0.5rem; right: 0.5rem; background: rgba(0,0,0,0.6); border: none; border-radius: 50%; width: 2.2rem; height: 2.2rem; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.9rem; opacity: 0; transition: opacity 0.15s, transform 0.15s; z-index: 2; }
+    /* thumbnail takes full width, no overlays */
+    .card-thumb-wrap { position: relative; width: 100%; aspect-ratio: 16/9; background: var(--surface); overflow: hidden; }
+    .card-thumb { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .card-thumb-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 1.5rem; }
+    /* video badge sits in top-left corner, small and unobtrusive */
+    .card-video-badge { position: absolute; top: 0.4rem; left: 0.4rem; background: rgba(0,0,0,0.65); border-radius: 4px; font-size: 0.6rem; color: var(--accent); padding: 0.15rem 0.4rem; pointer-events: none; }
+    .card-heart { position: absolute; top: 0.4rem; right: 0.4rem; background: rgba(0,0,0,0.6); border: none; border-radius: 50%; width: 2rem; height: 2rem; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.85rem; opacity: 0; transition: opacity 0.15s, transform 0.15s; z-index: 2; }
     .card-heart:hover { transform: scale(1.2); }
     .card-heart.faved { opacity: 1; }
-    @media (max-width: 768px) { .card-heart { opacity: 1; width: 2.8rem; height: 2.8rem; font-size: 1.1rem; } }
-    .card-body { padding: 0.75rem; display: flex; flex-direction: column; gap: 0.4rem; }
-    .card-title { font-family: 'Syne', sans-serif; font-size: 0.82rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .card-meta { display: flex; justify-content: space-between; align-items: center; }
-    .card-source { font-size: 0.65rem; color: var(--muted); }
-    .card-type { font-size: 0.62rem; background: var(--surface); border-radius: 4px; padding: 0.15rem 0.45rem; color: var(--accent); }
+    @media (max-width: 768px) { .card-heart { opacity: 1; width: 2.4rem; height: 2.4rem; font-size: 1rem; } }
+    /* info bar below thumbnail — clean, no overlap */
+    .card-info { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0.75rem; border-top: 1px solid var(--border); }
+    .card-source { font-size: 0.62rem; color: var(--muted); }
+    .card-type { font-size: 0.6rem; background: var(--surface); border-radius: 4px; padding: 0.12rem 0.4rem; color: var(--accent); }
     .status { font-size: 0.75rem; color: var(--muted); text-align: center; margin-bottom: 1rem; }
     .empty-state { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 3rem 1rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; grid-column: 1 / -1; }
     .empty-state span { font-size: 2rem; }
@@ -422,7 +425,6 @@
       const thumb    = item._sThumb || '';
       const filename = thumb.split('/').pop().replace(/\.[^.]+$/, '').replace(/^thumbnail_/, '');
       if (filename && filename.length > 8) { if (seen.has(filename)) return; seen.add(filename); }
-      const title     = item._sName       || 'Untitled';
       const sourceUrl = item._sProfileUrl || '#';
       const source    = item._sSource     || '';
       const paid      = item._bPaid       || false;
@@ -432,14 +434,14 @@
       card.className    = 'card';
       card.dataset.item = encodeURIComponent(JSON.stringify(item));
       card.innerHTML = `
-        <button class="card-heart ${faved ? 'faved' : ''}" data-url="${sourceUrl}" data-item="${encodeURIComponent(JSON.stringify(item))}">${faved ? '❤️' : '🤍'}</button>
-        ${thumb ? `<img class="card-thumb" src="${proxyImg(thumb)}" alt="${title}" loading="lazy" onerror="this.onerror=null;this.style.opacity='0.3'">` : `<div class="card-thumb-placeholder">🖼</div>`}
-        <div class="card-body">
-          <div class="card-title">${title}</div>
-          <div class="card-meta">
-            <div class="card-source">${source}${paid ? ' · <span style="color:var(--warn-text)">paid</span>' : ''}</div>
-            <div class="card-type">${isVideo ? '▶ Video' : 'Image'}</div>
-          </div>
+        <div class="card-thumb-wrap">
+          ${thumb ? `<img class="card-thumb" src="${proxyImg(thumb)}" loading="lazy" onerror="this.onerror=null;this.style.opacity='0.3'">` : `<div class="card-thumb-placeholder">🖼</div>`}
+          ${isVideo ? `<span class="card-video-badge">▶ Video</span>` : ''}
+          <button class="card-heart ${faved ? 'faved' : ''}" data-url="${sourceUrl}" data-item="${encodeURIComponent(JSON.stringify(item))}">${faved ? '❤️' : '🤍'}</button>
+        </div>
+        <div class="card-info">
+          <span class="card-source">${source}${paid ? ' · <span style="color:var(--warn-text)">paid</span>' : ''}</span>
+          ${!isVideo ? `<span class="card-type">Image</span>` : ''}
         </div>`;
       resultsEl.appendChild(card);
     });
