@@ -21,112 +21,47 @@
     }
     .page { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 6rem; }
     .logo-wrap { text-align: center; margin-bottom: 2rem; animation: fadeDown 0.5s ease both; }
-    .logo {
-      font-family: 'Syne', sans-serif; font-size: 3rem; font-weight: 800;
-      background: linear-gradient(135deg, #a78bfa 0%, #60a5fa 50%, #34d399 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text; letter-spacing: -0.02em; line-height: 1;
-    }
+    .logo { font-family: 'Syne', sans-serif; font-size: 3rem; font-weight: 800; background: linear-gradient(135deg, #a78bfa 0%, #60a5fa 50%, #34d399 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -0.02em; line-height: 1; }
     .tagline { font-size: 0.72rem; color: var(--muted); margin-top: 0.5rem; letter-spacing: 0.08em; }
-    .warning {
-      display: flex; gap: 0.75rem; align-items: flex-start;
-      background: #1a1508; border: 1px solid var(--warn-border);
-      border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 1.5rem;
-      animation: fadeDown 0.5s 0.05s ease both;
-    }
+    .warning { display: flex; gap: 0.75rem; align-items: flex-start; background: #1a1508; border: 1px solid var(--warn-border); border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 1.5rem; animation: fadeDown 0.5s 0.05s ease both; }
     .warning-icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.05rem; }
     .warning p { font-size: 0.68rem; line-height: 1.7; color: #b08040; }
     .warning strong { color: var(--warn-text); }
-    .search-wrap {
-      position: relative; z-index: 10;
-      margin-bottom: 1.25rem; animation: fadeDown 0.5s 0.1s ease both;
-    }
-    .search-box {
-      display: flex; align-items: center; background: var(--card);
-      border: 1px solid var(--border); border-radius: 12px;
-      padding: 0 1rem; gap: 0.75rem; transition: border-color 0.2s;
-    }
+    .search-wrap { position: relative; z-index: 10; margin-bottom: 1.25rem; animation: fadeDown 0.5s 0.1s ease both; }
+    .search-box { display: flex; align-items: center; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 0 1rem; gap: 0.75rem; transition: border-color 0.2s; }
     .search-box:focus-within { border-color: var(--accent); }
     .search-icon { color: var(--muted); font-size: 1.1rem; flex-shrink: 0; }
-    .search-box input {
-      flex: 1; background: none; border: none; outline: none;
-      color: var(--text); font-family: 'DM Mono', monospace;
-      font-size: 0.85rem; padding: 0.85rem 0;
-    }
+    .search-box input { flex: 1; background: none; border: none; outline: none; color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.85rem; padding: 0.85rem 0; }
     .search-box input::placeholder { color: var(--muted); }
-    .search-btn {
-      background: var(--accent); border: none; border-radius: 8px;
-      color: #0e0e12; font-family: 'DM Mono', monospace;
-      font-size: 0.78rem; font-weight: 500; padding: 0.5rem 1.1rem;
-      cursor: pointer; transition: opacity 0.15s; flex-shrink: 0;
-    }
+    .search-btn { background: var(--accent); border: none; border-radius: 8px; color: #0e0e12; font-family: 'DM Mono', monospace; font-size: 0.78rem; font-weight: 500; padding: 0.5rem 1.1rem; cursor: pointer; transition: opacity 0.15s; flex-shrink: 0; }
     .search-btn:hover { opacity: 0.85; }
-    .autocomplete {
-      position: absolute; top: calc(100% + 4px); left: 0; right: 0;
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 10px; overflow: hidden; z-index: 150;
-      display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.6);
-    }
+    .autocomplete { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; z-index: 150; display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.6); }
     .autocomplete.active { display: block; }
     .autocomplete-section { font-size: 0.6rem; color: var(--muted); padding: 0.5rem 1rem 0.25rem; text-transform: uppercase; letter-spacing: 0.1em; }
-    .autocomplete-item {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 0.55rem 1rem; font-size: 0.78rem; cursor: pointer; transition: background 0.1s;
-    }
+    .autocomplete-item { display: flex; justify-content: space-between; align-items: center; padding: 0.55rem 1rem; font-size: 0.78rem; cursor: pointer; transition: background 0.1s; }
     .autocomplete-item:hover, .autocomplete-item.selected { background: var(--surface); }
     .autocomplete-count { font-size: 0.65rem; color: var(--muted); }
     .filter-row { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
-    .filter-tab {
-      background: none; border: 1px solid var(--border); border-radius: 20px;
-      color: var(--muted); font-family: 'DM Mono', monospace;
-      font-size: 0.7rem; padding: 0.3rem 0.9rem; cursor: pointer;
-      transition: border-color 0.15s, color 0.15s;
-    }
+    .filter-tab { background: none; border: 1px solid var(--border); border-radius: 20px; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.7rem; padding: 0.3rem 0.9rem; cursor: pointer; transition: border-color 0.15s, color 0.15s; }
     .filter-tab.active { border-color: var(--accent); color: var(--accent); }
-    .source-toggles {
-      display: flex; gap: 0.5rem; margin-top: 0.6rem; flex-wrap: wrap; align-items: center;
-    }
+    .source-toggles { display: flex; gap: 0.5rem; margin-top: 0.6rem; flex-wrap: wrap; align-items: center; }
     .source-label { font-size: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
-    .source-btn {
-      background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
-      color: var(--muted); font-family: 'DM Mono', monospace;
-      font-size: 0.68rem; padding: 0.28rem 0.85rem; cursor: pointer;
-      transition: border-color 0.15s, color 0.15s, background 0.15s, opacity 0.15s;
-      opacity: 0.45;
-    }
+    .source-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.68rem; padding: 0.28rem 0.85rem; cursor: pointer; transition: border-color 0.15s, color 0.15s, background 0.15s, opacity 0.15s; opacity: 0.45; }
     .source-btn.on { border-color: var(--accent); color: var(--accent); background: rgba(167,139,250,0.08); opacity: 1; }
     .source-btn:hover { opacity: 1; }
     .main-tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; animation: fadeDown 0.5s 0.15s ease both; }
-    .main-tab {
-      background: none; border: 1px solid var(--border); border-radius: 20px;
-      color: var(--muted); font-family: 'DM Mono', monospace;
-      font-size: 0.7rem; padding: 0.35rem 1rem; cursor: pointer;
-      transition: border-color 0.15s, color 0.15s;
-    }
+    .main-tab { background: none; border: 1px solid var(--border); border-radius: 20px; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.7rem; padding: 0.35rem 1rem; cursor: pointer; transition: border-color 0.15s, color 0.15s; }
     .main-tab.active { border-color: var(--accent); color: var(--accent); }
-    .results {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 1rem; margin-bottom: 1.5rem; animation: fadeUp 0.4s ease both;
-    }
-    .card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 10px; overflow: hidden; cursor: pointer;
-      transition: border-color 0.15s, transform 0.15s; position: relative;
-    }
+    .hero { text-align: center; padding: 4rem 1rem; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+    .hero-hint { font-size: 0.72rem; line-height: 2; }
+    .hero-hint code { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.1rem 0.4rem; color: var(--accent); font-size: 0.7rem; }
+    .results { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; animation: fadeUp 0.4s ease both; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; cursor: pointer; transition: border-color 0.15s, transform 0.15s; position: relative; }
     .card:hover { border-color: var(--accent); transform: translateY(-2px); }
     .card:hover .card-heart { opacity: 1; }
     .card-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; background: var(--surface); display: block; }
-    .card-thumb-placeholder {
-      width: 100%; aspect-ratio: 16/9; background: var(--surface);
-      display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 1.5rem;
-    }
-    .card-heart {
-      position: absolute; top: 0.5rem; right: 0.5rem;
-      background: rgba(0,0,0,0.6); border: none; border-radius: 50%;
-      width: 2.2rem; height: 2.2rem; display: flex; align-items: center;
-      justify-content: center; cursor: pointer; font-size: 0.9rem; opacity: 0;
-      transition: opacity 0.15s, transform 0.15s; z-index: 2;
-    }
+    .card-thumb-placeholder { width: 100%; aspect-ratio: 16/9; background: var(--surface); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 1.5rem; }
+    .card-heart { position: absolute; top: 0.5rem; right: 0.5rem; background: rgba(0,0,0,0.6); border: none; border-radius: 50%; width: 2.2rem; height: 2.2rem; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.9rem; opacity: 0; transition: opacity 0.15s, transform 0.15s; z-index: 2; }
     .card-heart:hover { transform: scale(1.2); }
     .card-heart.faved { opacity: 1; }
     @media (max-width: 768px) { .card-heart { opacity: 1; width: 2.8rem; height: 2.8rem; font-size: 1.1rem; } }
@@ -136,121 +71,46 @@
     .card-source { font-size: 0.65rem; color: var(--muted); }
     .card-type { font-size: 0.62rem; background: var(--surface); border-radius: 4px; padding: 0.15rem 0.45rem; color: var(--accent); }
     .status { font-size: 0.75rem; color: var(--muted); text-align: center; margin-bottom: 1rem; }
-    .empty-state {
-      text-align: center; color: var(--muted); font-size: 0.8rem; padding: 3rem 1rem;
-      display: flex; flex-direction: column; align-items: center; gap: 0.5rem; grid-column: 1 / -1;
-    }
+    .empty-state { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 3rem 1rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; grid-column: 1 / -1; }
     .empty-state span { font-size: 2rem; }
-    .hero {
-      text-align: center; padding: 4rem 1rem; color: var(--muted);
-      display: flex; flex-direction: column; align-items: center; gap: 1rem;
-    }
-    .hero-hint { font-size: 0.72rem; line-height: 1.8; }
-    .hero-hint code {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 4px; padding: 0.1rem 0.4rem; color: var(--accent); font-size: 0.7rem;
-    }
     .pagination { display: flex; align-items: center; gap: 0.75rem; animation: fadeUp 0.4s ease both; }
-    .page-btn {
-      background: var(--card); border: 1px solid var(--border); border-radius: 8px;
-      color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.78rem;
-      padding: 0.5rem 1.2rem; cursor: pointer; transition: border-color 0.15s, color 0.15s;
-    }
+    .page-btn { background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.78rem; padding: 0.5rem 1.2rem; cursor: pointer; transition: border-color 0.15s, color 0.15s; }
     .page-btn:hover { border-color: var(--accent); color: var(--accent); }
     .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
     .page-info { font-size: 0.72rem; color: var(--muted); }
-    .footer {
-      position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%);
-      font-size: 0.62rem; color: #3a3a45; letter-spacing: 0.1em;
-      text-transform: uppercase; white-space: nowrap; z-index: 1;
-    }
-    .bubble {
-      position: fixed; bottom: 2rem; right: 2rem; width: 520px;
-      min-width: 200px; min-height: 160px; background: var(--card);
-      border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
-      box-shadow: 0 16px 48px rgba(0,0,0,0.6); z-index: 100; display: none; flex-direction: column;
-    }
+    .footer { position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%); font-size: 0.62rem; color: #3a3a45; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; z-index: 1; }
+    .bubble { position: fixed; bottom: 2rem; right: 2rem; width: 520px; min-width: 200px; min-height: 160px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: 0 16px 48px rgba(0,0,0,0.6); z-index: 100; display: none; flex-direction: column; }
     .bubble.active { display: flex; }
-    .bubble.fullscreen {
-      top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
-      width: 100vw !important; height: 100vh !important; border-radius: 0;
-    }
-    .bubble-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0.6rem 0.8rem; background: var(--surface);
-      border-bottom: 1px solid var(--border); flex-shrink: 0;
-      cursor: grab; user-select: none; touch-action: none;
-      position: sticky; top: 0; z-index: 2;
-    }
+    .bubble.fullscreen { top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100vw !important; height: 100vh !important; border-radius: 0; }
+    .bubble-header { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.8rem; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; cursor: grab; user-select: none; touch-action: none; position: sticky; top: 0; z-index: 2; }
     .bubble-header:active { cursor: grabbing; }
-    .bubble-title {
-      font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 700;
-      color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;
-    }
+    .bubble-title { font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px; }
     .bubble-controls { display: flex; gap: 0.4rem; align-items: center; }
-    .bubble-btn {
-      background: none; border: none; color: var(--muted); cursor: pointer;
-      font-size: 0.95rem; min-width: 2rem; min-height: 2rem;
-      display: flex; align-items: center; justify-content: center; transition: color 0.15s; border-radius: 4px;
-    }
+    .bubble-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.95rem; min-width: 2rem; min-height: 2rem; display: flex; align-items: center; justify-content: center; transition: color 0.15s; border-radius: 4px; }
     .bubble-btn:hover { color: var(--text); background: var(--border); }
-    .bubble-media {
-      width: 100%; background: #000; flex: 1; min-height: 0;
-      overflow-y: auto; -webkit-overflow-scrolling: touch;
-      display: flex; align-items: flex-start; justify-content: center;
-    }
+    .bubble-media { width: 100%; background: #000; flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; display: flex; align-items: flex-start; justify-content: center; }
     .bubble-media img { width: 100%; height: auto; display: block; object-fit: contain; }
     .bubble-media video { width: 100%; height: 100%; display: block; object-fit: contain; }
     .bubble-loading { color: var(--muted); font-size: 0.75rem; text-align: center; padding: 2rem; width: 100%; }
-    .bubble-paid {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 0.75rem; padding: 2rem; width: 100%; text-align: center;
-    }
+    .bubble-paid { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; padding: 2rem; width: 100%; text-align: center; }
     .bubble-paid-icon { font-size: 2rem; }
     .bubble-paid-msg { font-size: 0.72rem; color: var(--muted); line-height: 1.6; }
-    .bubble-paid-tag {
-      font-size: 0.62rem; background: #2a1f08; border: 1px solid var(--warn-border);
-      border-radius: 20px; padding: 0.2rem 0.7rem; color: var(--warn-text);
-    }
+    .bubble-paid-tag { font-size: 0.62rem; background: #2a1f08; border: 1px solid var(--warn-border); border-radius: 20px; padding: 0.2rem 0.7rem; color: var(--warn-text); }
     .bubble-actions { padding: 0.6rem 0.8rem; display: flex; gap: 0.5rem; flex-shrink: 0; background: var(--card); }
-    .bubble-visit {
-      flex: 1; background: none; border: 1px solid var(--border); border-radius: 7px;
-      color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.68rem; padding: 0.45rem;
-      cursor: pointer; transition: border-color 0.15s, color 0.15s; text-align: center;
-      text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.3rem;
-    }
+    .bubble-visit { flex: 1; background: none; border: 1px solid var(--border); border-radius: 7px; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.68rem; padding: 0.45rem; cursor: pointer; transition: border-color 0.15s, color 0.15s; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.3rem; }
     .bubble-visit:hover { border-color: var(--accent); color: var(--accent); }
-    .bubble-resize {
-      position: absolute; bottom: 0; right: 0; width: 28px; height: 28px;
-      cursor: se-resize; z-index: 10; display: flex;
-      align-items: flex-end; justify-content: flex-end; padding: 4px; touch-action: none;
-    }
+    .bubble-resize { position: absolute; bottom: 0; right: 0; width: 28px; height: 28px; cursor: se-resize; z-index: 10; display: flex; align-items: flex-end; justify-content: flex-end; padding: 4px; touch-action: none; }
     .bubble-resize svg { width: 14px; height: 14px; opacity: 0.4; }
     .bubble:hover .bubble-resize svg { opacity: 0.8; }
-    .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center;
-    }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; }
     .modal-overlay.active { display: flex; }
-    .modal {
-      background: var(--card); border: 1px solid var(--warn-border);
-      border-radius: 16px; padding: 2rem; max-width: 380px; width: 90%;
-      display: flex; flex-direction: column; gap: 1rem;
-    }
+    .modal { background: var(--card); border: 1px solid var(--warn-border); border-radius: 16px; padding: 2rem; max-width: 380px; width: 90%; display: flex; flex-direction: column; gap: 1rem; }
     .modal h2 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; color: var(--warn-text); }
     .modal p { font-size: 0.75rem; line-height: 1.7; color: var(--muted); }
     .modal-btns { display: flex; gap: 0.75rem; }
-    .modal-cancel {
-      flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
-      color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.78rem;
-      padding: 0.65rem; cursor: pointer; transition: border-color 0.15s;
-    }
+    .modal-cancel { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.78rem; padding: 0.65rem; cursor: pointer; transition: border-color 0.15s; }
     .modal-cancel:hover { border-color: var(--accent); }
-    .modal-confirm {
-      flex: 1; background: #4a3010; border: 1px solid var(--warn-border); border-radius: 8px;
-      color: var(--warn-text); font-family: 'DM Mono', monospace; font-size: 0.78rem;
-      padding: 0.65rem; cursor: pointer; transition: background 0.15s;
-    }
+    .modal-confirm { flex: 1; background: #4a3010; border: 1px solid var(--warn-border); border-radius: 8px; color: var(--warn-text); font-family: 'DM Mono', monospace; font-size: 0.78rem; padding: 0.65rem; cursor: pointer; transition: background 0.15s; }
     .modal-confirm:hover { background: #5a3f15; }
     @keyframes fadeDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes fadeUp   { from { opacity: 0; transform: translateY(16px);  } to { opacity: 1; transform: translateY(0); } }
@@ -295,13 +155,13 @@
   <div class="status" id="status"></div>
   <div id="heroState">
     <div class="hero">
-      <div style="font-size:2.5rem;">🔍</div>
+      <div style="font-size:2.5rem">🔍</div>
       <div class="hero-hint">
         Search any tag to get started<br>
         <code>miruko, animated</code> — combine tags &nbsp;·&nbsp;
         <code>miruko/yoruichi</code> — either tag &nbsp;·&nbsp;
-        <code>-tag</code> — exclude tag<br>
-        Search with no tags to browse latest posts
+        <code>-tag</code> — exclude<br>
+        Leave search empty to browse latest posts
       </div>
     </div>
   </div>
@@ -327,15 +187,14 @@
   </div>
   <div class="bubble-resize" id="bubbleResize">
     <svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.5">
-      <line x1="9" y1="1" x2="1" y2="9"/>
-      <line x1="9" y1="5" x2="5" y2="9"/>
+      <line x1="9" y1="1" x2="1" y2="9"/><line x1="9" y1="5" x2="5" y2="9"/>
     </svg>
   </div>
 </div>
 <div class="modal-overlay" id="leaveModal">
   <div class="modal">
     <h2>⚠️ You're leaving Diverse</h2>
-    <p>You're about to visit an external site. Once you leave Diverse, your <strong style="color:#e0a44a">IP address and browsing data will be visible</strong> to that site. We cannot protect you outside of Diverse.</p>
+    <p>You're about to visit an external site. Once you leave Diverse, your <strong style="color:#e0a44a">IP address and browsing data will be visible</strong> to that site.</p>
     <div class="modal-btns">
       <button class="modal-cancel" onclick="closeModal()">Stay on Diverse</button>
       <button class="modal-confirm" id="modalConfirm">Leave anyway →</button>
@@ -344,17 +203,19 @@
 </div>
 <script>
   const PROXY = 'https://diverse-proxy.alpc493.workers.dev';
+
   const ALL_SOURCES = [
     { id: 'rule34xyz',  label: 'Rule34.xyz',  paid: false, default: true  },
     { id: 'gelbooru',   label: 'Gelbooru',    paid: false, default: false },
     { id: 'danbooru',   label: 'Danbooru',    paid: false, default: false },
-    { id: 'xbooru',     label: 'Xbooru',      paid: false, default: false },
-    { id: 'rule34porn', label: 'Rule34.porn', paid: false, default: false },
     { id: 'e621',       label: 'E621',        paid: false, default: false },
     { id: 'rule34us',   label: 'Rule34.us',   paid: false, default: false },
     { id: 'paheal',     label: 'Paheal',      paid: false, default: false },
     { id: 'yandere',    label: 'Yande.re',    paid: false, default: false },
+    { id: 'xbooru',     label: 'Xbooru',      paid: false, default: false },
+    { id: 'rule34porn', label: 'Rule34.porn', paid: false, default: false },
   ];
+
   const enabledSources = new Set(ALL_SOURCES.filter(s => s.default).map(s => s.id));
   const togglesEl = document.getElementById('sourceToggles');
   ALL_SOURCES.forEach(src => {
@@ -375,6 +236,7 @@
     };
     togglesEl.appendChild(btn);
   });
+
   const searchInput    = document.getElementById('searchInput');
   const resultsEl      = document.getElementById('results');
   const statusEl       = document.getElementById('status');
@@ -387,9 +249,11 @@
   const bubbleHeader   = document.getElementById('bubbleHeader');
   const bubbleResize   = document.getElementById('bubbleResize');
   const autocompleteEl = document.getElementById('autocomplete');
+
   let activeFilter = 'all', currentPage = 1, currentQuery = null;
   let isFullscreen = false, activeMainTab = 'search';
   let acSelected = -1, acItems = [], acTimer = null, lastRecords = [];
+
   function getStorage(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; } }
   function setStorage(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
   function getFavs() { return getStorage('diverse_favs'); }
@@ -417,6 +281,7 @@
     const hist = getSearchHistory().filter(h => h !== q);
     hist.unshift(q); setStorage('diverse_searches', hist.slice(0, 20));
   }
+
   searchInput.addEventListener('input', () => {
     clearTimeout(acTimer);
     const val = searchInput.value;
@@ -467,28 +332,25 @@
     else if (e.key === 'Escape') { hideAc(); }
   });
   document.addEventListener('click', e => { if (!autocompleteEl.contains(e.target) && e.target !== searchInput) hideAc(); });
+
   resultsEl.addEventListener('click', e => {
     const heart = e.target.closest('.card-heart');
     if (heart) { e.stopPropagation(); toggleFav(JSON.parse(decodeURIComponent(heart.dataset.item))); return; }
     const card = e.target.closest('.card');
-    if (card) {
-      const item = JSON.parse(decodeURIComponent(card.dataset.item));
-      addHistory(item);
-      openBubble(item);
-    }
+    if (card) { const item = JSON.parse(decodeURIComponent(card.dataset.item)); addHistory(item); openBubble(item); }
   });
+
   function setMainTab(tab, el) {
     activeMainTab = tab;
     document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
-    paginationEl.style.display = 'none'; statusEl.textContent = '';
-    heroEl.style.display = 'none';
+    paginationEl.style.display = 'none'; statusEl.textContent = ''; heroEl.style.display = 'none';
     if (tab === 'search') {
       if (currentQuery === null && !lastRecords.length) { heroEl.style.display = 'block'; resultsEl.innerHTML = ''; }
       else if (lastRecords.length) { statusEl.textContent = `Page ${currentPage} — ${lastRecords.length} results`; renderCards(lastRecords); paginationEl.style.display = 'flex'; }
     }
     else if (tab === 'favorites') renderFavorites();
-    else if (tab === 'history') renderHistoryTab();
+    else if (tab === 'history')   renderHistoryTab();
   }
   function renderFavorites() {
     heroEl.style.display = 'none';
@@ -508,16 +370,16 @@
     el.classList.add('active');
     if (lastRecords.length) renderCards(lastRecords);
   }
+
   async function handleSearch(page = 1) {
     const raw   = searchInput.value;
-    const query = raw.trim() === '' ? null : raw; // null = latest posts
+    const query = raw.trim() === '' ? null : raw;
     currentQuery = query;
     currentPage  = page;
     if (query) addSearchHistory(query);
     document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
     document.querySelector('.main-tab').classList.add('active');
-    activeMainTab = 'search';
-    heroEl.style.display = 'none';
+    activeMainTab = 'search'; heroEl.style.display = 'none';
     resultsEl.innerHTML = ''; paginationEl.style.display = 'none';
     statusEl.textContent = query ? 'Searching...' : 'Loading latest posts...';
     try {
@@ -545,11 +407,12 @@
   }
   function changePage(direction) { handleSearch(currentPage + direction); }
   function proxyImg(url) { return `${PROXY}/?img=${encodeURIComponent(url)}`; }
+
   function renderCards(records) {
     resultsEl.innerHTML = '';
     const seen = new Set();
     const filtered = activeFilter === 'all' ? records
-      : activeFilter === 'video' ? records.filter(r => r._sIsVideo)
+      : activeFilter === 'video'   ? records.filter(r => r._sIsVideo)
       : records.filter(r => !r._sIsVideo);
     if (!filtered.length) {
       resultsEl.innerHTML = `<div class="empty-state"><span>🎞</span>No ${activeFilter === 'video' ? 'videos' : 'images'} on this page — try Next →</div>`;
@@ -558,10 +421,7 @@
     filtered.forEach(item => {
       const thumb    = item._sThumb || '';
       const filename = thumb.split('/').pop().replace(/\.[^.]+$/, '').replace(/^thumbnail_/, '');
-      if (filename && filename.length > 8) {
-        if (seen.has(filename)) return;
-        seen.add(filename);
-      }
+      if (filename && filename.length > 8) { if (seen.has(filename)) return; seen.add(filename); }
       const title     = item._sName       || 'Untitled';
       const sourceUrl = item._sProfileUrl || '#';
       const source    = item._sSource     || '';
@@ -571,10 +431,9 @@
       const card      = document.createElement('div');
       card.className    = 'card';
       card.dataset.item = encodeURIComponent(JSON.stringify(item));
-      const thumbProxied = proxyImg(thumb);
       card.innerHTML = `
         <button class="card-heart ${faved ? 'faved' : ''}" data-url="${sourceUrl}" data-item="${encodeURIComponent(JSON.stringify(item))}">${faved ? '❤️' : '🤍'}</button>
-        ${thumb ? `<img class="card-thumb" src="${thumbProxied}" alt="${title}" loading="lazy" onerror="this.onerror=null;this.style.opacity='0.3';">` : `<div class="card-thumb-placeholder">🖼</div>`}
+        ${thumb ? `<img class="card-thumb" src="${proxyImg(thumb)}" alt="${title}" loading="lazy" onerror="this.onerror=null;this.style.opacity='0.3'">` : `<div class="card-thumb-placeholder">🖼</div>`}
         <div class="card-body">
           <div class="card-title">${title}</div>
           <div class="card-meta">
@@ -585,6 +444,7 @@
       resultsEl.appendChild(card);
     });
   }
+
   let dragging = false, dragOffX = 0, dragOffY = 0;
   let resizing = false, resizeStartX = 0, resizeStartY = 0, resizeStartW = 0, resizeStartH = 0;
   function startDrag(cx, cy) { if (isFullscreen) return; dragging = true; const r = bubble.getBoundingClientRect(); dragOffX = cx - r.left; dragOffY = cy - r.top; bubble.style.transition = 'none'; }
@@ -600,6 +460,7 @@
   bubbleResize.addEventListener('touchstart', e => { startResize(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }, { passive: false });
   document.addEventListener('touchmove', e => { if (dragging || resizing) { moveDrag(e.touches[0].clientX, e.touches[0].clientY); moveResize(e.touches[0].clientX, e.touches[0].clientY); } }, { passive: true });
   document.addEventListener('touchend', endInteraction, { passive: true });
+
   async function openBubble(item) {
     const thumbUrl  = item._sThumb      || '';
     const title     = item._sName       || 'Untitled';
@@ -614,12 +475,7 @@
     bubble.classList.add('active'); bubble.classList.remove('fullscreen');
     isFullscreen = false; bubble.style.cssText = 'bottom:2rem;right:2rem;width:520px;height:520px;';
     if (paid) {
-      mediaEl.innerHTML = `
-        <div class="bubble-paid">
-          <div class="bubble-paid-icon">🔒</div>
-          <div class="bubble-paid-tag">Paid content</div>
-          <div class="bubble-paid-msg">Full content requires a subscription on the source site.</div>
-        </div>`;
+      mediaEl.innerHTML = `<div class="bubble-paid"><div class="bubble-paid-icon">🔒</div><div class="bubble-paid-tag">Paid content</div><div class="bubble-paid-msg">Full content requires a subscription on the source site.</div></div>`;
       return;
     }
     if (isVideo && fullUrl) {
@@ -661,9 +517,11 @@
       img.src = proxyImg(thumbUrl); img.alt = title; mediaEl.appendChild(img);
     }
   }
+
   function toggleFullscreen() { isFullscreen = !isFullscreen; bubble.classList.toggle('fullscreen', isFullscreen); if (!isFullscreen) bubble.style.cssText = 'bottom:2rem;right:2rem;width:520px;height:520px;'; }
   function closeBubble() { const v = document.getElementById('bubbleMedia').querySelector('video'); if (v) v.pause(); document.getElementById('bubbleMedia').innerHTML = ''; bubble.classList.remove('active', 'fullscreen'); bubble.style.cssText = 'bottom:2rem;right:2rem;width:520px;height:520px;'; isFullscreen = false; }
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (isFullscreen) toggleFullscreen(); else closeBubble(); } });
+
   let pendingUrl = null;
   function warnLeave(e, url) { e.preventDefault(); pendingUrl = url; document.getElementById('leaveModal').classList.add('active'); document.getElementById('modalConfirm').onclick = () => { window.open(pendingUrl, '_blank'); closeModal(); }; }
   function closeModal() { document.getElementById('leaveModal').classList.remove('active'); pendingUrl = null; }
