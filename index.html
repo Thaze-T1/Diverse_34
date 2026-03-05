@@ -90,8 +90,9 @@
     .bubble-controls { display: flex; gap: 0.4rem; align-items: center; }
     .bubble-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.95rem; min-width: 2rem; min-height: 2rem; display: flex; align-items: center; justify-content: center; transition: color 0.15s; border-radius: 4px; }
     .bubble-btn:hover { color: var(--text); background: var(--border); }
-    .bubble-media { width: 100%; background: #000; flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; display: flex; align-items: flex-start; justify-content: center; }
-    .bubble-media img { width: 100%; height: auto; display: block; object-fit: contain; }
+    /* ── FIXED: block layout so tall images scroll naturally ── */
+    .bubble-media { width: 100%; background: #000; flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; display: block; }
+    .bubble-media img { width: 100%; height: auto; display: block; }
     .bubble-media video { width: 100%; height: 100%; display: block; object-fit: contain; }
     .bubble-loading { color: var(--muted); font-size: 0.75rem; text-align: center; padding: 2rem; width: 100%; }
     .bubble-paid { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; padding: 2rem; width: 100%; text-align: center; }
@@ -239,7 +240,7 @@
         enabledSources.add(src.id);
         btn.classList.add('on');
       }
-      if (currentQuery !== null) handleSearch(1);
+      if (lastRecords.length || currentQuery === null) handleSearch(1);
     };
     togglesEl.appendChild(btn);
   });
@@ -260,7 +261,7 @@
   let activeFilter = 'all', currentPage = 1, currentQuery = null;
   let isFullscreen = false, activeMainTab = 'search';
   let acSelected = -1, acItems = [], acTimer = null, lastRecords = [];
-  let bubbleIndex = -1;  // index into current filtered list
+  let bubbleIndex = -1;
   let filteredForBubble = [];
 
   function getStorage(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; } }
@@ -349,7 +350,6 @@
     if (card) {
       const item = JSON.parse(decodeURIComponent(card.dataset.item));
       addHistory(item);
-      // find index in filteredForBubble
       const idx = filteredForBubble.findIndex(r => r._sProfileUrl === item._sProfileUrl);
       bubbleIndex = idx >= 0 ? idx : 0;
       openBubble(item);
@@ -401,19 +401,21 @@
   }
 
   async function handleSearch(page = 1) {
-    const raw   = searchInput.value;
-    const query = raw.trim() === '' ? null : raw;
-    currentQuery = query;
-    currentPage  = page;
-    if (query) addSearchHistory(query);
+    const isNewSearch = page === 1;
+    if (isNewSearch) {
+      const raw = searchInput.value;
+      currentQuery = raw.trim() === '' ? null : raw;
+      if (currentQuery) addSearchHistory(currentQuery);
+    }
+    currentPage = page;
     document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
     document.querySelector('.main-tab').classList.add('active');
     activeMainTab = 'search'; heroEl.style.display = 'none';
     resultsEl.innerHTML = ''; paginationEl.style.display = 'none';
-    statusEl.textContent = query ? 'Searching...' : 'Loading latest posts...';
+    statusEl.textContent = currentQuery ? 'Searching...' : 'Loading latest posts...';
     try {
       const activeSources = [...enabledSources];
-      const qParam = query ? encodeURIComponent(query) : '';
+      const qParam = currentQuery ? encodeURIComponent(currentQuery) : '';
       const responses = await Promise.all(
         activeSources.map(source =>
           fetch(`${PROXY}/?q=${qParam}&source=${source}&page=${page}`)
@@ -427,7 +429,7 @@
         if (page > 1) { paginationEl.style.display = 'flex'; prevBtn.disabled = false; nextBtn.disabled = true; pageInfoEl.textContent = `Page ${page}`; }
         return;
       }
-      statusEl.textContent = query ? `Page ${page} — ${records.length} results` : `Latest posts — page ${page}`;
+      statusEl.textContent = currentQuery ? `Page ${page} — ${records.length} results` : `Latest posts — page ${page}`;
       renderCards(records);
       paginationEl.style.display = 'flex'; pageInfoEl.textContent = `Page ${page}`;
       prevBtn.disabled = page <= 1; nextBtn.disabled = false;
@@ -443,7 +445,7 @@
     const filtered = activeFilter === 'all' ? records
       : activeFilter === 'video'   ? records.filter(r => r._sIsVideo)
       : records.filter(r => !r._sIsVideo);
-    filteredForBubble = filtered; // keep in sync for arrow nav
+    filteredForBubble = filtered;
     if (!filtered.length) {
       resultsEl.innerHTML = `<div class="empty-state"><span>🎞</span>No ${activeFilter === 'video' ? 'videos' : 'images'} on this page — try Next →</div>`;
       return;
@@ -559,12 +561,12 @@
     const bubbleOpen = bubble.classList.contains('active');
     const inInput    = document.activeElement === searchInput;
     if (e.key === 'Escape') { if (isFullscreen) toggleFullscreen(); else if (bubbleOpen) closeBubble(); return; }
-    if (inInput) return; // don't hijack arrow keys while typing
+    if (inInput) return;
     if (bubbleOpen) {
-      if (e.key === 'ArrowRight') { e.preventDefault(); bubbleStep(1); }
-      else if (e.key === 'ArrowLeft') { e.preventDefault(); bubbleStep(-1); }
-      else if (e.key === 'ArrowUp')   { e.preventDefault(); changePage(-1); }
-      else if (e.key === 'ArrowDown') { e.preventDefault(); changePage(1); }
+      if      (e.key === 'ArrowRight') { e.preventDefault(); bubbleStep(1); }
+      else if (e.key === 'ArrowLeft')  { e.preventDefault(); bubbleStep(-1); }
+      else if (e.key === 'ArrowUp')    { e.preventDefault(); changePage(-1); }
+      else if (e.key === 'ArrowDown')  { e.preventDefault(); changePage(1); }
     }
   });
 
