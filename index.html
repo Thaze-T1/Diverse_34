@@ -156,7 +156,7 @@
       text-transform: uppercase; white-space: nowrap; z-index: 1;
     }
     .bubble {
-      position: fixed; bottom: 2rem; right: 2rem; width: 340px;
+      position: fixed; bottom: 2rem; right: 2rem; width: 520px;
       min-width: 200px; min-height: 160px; background: var(--card);
       border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
       box-shadow: 0 16px 48px rgba(0,0,0,0.6); z-index: 100; display: none; flex-direction: column;
@@ -176,7 +176,7 @@
     .bubble-header:active { cursor: grabbing; }
     .bubble-title {
       font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 700;
-      color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;
+      color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;
     }
     .bubble-controls { display: flex; gap: 0.4rem; align-items: center; }
     .bubble-btn {
@@ -326,7 +326,6 @@
   const ALL_SOURCES = [
     { id: 'gelbooru',  label: 'Gelbooru',  paid: false },
     { id: 'danbooru',  label: 'Danbooru',  paid: false },
-    { id: 'safebooru', label: 'Safebooru', paid: false },
     { id: 'xbooru',    label: 'Xbooru',    paid: false },
     { id: 'e621',      label: 'E621',      paid: false },
     { id: 'rule34us',  label: 'Rule34.us', paid: false },
@@ -562,7 +561,7 @@
     const visitBtn = document.getElementById('bubbleVisitBtn');
     titleEl.textContent = title; visitBtn.href = sourceUrl;
     bubble.classList.add('active'); bubble.classList.remove('fullscreen');
-    isFullscreen = false; bubble.style.cssText = 'bottom:2rem;right:2rem;width:340px;';
+    isFullscreen = false; bubble.style.cssText = 'bottom:2rem;right:2rem;width:520px;height:520px;';
     if (paid) {
       mediaEl.innerHTML = `
         <div class="bubble-paid">
@@ -603,8 +602,8 @@
       img.src = proxyImg(thumbUrl); img.alt = title; mediaEl.appendChild(img);
     }
   }
-  function toggleFullscreen() { isFullscreen = !isFullscreen; bubble.classList.toggle('fullscreen', isFullscreen); if (!isFullscreen) bubble.style.cssText = 'bottom:2rem;right:2rem;width:340px;'; }
-  function closeBubble() { const v = document.getElementById('bubbleMedia').querySelector('video'); if (v) v.pause(); document.getElementById('bubbleMedia').innerHTML = ''; bubble.classList.remove('active', 'fullscreen'); bubble.style.cssText = 'bottom:2rem;right:2rem;width:340px;'; isFullscreen = false; }
+  function toggleFullscreen() { isFullscreen = !isFullscreen; bubble.classList.toggle('fullscreen', isFullscreen); if (!isFullscreen) bubble.style.cssText = 'bottom:2rem;right:2rem;width:520px;height:520px;'; }
+  function closeBubble() { const v = document.getElementById('bubbleMedia').querySelector('video'); if (v) v.pause(); document.getElementById('bubbleMedia').innerHTML = ''; bubble.classList.remove('active', 'fullscreen'); bubble.style.cssText = 'bottom:2rem;right:2rem;width:520px;height:520px;'; isFullscreen = false; }
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (isFullscreen) toggleFullscreen(); else closeBubble(); } });
   let pendingUrl = null;
   function warnLeave(e, url) { e.preventDefault(); pendingUrl = url; document.getElementById('leaveModal').classList.add('active'); document.getElementById('modalConfirm').onclick = () => { window.open(pendingUrl, '_blank'); closeModal(); }; }
