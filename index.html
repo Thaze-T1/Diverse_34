@@ -326,9 +326,11 @@
   const ALL_SOURCES = [
     { id: 'gelbooru',  label: 'Gelbooru',  paid: false },
     { id: 'danbooru',  label: 'Danbooru',  paid: false },
-    { id: 'e621',      label: 'E621',       paid: false },
+    { id: 'safebooru', label: 'Safebooru', paid: false },
+    { id: 'xbooru',    label: 'Xbooru',    paid: false },
+    { id: 'e621',      label: 'E621',      paid: false },
     { id: 'rule34us',  label: 'Rule34.us', paid: false },
-    { id: 'paheal',    label: 'Paheal',     paid: false },
+    { id: 'paheal',    label: 'Paheal',    paid: false },
     { id: 'yandere',   label: 'Yande.re',  paid: false },
   ];
   const enabledSources = new Set(ALL_SOURCES.map(s => s.id));
@@ -570,7 +572,6 @@
         </div>`;
       return;
     }
-    // yande.re (and any future source) passes fullUrl directly — skip the post fetch entirely
     if (fullUrl) {
       mediaEl.innerHTML = '';
       const img = document.createElement('img');
@@ -587,9 +588,13 @@
         const video = document.createElement('video');
         video.src = proxyImg(data.url); video.controls = true; video.autoplay = true; video.loop = true;
         mediaEl.appendChild(video);
+      } else if (data.type === 'image' && data.url) {
+        const img = document.createElement('img');
+        img.src = proxyImg(data.url); img.alt = title;
+        mediaEl.appendChild(img);
       } else {
         const img = document.createElement('img');
-        img.src = proxyImg(data.type === 'image' ? data.url : thumbUrl); img.alt = title;
+        img.src = proxyImg(thumbUrl); img.alt = title;
         mediaEl.appendChild(img);
       }
     } catch {
