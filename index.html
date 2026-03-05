@@ -135,12 +135,21 @@
     .card-meta { display: flex; justify-content: space-between; align-items: center; }
     .card-source { font-size: 0.65rem; color: var(--muted); }
     .card-type { font-size: 0.62rem; background: var(--surface); border-radius: 4px; padding: 0.15rem 0.45rem; color: var(--accent); }
-    .status { font-size: 0.75rem; color: var(--muted); text-align: center; }
+    .status { font-size: 0.75rem; color: var(--muted); text-align: center; margin-bottom: 1rem; }
     .empty-state {
       text-align: center; color: var(--muted); font-size: 0.8rem; padding: 3rem 1rem;
       display: flex; flex-direction: column; align-items: center; gap: 0.5rem; grid-column: 1 / -1;
     }
     .empty-state span { font-size: 2rem; }
+    .hero {
+      text-align: center; padding: 4rem 1rem; color: var(--muted);
+      display: flex; flex-direction: column; align-items: center; gap: 1rem;
+    }
+    .hero-hint { font-size: 0.72rem; line-height: 1.8; }
+    .hero-hint code {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 4px; padding: 0.1rem 0.4rem; color: var(--accent); font-size: 0.7rem;
+    }
     .pagination { display: flex; align-items: center; gap: 0.75rem; animation: fadeUp 0.4s ease both; }
     .page-btn {
       background: var(--card); border: 1px solid var(--border); border-radius: 8px;
@@ -265,7 +274,7 @@
   <div class="search-wrap">
     <div class="search-box">
       <span class="search-icon">⌕</span>
-      <input type="text" id="searchInput" placeholder="search tags — use comma for multiple e.g. miruko, animated" autocomplete="off" spellcheck="false"/>
+      <input type="text" id="searchInput" placeholder="search tags — comma to combine, tag1/tag2 for OR, -tag to exclude" autocomplete="off" spellcheck="false"/>
       <button class="search-btn" onclick="handleSearch()">Search</button>
     </div>
     <div class="autocomplete" id="autocomplete"></div>
@@ -284,6 +293,18 @@
     <button class="main-tab" onclick="setMainTab('history', this)">🕒 History</button>
   </div>
   <div class="status" id="status"></div>
+  <div id="heroState">
+    <div class="hero">
+      <div style="font-size:2.5rem;">🔍</div>
+      <div class="hero-hint">
+        Search any tag to get started<br>
+        <code>miruko, animated</code> — combine tags &nbsp;·&nbsp;
+        <code>miruko/yoruichi</code> — either tag &nbsp;·&nbsp;
+        <code>-tag</code> — exclude tag<br>
+        Search with no tags to browse latest posts
+      </div>
+    </div>
+  </div>
   <div class="results" id="results"></div>
   <div class="pagination" id="pagination" style="display:none;">
     <button class="page-btn" id="prevBtn" onclick="changePage(-1)" disabled>← Prev</button>
@@ -350,7 +371,7 @@
         enabledSources.add(src.id);
         btn.classList.add('on');
       }
-      if (currentQuery) handleSearch(1);
+      if (currentQuery !== null) handleSearch(1);
     };
     togglesEl.appendChild(btn);
   });
@@ -361,11 +382,12 @@
   const prevBtn        = document.getElementById('prevBtn');
   const nextBtn        = document.getElementById('nextBtn');
   const pageInfoEl     = document.getElementById('pageInfo');
+  const heroEl         = document.getElementById('heroState');
   const bubble         = document.getElementById('bubble');
   const bubbleHeader   = document.getElementById('bubbleHeader');
   const bubbleResize   = document.getElementById('bubbleResize');
   const autocompleteEl = document.getElementById('autocomplete');
-  let activeFilter = 'all', currentPage = 1, currentQuery = '';
+  let activeFilter = 'all', currentPage = 1, currentQuery = null;
   let isFullscreen = false, activeMainTab = 'search';
   let acSelected = -1, acItems = [], acTimer = null, lastRecords = [];
   function getStorage(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; } }
@@ -391,14 +413,14 @@
   }
   function getSearchHistory() { return getStorage('diverse_searches'); }
   function addSearchHistory(q) {
+    if (!q || !q.trim()) return;
     const hist = getSearchHistory().filter(h => h !== q);
     hist.unshift(q); setStorage('diverse_searches', hist.slice(0, 20));
   }
   searchInput.addEventListener('input', () => {
     clearTimeout(acTimer);
-    // autocomplete on the last tag being typed (after last comma)
     const val = searchInput.value;
-    const lastTag = val.split(',').pop().trim();
+    const lastTag = val.split(',').pop().trim().replace(/^[-~]/, '').split('/').pop().trim();
     if (!lastTag) { hideAc(); return; }
     acTimer = setTimeout(() => fetchAc(lastTag), 300);
   });
@@ -432,7 +454,6 @@
   }
   function hideAc() { autocompleteEl.classList.remove('active'); acSelected = -1; }
   function pickAc(idx) {
-    // replace only the last tag in the input
     const parts = searchInput.value.split(',');
     parts[parts.length - 1] = ' ' + acItems[idx];
     searchInput.value = parts.join(',');
@@ -461,16 +482,22 @@
     document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
     paginationEl.style.display = 'none'; statusEl.textContent = '';
-    if (tab === 'search') { if (lastRecords.length) { statusEl.textContent = `Page ${currentPage} — ${lastRecords.length} results`; renderCards(lastRecords); paginationEl.style.display = 'flex'; } }
+    heroEl.style.display = 'none';
+    if (tab === 'search') {
+      if (currentQuery === null && !lastRecords.length) { heroEl.style.display = 'block'; resultsEl.innerHTML = ''; }
+      else if (lastRecords.length) { statusEl.textContent = `Page ${currentPage} — ${lastRecords.length} results`; renderCards(lastRecords); paginationEl.style.display = 'flex'; }
+    }
     else if (tab === 'favorites') renderFavorites();
     else if (tab === 'history') renderHistoryTab();
   }
   function renderFavorites() {
+    heroEl.style.display = 'none';
     const favs = getFavs(); resultsEl.innerHTML = '';
     if (!favs.length) { resultsEl.innerHTML = `<div class="empty-state"><span>❤️</span>No favorites yet!</div>`; return; }
     statusEl.textContent = `${favs.length} favorites`; renderCards(favs);
   }
   function renderHistoryTab() {
+    heroEl.style.display = 'none';
     const hist = getHistory(); resultsEl.innerHTML = '';
     if (!hist.length) { resultsEl.innerHTML = `<div class="empty-state"><span>🕒</span>No history yet!</div>`; return; }
     statusEl.textContent = `${hist.length} viewed posts`; renderCards(hist);
@@ -482,21 +509,23 @@
     if (lastRecords.length) renderCards(lastRecords);
   }
   async function handleSearch(page = 1) {
-    const query = searchInput.value.trim();
-    if (!query) return;
+    const raw   = searchInput.value;
+    const query = raw.trim() === '' ? null : raw; // null = latest posts
     currentQuery = query;
     currentPage  = page;
-    addSearchHistory(query);
+    if (query) addSearchHistory(query);
     document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
     document.querySelector('.main-tab').classList.add('active');
     activeMainTab = 'search';
+    heroEl.style.display = 'none';
     resultsEl.innerHTML = ''; paginationEl.style.display = 'none';
-    statusEl.textContent = 'Searching...';
+    statusEl.textContent = query ? 'Searching...' : 'Loading latest posts...';
     try {
       const activeSources = [...enabledSources];
+      const qParam = query ? encodeURIComponent(query) : '';
       const responses = await Promise.all(
         activeSources.map(source =>
-          fetch(`${PROXY}/?q=${encodeURIComponent(query)}&source=${source}&page=${page}`)
+          fetch(`${PROXY}/?q=${qParam}&source=${source}&page=${page}`)
             .then(r => r.json()).catch(() => ({ _aRecords: [] }))
         )
       );
@@ -507,7 +536,7 @@
         if (page > 1) { paginationEl.style.display = 'flex'; prevBtn.disabled = false; nextBtn.disabled = true; pageInfoEl.textContent = `Page ${page}`; }
         return;
       }
-      statusEl.textContent = `Page ${page} — ${records.length} results`;
+      statusEl.textContent = query ? `Page ${page} — ${records.length} results` : `Latest posts — page ${page}`;
       renderCards(records);
       paginationEl.style.display = 'flex'; pageInfoEl.textContent = `Page ${page}`;
       prevBtn.disabled = page <= 1; nextBtn.disabled = false;
@@ -522,6 +551,10 @@
     const filtered = activeFilter === 'all' ? records
       : activeFilter === 'video' ? records.filter(r => r._sIsVideo)
       : records.filter(r => !r._sIsVideo);
+    if (!filtered.length) {
+      resultsEl.innerHTML = `<div class="empty-state"><span>🎞</span>No ${activeFilter === 'video' ? 'videos' : 'images'} on this page — try Next →</div>`;
+      return;
+    }
     filtered.forEach(item => {
       const thumb    = item._sThumb || '';
       const filename = thumb.split('/').pop().replace(/\.[^.]+$/, '').replace(/^thumbnail_/, '');
@@ -538,7 +571,7 @@
       const card      = document.createElement('div');
       card.className    = 'card';
       card.dataset.item = encodeURIComponent(JSON.stringify(item));
-      const thumbProxied  = proxyImg(thumb);
+      const thumbProxied = proxyImg(thumb);
       card.innerHTML = `
         <button class="card-heart ${faved ? 'faved' : ''}" data-url="${sourceUrl}" data-item="${encodeURIComponent(JSON.stringify(item))}">${faved ? '❤️' : '🤍'}</button>
         ${thumb ? `<img class="card-thumb" src="${thumbProxied}" alt="${title}" loading="lazy" onerror="this.onerror=null;this.style.opacity='0.3';">` : `<div class="card-thumb-placeholder">🖼</div>`}
