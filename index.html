@@ -75,14 +75,6 @@
     }
     .autocomplete-item:hover, .autocomplete-item.selected { background: var(--surface); }
     .autocomplete-count { font-size: 0.65rem; color: var(--muted); }
-    .filter-row { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
-    .filter-tab {
-      background: none; border: 1px solid var(--border); border-radius: 20px;
-      color: var(--muted); font-family: 'DM Mono', monospace;
-      font-size: 0.7rem; padding: 0.3rem 0.9rem; cursor: pointer;
-      transition: border-color 0.15s, color 0.15s;
-    }
-    .filter-tab.active { border-color: var(--accent); color: var(--accent); }
     .source-toggles {
       display: flex; gap: 0.5rem; margin-top: 0.6rem; flex-wrap: wrap; align-items: center;
     }
@@ -269,11 +261,6 @@
       <button class="search-btn" onclick="handleSearch()">Search</button>
     </div>
     <div class="autocomplete" id="autocomplete"></div>
-    <div class="filter-row">
-      <button class="filter-tab active" onclick="setFilter('all', this)">All</button>
-      <button class="filter-tab" onclick="setFilter('video', this)">Video</button>
-      <button class="filter-tab" onclick="setFilter('picture', this)">Picture</button>
-    </div>
     <div class="source-toggles" id="sourceToggles">
       <span class="source-label">Sources:</span>
     </div>
@@ -324,21 +311,21 @@
 <script>
   const PROXY = 'https://diverse-proxy.alpc493.workers.dev';
   const ALL_SOURCES = [
-    { id: 'gelbooru',   label: 'Gelbooru',    paid: false },
-    { id: 'danbooru',   label: 'Danbooru',    paid: false },
-    { id: 'xbooru',     label: 'Xbooru',      paid: false },
-    { id: 'rule34porn', label: 'Rule34.porn', paid: false },
-    { id: 'rule34xyz',  label: 'Rule34.xyz',  paid: false },
-    { id: 'e621',       label: 'E621',        paid: false },
-    { id: 'rule34us',   label: 'Rule34.us',   paid: false },
-    { id: 'paheal',     label: 'Paheal',      paid: false },
-    { id: 'yandere',    label: 'Yande.re',    paid: false },
+    { id: 'rule34xyz',  label: 'Rule34.xyz',  paid: false, default: true  },
+    { id: 'gelbooru',   label: 'Gelbooru',    paid: false, default: false },
+    { id: 'danbooru',   label: 'Danbooru',    paid: false, default: false },
+    { id: 'xbooru',     label: 'Xbooru',      paid: false, default: false },
+    { id: 'rule34porn', label: 'Rule34.porn', paid: false, default: false },
+    { id: 'e621',       label: 'E621',        paid: false, default: false },
+    { id: 'rule34us',   label: 'Rule34.us',   paid: false, default: false },
+    { id: 'paheal',     label: 'Paheal',      paid: false, default: false },
+    { id: 'yandere',    label: 'Yande.re',    paid: false, default: false },
   ];
-  const enabledSources = new Set(ALL_SOURCES.map(s => s.id));
+  const enabledSources = new Set(ALL_SOURCES.filter(s => s.default).map(s => s.id));
   const togglesEl = document.getElementById('sourceToggles');
   ALL_SOURCES.forEach(src => {
     const btn = document.createElement('button');
-    btn.className   = 'source-btn on';
+    btn.className   = 'source-btn' + (src.default ? ' on' : '');
     btn.textContent = src.label + (src.paid ? ' 🔒' : '');
     btn.dataset.id  = src.id;
     btn.onclick = () => {
@@ -467,19 +454,12 @@
     if (!hist.length) { resultsEl.innerHTML = `<div class="empty-state"><span>🕒</span>No history yet!</div>`; return; }
     statusEl.textContent = `${hist.length} viewed posts`; renderCards(hist);
   }
-  function setFilter(filter, el) {
-    activeFilter = filter;
-    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    if (currentQuery) handleSearch(1);
-  }
   async function handleSearch(page = 1) {
-    let query = searchInput.value.trim();
+    const query = searchInput.value.trim();
     if (!query) return;
-    if (activeFilter !== 'all') query = query + ' ' + activeFilter;
-    currentQuery = searchInput.value.trim();
+    currentQuery = query;
     currentPage  = page;
-    addSearchHistory(searchInput.value.trim());
+    addSearchHistory(query);
     document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
     document.querySelector('.main-tab').classList.add('active');
     activeMainTab = 'search';
@@ -528,9 +508,11 @@
       const card      = document.createElement('div');
       card.className    = 'card';
       card.dataset.item = encodeURIComponent(JSON.stringify(item));
+      const thumbProxied = proxyImg(thumb);
+      const thumbFallback = proxyImg(item._sThumb || '');
       card.innerHTML = `
         <button class="card-heart ${faved ? 'faved' : ''}" data-url="${sourceUrl}" data-item="${encodeURIComponent(JSON.stringify(item))}">${faved ? '❤️' : '🤍'}</button>
-        ${thumb ? `<img class="card-thumb" src="${proxyImg(thumb)}" alt="${title}" loading="lazy">` : `<div class="card-thumb-placeholder">🖼</div>`}
+        ${thumb ? `<img class="card-thumb" src="${thumbProxied}" alt="${title}" loading="lazy" onerror="this.src='${thumbFallback}';this.onerror=null;">` : `<div class="card-thumb-placeholder">🖼</div>`}
         <div class="card-body">
           <div class="card-title">${title}</div>
           <div class="card-meta">
@@ -589,6 +571,7 @@
       mediaEl.innerHTML = '';
       const img = document.createElement('img');
       img.src = proxyImg(fullUrl); img.alt = title;
+      img.onerror = () => { img.src = proxyImg(thumbUrl); img.onerror = null; };
       mediaEl.appendChild(img);
       return;
     }
