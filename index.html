@@ -328,6 +328,7 @@
     { id: 'danbooru',   label: 'Danbooru',    paid: false },
     { id: 'xbooru',     label: 'Xbooru',      paid: false },
     { id: 'rule34porn', label: 'Rule34.porn', paid: false },
+    { id: 'rule34xyz',  label: 'Rule34.xyz',  paid: false },
     { id: 'e621',       label: 'E621',        paid: false },
     { id: 'rule34us',   label: 'Rule34.us',   paid: false },
     { id: 'paheal',     label: 'Paheal',      paid: false },
@@ -577,7 +578,6 @@
         </div>`;
       return;
     }
-    // direct video — no post fetch needed
     if (isVideo && fullUrl) {
       mediaEl.innerHTML = '';
       const video = document.createElement('video');
@@ -585,7 +585,6 @@
       mediaEl.appendChild(video);
       return;
     }
-    // direct image — no post fetch needed
     if (!isVideo && fullUrl) {
       mediaEl.innerHTML = '';
       const img = document.createElement('img');
@@ -593,7 +592,6 @@
       mediaEl.appendChild(img);
       return;
     }
-    // fallback — fetch post page
     mediaEl.innerHTML = '<div class="bubble-loading">Loading...</div>';
     try {
       const res  = await fetch(`${PROXY}/?post=${encodeURIComponent(sourceUrl)}`);
