@@ -324,13 +324,14 @@
 <script>
   const PROXY = 'https://diverse-proxy.alpc493.workers.dev';
   const ALL_SOURCES = [
-    { id: 'gelbooru',  label: 'Gelbooru',  paid: false },
-    { id: 'danbooru',  label: 'Danbooru',  paid: false },
-    { id: 'xbooru',    label: 'Xbooru',    paid: false },
-    { id: 'e621',      label: 'E621',      paid: false },
-    { id: 'rule34us',  label: 'Rule34.us', paid: false },
-    { id: 'paheal',    label: 'Paheal',    paid: false },
-    { id: 'yandere',   label: 'Yande.re',  paid: false },
+    { id: 'gelbooru',   label: 'Gelbooru',    paid: false },
+    { id: 'danbooru',   label: 'Danbooru',    paid: false },
+    { id: 'xbooru',     label: 'Xbooru',      paid: false },
+    { id: 'rule34porn', label: 'Rule34.porn', paid: false },
+    { id: 'e621',       label: 'E621',        paid: false },
+    { id: 'rule34us',   label: 'Rule34.us',   paid: false },
+    { id: 'paheal',     label: 'Paheal',      paid: false },
+    { id: 'yandere',    label: 'Yande.re',    paid: false },
   ];
   const enabledSources = new Set(ALL_SOURCES.map(s => s.id));
   const togglesEl = document.getElementById('sourceToggles');
@@ -339,7 +340,6 @@
     btn.className   = 'source-btn on';
     btn.textContent = src.label + (src.paid ? ' 🔒' : '');
     btn.dataset.id  = src.id;
-    btn.title       = src.paid ? 'Features paid content — previews only' : '';
     btn.onclick = () => {
       if (enabledSources.has(src.id)) {
         if (enabledSources.size === 1) return;
@@ -444,7 +444,7 @@
     if (card) {
       const item = JSON.parse(decodeURIComponent(card.dataset.item));
       addHistory(item);
-      openBubble(item._sThumb, item._sName || 'Untitled', item._sProfileUrl, item._bPaid || false, item._sFullUrl || null);
+      openBubble(item);
     }
   });
   function setMainTab(tab, el) {
@@ -519,10 +519,10 @@
         seen.add(filename);
       }
       const title     = item._sName       || 'Untitled';
-      const type      = item._sModelName  || 'Image';
       const sourceUrl = item._sProfileUrl || '#';
       const source    = item._sSource     || '';
       const paid      = item._bPaid       || false;
+      const isVideo   = item._sIsVideo    || false;
       const faved     = isFaved(sourceUrl);
       const card      = document.createElement('div');
       card.className    = 'card';
@@ -534,7 +534,7 @@
           <div class="card-title">${title}</div>
           <div class="card-meta">
             <div class="card-source">${source}${paid ? ' · <span style="color:var(--warn-text)">paid</span>' : ''}</div>
-            <div class="card-type">${type}</div>
+            <div class="card-type">${isVideo ? '▶ Video' : 'Image'}</div>
           </div>
         </div>`;
       resultsEl.appendChild(card);
@@ -555,10 +555,16 @@
   bubbleResize.addEventListener('touchstart', e => { startResize(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }, { passive: false });
   document.addEventListener('touchmove', e => { if (dragging || resizing) { moveDrag(e.touches[0].clientX, e.touches[0].clientY); moveResize(e.touches[0].clientX, e.touches[0].clientY); } }, { passive: true });
   document.addEventListener('touchend', endInteraction, { passive: true });
-  async function openBubble(thumbUrl, title, sourceUrl, paid, fullUrl) {
-    const mediaEl  = document.getElementById('bubbleMedia');
-    const titleEl  = document.getElementById('bubbleTitle');
-    const visitBtn = document.getElementById('bubbleVisitBtn');
+  async function openBubble(item) {
+    const thumbUrl  = item._sThumb      || '';
+    const title     = item._sName       || 'Untitled';
+    const sourceUrl = item._sProfileUrl || '#';
+    const paid      = item._bPaid       || false;
+    const fullUrl   = item._sFullUrl    || null;
+    const isVideo   = item._sIsVideo    || false;
+    const mediaEl   = document.getElementById('bubbleMedia');
+    const titleEl   = document.getElementById('bubbleTitle');
+    const visitBtn  = document.getElementById('bubbleVisitBtn');
     titleEl.textContent = title; visitBtn.href = sourceUrl;
     bubble.classList.add('active'); bubble.classList.remove('fullscreen');
     isFullscreen = false; bubble.style.cssText = 'bottom:2rem;right:2rem;width:520px;height:520px;';
@@ -571,13 +577,23 @@
         </div>`;
       return;
     }
-    if (fullUrl) {
+    // direct video — no post fetch needed
+    if (isVideo && fullUrl) {
+      mediaEl.innerHTML = '';
+      const video = document.createElement('video');
+      video.src = proxyImg(fullUrl); video.controls = true; video.autoplay = true; video.loop = true;
+      mediaEl.appendChild(video);
+      return;
+    }
+    // direct image — no post fetch needed
+    if (!isVideo && fullUrl) {
       mediaEl.innerHTML = '';
       const img = document.createElement('img');
       img.src = proxyImg(fullUrl); img.alt = title;
       mediaEl.appendChild(img);
       return;
     }
+    // fallback — fetch post page
     mediaEl.innerHTML = '<div class="bubble-loading">Loading...</div>';
     try {
       const res  = await fetch(`${PROXY}/?post=${encodeURIComponent(sourceUrl)}`);
