@@ -265,7 +265,7 @@
   <div class="search-wrap">
     <div class="search-box">
       <span class="search-icon">⌕</span>
-      <input type="text" id="searchInput" placeholder="search anything..." autocomplete="off" spellcheck="false"/>
+      <input type="text" id="searchInput" placeholder="search tags — use comma for multiple e.g. miruko, animated" autocomplete="off" spellcheck="false"/>
       <button class="search-btn" onclick="handleSearch()">Search</button>
     </div>
     <div class="autocomplete" id="autocomplete"></div>
@@ -396,9 +396,11 @@
   }
   searchInput.addEventListener('input', () => {
     clearTimeout(acTimer);
-    const val = searchInput.value.trim();
-    if (!val) { hideAc(); return; }
-    acTimer = setTimeout(() => fetchAc(val), 300);
+    // autocomplete on the last tag being typed (after last comma)
+    const val = searchInput.value;
+    const lastTag = val.split(',').pop().trim();
+    if (!lastTag) { hideAc(); return; }
+    acTimer = setTimeout(() => fetchAc(lastTag), 300);
   });
   async function fetchAc(val) {
     acSelected = -1; acItems = [];
@@ -429,7 +431,13 @@
     autocompleteEl.classList.add('active');
   }
   function hideAc() { autocompleteEl.classList.remove('active'); acSelected = -1; }
-  function pickAc(idx) { searchInput.value = acItems[idx]; hideAc(); handleSearch(); }
+  function pickAc(idx) {
+    // replace only the last tag in the input
+    const parts = searchInput.value.split(',');
+    parts[parts.length - 1] = ' ' + acItems[idx];
+    searchInput.value = parts.join(',');
+    hideAc();
+  }
   searchInput.addEventListener('keydown', e => {
     const items = autocompleteEl.querySelectorAll('.autocomplete-item');
     if (e.key === 'ArrowDown') { e.preventDefault(); acSelected = Math.min(acSelected + 1, items.length - 1); items.forEach((el, i) => el.classList.toggle('selected', i === acSelected)); }
@@ -531,10 +539,9 @@
       card.className    = 'card';
       card.dataset.item = encodeURIComponent(JSON.stringify(item));
       const thumbProxied  = proxyImg(thumb);
-      const thumbFallback = proxyImg(thumb);
       card.innerHTML = `
         <button class="card-heart ${faved ? 'faved' : ''}" data-url="${sourceUrl}" data-item="${encodeURIComponent(JSON.stringify(item))}">${faved ? '❤️' : '🤍'}</button>
-        ${thumb ? `<img class="card-thumb" src="${thumbProxied}" alt="${title}" loading="lazy" onerror="this.onerror=null;this.src='${thumbFallback}';">` : `<div class="card-thumb-placeholder">🖼</div>`}
+        ${thumb ? `<img class="card-thumb" src="${thumbProxied}" alt="${title}" loading="lazy" onerror="this.onerror=null;this.style.opacity='0.3';">` : `<div class="card-thumb-placeholder">🖼</div>`}
         <div class="card-body">
           <div class="card-title">${title}</div>
           <div class="card-meta">
