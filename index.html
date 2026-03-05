@@ -75,6 +75,14 @@
     }
     .autocomplete-item:hover, .autocomplete-item.selected { background: var(--surface); }
     .autocomplete-count { font-size: 0.65rem; color: var(--muted); }
+    .filter-row { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
+    .filter-tab {
+      background: none; border: 1px solid var(--border); border-radius: 20px;
+      color: var(--muted); font-family: 'DM Mono', monospace;
+      font-size: 0.7rem; padding: 0.3rem 0.9rem; cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .filter-tab.active { border-color: var(--accent); color: var(--accent); }
     .source-toggles {
       display: flex; gap: 0.5rem; margin-top: 0.6rem; flex-wrap: wrap; align-items: center;
     }
@@ -261,6 +269,11 @@
       <button class="search-btn" onclick="handleSearch()">Search</button>
     </div>
     <div class="autocomplete" id="autocomplete"></div>
+    <div class="filter-row">
+      <button class="filter-tab active" onclick="setFilter('all', this)">All</button>
+      <button class="filter-tab" onclick="setFilter('video', this)">Video</button>
+      <button class="filter-tab" onclick="setFilter('picture', this)">Picture</button>
+    </div>
     <div class="source-toggles" id="sourceToggles">
       <span class="source-label">Sources:</span>
     </div>
@@ -454,6 +467,12 @@
     if (!hist.length) { resultsEl.innerHTML = `<div class="empty-state"><span>🕒</span>No history yet!</div>`; return; }
     statusEl.textContent = `${hist.length} viewed posts`; renderCards(hist);
   }
+  function setFilter(filter, el) {
+    activeFilter = filter;
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    if (lastRecords.length) renderCards(lastRecords);
+  }
   async function handleSearch(page = 1) {
     const query = searchInput.value.trim();
     if (!query) return;
@@ -492,7 +511,10 @@
   function renderCards(records) {
     resultsEl.innerHTML = '';
     const seen = new Set();
-    records.forEach(item => {
+    const filtered = activeFilter === 'all' ? records
+      : activeFilter === 'video' ? records.filter(r => r._sIsVideo)
+      : records.filter(r => !r._sIsVideo);
+    filtered.forEach(item => {
       const thumb    = item._sThumb || '';
       const filename = thumb.split('/').pop().replace(/\.[^.]+$/, '').replace(/^thumbnail_/, '');
       if (filename && filename.length > 8) {
@@ -508,11 +530,11 @@
       const card      = document.createElement('div');
       card.className    = 'card';
       card.dataset.item = encodeURIComponent(JSON.stringify(item));
-      const thumbProxied = proxyImg(thumb);
-      const thumbFallback = proxyImg(item._sThumb || '');
+      const thumbProxied  = proxyImg(thumb);
+      const thumbFallback = proxyImg(thumb);
       card.innerHTML = `
         <button class="card-heart ${faved ? 'faved' : ''}" data-url="${sourceUrl}" data-item="${encodeURIComponent(JSON.stringify(item))}">${faved ? '❤️' : '🤍'}</button>
-        ${thumb ? `<img class="card-thumb" src="${thumbProxied}" alt="${title}" loading="lazy" onerror="this.src='${thumbFallback}';this.onerror=null;">` : `<div class="card-thumb-placeholder">🖼</div>`}
+        ${thumb ? `<img class="card-thumb" src="${thumbProxied}" alt="${title}" loading="lazy" onerror="this.onerror=null;this.src='${thumbFallback}';">` : `<div class="card-thumb-placeholder">🖼</div>`}
         <div class="card-body">
           <div class="card-title">${title}</div>
           <div class="card-meta">
