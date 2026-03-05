@@ -90,7 +90,6 @@
     .bubble-controls { display: flex; gap: 0.4rem; align-items: center; }
     .bubble-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.95rem; min-width: 2rem; min-height: 2rem; display: flex; align-items: center; justify-content: center; transition: color 0.15s; border-radius: 4px; }
     .bubble-btn:hover { color: var(--text); background: var(--border); }
-    /* ── FIXED: block layout so tall images scroll naturally ── */
     .bubble-media { width: 100%; background: #000; flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; display: block; }
     .bubble-media img { width: 100%; height: auto; display: block; }
     .bubble-media video { width: 100%; height: 100%; display: block; object-fit: contain; }
@@ -565,8 +564,8 @@
     if (bubbleOpen) {
       if      (e.key === 'ArrowRight') { e.preventDefault(); bubbleStep(1); }
       else if (e.key === 'ArrowLeft')  { e.preventDefault(); bubbleStep(-1); }
-      else if (e.key === 'ArrowUp')    { e.preventDefault(); changePage(-1); }
-      else if (e.key === 'ArrowDown')  { e.preventDefault(); changePage(1); }
+      else if (e.key === '9')          { e.preventDefault(); changePage(-1); }
+      else if (e.key === '0')          { e.preventDefault(); changePage(1); }
     }
   });
 
