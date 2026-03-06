@@ -57,11 +57,11 @@
     .hero { text-align: center; padding: 4rem 1rem; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 1rem; }
     .hero-hint { font-size: 0.72rem; line-height: 2; }
     .hero-hint code { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.1rem 0.4rem; color: var(--accent); font-size: 0.7rem; }
-    .results { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; animation: fadeUp 0.4s ease both; }
+    .results { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; animation: fadeUp 0.4s ease both; align-items: start; }
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; cursor: pointer; transition: border-color 0.15s, transform 0.15s; position: relative; }
     .card:hover { border-color: var(--accent); transform: translateY(-2px); }
     .card:hover .card-heart { opacity: 1; }
-    .card-thumb-wrap { position: relative; width: 100%; aspect-ratio: 1 / 1; background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+    .card-thumb-wrap { position: relative; width: 100%; aspect-ratio: 1/1; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
     .card-thumb { width: 100%; height: 100%; object-fit: contain; display: block; }
     .card-thumb-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 1.5rem; }
     .card-video-badge { position: absolute; top: 0.4rem; left: 0.4rem; background: rgba(0,0,0,0.65); border-radius: 4px; font-size: 0.6rem; color: var(--accent); padding: 0.15rem 0.4rem; pointer-events: none; }
@@ -88,7 +88,7 @@
     .bubble.fullscreen { top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100vw !important; height: 100vh !important; border-radius: 0; }
     .bubble-header { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.8rem; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; cursor: grab; user-select: none; touch-action: none; position: sticky; top: 0; z-index: 2; }
     .bubble-header:active { cursor: grabbing; }
-    .bubble-title { font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+    .bubble-title { font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px; }
     .bubble-controls { display: flex; gap: 0.4rem; align-items: center; }
     .bubble-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.95rem; min-width: 2rem; min-height: 2rem; display: flex; align-items: center; justify-content: center; transition: color 0.15s; border-radius: 4px; }
     .bubble-btn:hover { color: var(--text); background: var(--border); }
@@ -112,22 +112,19 @@
     .bubble-resize svg { width: 14px; height: 14px; opacity: 0.4; }
     .bubble:hover .bubble-resize svg { opacity: 0.8; }
     .bubble-tags-panel { background: var(--surface); border-top: 1px solid var(--border); flex-shrink: 0; max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
-    .bubble-tags-panel.open { max-height: 300px; }
-    .bubble-tags-inner { padding: 0.7rem 0.8rem; overflow-y: auto; max-height: 300px; display: flex; flex-direction: column; gap: 0.55rem; }
-    .tag-group { display: flex; flex-direction: column; gap: 0.3rem; }
-    .tag-group-label { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); opacity: 0.55; }
-    .tag-group-pills { display: flex; flex-wrap: wrap; gap: 0.3rem; }
-    .bubble-tag { border-radius: 20px; font-size: 0.63rem; padding: 0.2rem 0.7rem; border: 1px solid var(--border); color: var(--muted); background: var(--card); cursor: pointer; transition: border-color 0.15s, color 0.15s, background 0.15s; white-space: nowrap; }
+    .bubble-tags-panel.open { max-height: 220px; }
+    .bubble-tags-inner { padding: 0.6rem 0.8rem; overflow-y: auto; max-height: 220px; }
+    .bubble-tags-list { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    /* base tag */
+    .bubble-tag { background: var(--card); border: 1px solid var(--border); border-radius: 20px; font-size: 0.62rem; color: var(--muted); padding: 0.18rem 0.65rem; cursor: pointer; transition: border-color 0.15s, color 0.15s; white-space: nowrap; }
     .bubble-tag:hover { border-color: var(--accent); color: var(--accent); }
+    /* artist — purple */
     .bubble-tag-artist { border-color: #7c5cbf; color: #c4b5fd; font-weight: 500; }
     .bubble-tag-artist:hover { background: rgba(167,139,250,0.15); border-color: #c4b5fd; color: #e9d5ff; }
+    /* uploader — blue, not clickable */
     .bubble-tag-uploader { border-color: #1e4a8a; color: #60a5fa; cursor: default; }
     .bubble-tag-uploader:hover { border-color: #1e4a8a; color: #60a5fa; background: var(--card); }
-    .bubble-tag-copyright { border-color: #7f1d1d; color: #fca5a5; }
-    .bubble-tag-copyright:hover { background: rgba(248,113,113,0.1); border-color: #f87171; color: #fca5a5; }
-    .bubble-tag-character { border-color: #14532d; color: #6ee7b7; }
-    .bubble-tag-character:hover { background: rgba(52,211,153,0.1); border-color: #34d399; color: #6ee7b7; }
-    .bubble-tags-loading { font-size: 0.68rem; color: var(--muted); padding: 0.25rem 0; }
+    .bubble-tags-loading { font-size: 0.68rem; color: var(--muted); padding: 0.5rem 0; }
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; }
     .modal-overlay.active { display: flex; }
     .modal { background: var(--card); border: 1px solid var(--warn-border); border-radius: 16px; padding: 2rem; max-width: 380px; width: 90%; display: flex; flex-direction: column; gap: 1rem; }
@@ -207,14 +204,16 @@
     <span class="bubble-title" id="bubbleTitle">Preview</span>
     <div class="bubble-controls">
       <button class="bubble-btn" id="bubbleFavBtn" onclick="toggleBubbleFav()" title="Favorite">🤍</button>
-      <button class="bubble-btn" id="bubbleTagsBtn" onclick="toggleTagsPanel()" title="Tags" style="display:none;">🏷</button>
+      <button class="bubble-btn" id="bubbleTagsBtn" onclick="toggleTagsPanel()" title="Tags" style="display:none;">🏷 Tags</button>
       <button class="bubble-btn" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
       <button class="bubble-btn" onclick="closeBubble()" title="Close">✕</button>
     </div>
   </div>
   <div class="bubble-media" id="bubbleMedia"></div>
   <div class="bubble-tags-panel" id="bubbleTagsPanel">
-    <div class="bubble-tags-inner" id="bubbleTagsInner"></div>
+    <div class="bubble-tags-inner">
+      <div class="bubble-tags-list" id="bubbleTagsList"></div>
+    </div>
   </div>
   <div class="bubble-actions">
     <button class="bubble-nav" id="bubblePrev" onclick="bubbleStep(-1)">←</button>
@@ -285,7 +284,7 @@
   const bubbleResize    = document.getElementById('bubbleResize');
   const autocompleteEl  = document.getElementById('autocomplete');
   const bubbleTagsPanel = document.getElementById('bubbleTagsPanel');
-  const bubbleTagsInner = document.getElementById('bubbleTagsInner');
+  const bubbleTagsList  = document.getElementById('bubbleTagsList');
   const bubbleFavBtn    = document.getElementById('bubbleFavBtn');
   const bubbleTagsBtn   = document.getElementById('bubbleTagsBtn');
 
@@ -339,77 +338,59 @@
     if (tagsPanelOpen && !tagsLoaded) loadTags();
   }
 
-  function pill(tag, cls, clickable) {
-    const esc = tag.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-    const onclick = clickable ? `onclick="searchFromTag('${esc}')"` : '';
-    return `<span class="bubble-tag ${cls}" ${onclick}>${tag}</span>`;
-  }
-  function group(label, tags, cls, clickable = true) {
-    if (!tags || !tags.length) return '';
-    return `<div class="tag-group"><div class="tag-group-label">${label}</div><div class="tag-group-pills">${tags.map(t => pill(t, cls, clickable)).join('')}</div></div>`;
-  }
-
   async function loadTags() {
     if (!currentBubbleItem) return;
-    const postId = currentBubbleItem._sPostId;
-    const src    = currentBubbleItem._sSource;
+    const postId   = currentBubbleItem._sPostId;
+    const source   = currentBubbleItem._sSource;
+    const artist   = (currentBubbleItem._sArtist || '').toLowerCase().trim();
 
-    if (src !== 'Rule34.xxx' || !postId) {
-      bubbleTagsInner.innerHTML = '<span class="bubble-tags-loading">Tags only available for Rule34.xxx posts</span>';
+    if (source !== 'Rule34.xxx' || !postId) {
+      bubbleTagsList.innerHTML = '<span class="bubble-tags-loading">Tags only available for Rule34.xxx posts</span>';
       tagsLoaded = true; return;
     }
-
-    bubbleTagsInner.innerHTML = '<span class="bubble-tags-loading">Loading tags…</span>';
-
+    bubbleTagsList.innerHTML = '<span class="bubble-tags-loading">Loading tags...</span>';
     try {
       const res  = await fetch(`${PROXY}/?postid=${postId}`);
       const data = await res.json();
       tagsLoaded = true;
 
-      const artists   = data.artists   || [];
-      const copyright = data.copyright || [];
-      const character = data.character || [];
-      const general   = data.general   || [];
-      const uploader  = data.uploader  || null;
-      // allTags is only set when tag_info was absent — flat fallback
-      // otherwise use _sAllTags stored on the card item
-      const flatTags  = (data.allTags && data.allTags.length)
-        ? data.allTags
-        : (currentBubbleItem._sAllTags || []);
+      const tags     = data.tags     || [];
+      const uploader = data.uploader || null;
 
-      const hasTyped = artists.length || copyright.length || character.length || general.length;
+      if (!tags.length && !uploader) {
+        bubbleTagsList.innerHTML = '<span class="bubble-tags-loading">No tags found</span>';
+        return;
+      }
+
+      // Known artist tags: anything in the tag list that matches _sArtist from the card
+      // Rule34.xxx artist tags typically use underscores — normalise for comparison
+      const artistTags = new Set(
+        artist ? tags.filter(t => t.toLowerCase().replace(/_/g,' ') === artist.replace(/_/g,' ') || t.toLowerCase() === artist) : []
+      );
 
       let html = '';
 
-      if (hasTyped || uploader) {
-        // we have proper categorized data
-        if (artists.length) html += group('Artist', artists, 'bubble-tag-artist', true);
-        if (uploader)       html += `<div class="tag-group"><div class="tag-group-label">Uploader</div><div class="tag-group-pills">${pill(uploader, 'bubble-tag-uploader', false)}</div></div>`;
-        if (copyright.length) html += group('Copyright', copyright, 'bubble-tag-copyright', true);
-        if (character.length) html += group('Character', character, 'bubble-tag-character', true);
-        if (general.length)   html += group('General',   general,   '', true);
-      } else if (flatTags.length) {
-        // tag_info didn't return typed data — show flat list with uploader from card if we have it
-        const cardUploader = currentBubbleItem._sArtist || null;
-        if (cardUploader) html += `<div class="tag-group"><div class="tag-group-label">Uploader</div><div class="tag-group-pills">${pill(cardUploader, 'bubble-tag-uploader', false)}</div></div>`;
-        html += group('Tags', flatTags, '', true);
-      } else {
-        html = '<span class="bubble-tags-loading">No tags found</span>';
+      // Uploader first (blue, not clickable)
+      if (uploader) {
+        html += `<span class="bubble-tag bubble-tag-uploader">${uploader}</span>`;
       }
 
-      bubbleTagsInner.innerHTML = html;
+      // Artist-matching tags (purple, clickable)
+      artistTags.forEach(t => {
+        const esc = t.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+        html += `<span class="bubble-tag bubble-tag-artist" onclick="searchFromTag('${esc}')">${t}</span>`;
+      });
 
+      // All other tags (default, clickable)
+      tags.forEach(t => {
+        if (artistTags.has(t)) return; // already rendered above
+        const esc = t.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+        html += `<span class="bubble-tag" onclick="searchFromTag('${esc}')">${t}</span>`;
+      });
+
+      bubbleTagsList.innerHTML = html;
     } catch {
-      const flat = currentBubbleItem._sAllTags || [];
-      if (flat.length) {
-        const cardUploader = currentBubbleItem._sArtist || null;
-        let html = '';
-        if (cardUploader) html += `<div class="tag-group"><div class="tag-group-label">Uploader</div><div class="tag-group-pills">${pill(cardUploader, 'bubble-tag-uploader', false)}</div></div>`;
-        html += group('Tags', flat, '', true);
-        bubbleTagsInner.innerHTML = html;
-      } else {
-        bubbleTagsInner.innerHTML = '<span class="bubble-tags-loading">Failed to load tags</span>';
-      }
+      bubbleTagsList.innerHTML = '<span class="bubble-tags-loading">Failed to load tags</span>';
       tagsLoaded = true;
     }
   }
@@ -622,8 +603,9 @@
     tagsLoaded=false; tagsPanelOpen=false;
     bubbleTagsPanel.classList.remove('open');
     bubbleTagsBtn.classList.remove('active-btn');
-    bubbleTagsInner.innerHTML='';
+    bubbleTagsList.innerHTML='';
     bubbleTagsBtn.style.display=item._sSource==='Rule34.xxx'?'flex':'none';
+
     const mediaEl=document.getElementById('bubbleMedia');
     const thumbUrl=item._sThumb||'';
     const title=item._sName||'Untitled';
@@ -636,6 +618,7 @@
     bubble.classList.add('active'); bubble.classList.remove('fullscreen');
     isFullscreen=false; bubble.style.cssText='bottom:2rem;right:2rem;width:520px;height:520px;';
     updateBubbleNav(); updateBubbleFavBtn();
+
     if (item._bPaid) {
       mediaEl.innerHTML=`<div class="bubble-paid"><div class="bubble-paid-icon">🔒</div><div class="bubble-paid-tag">Paid content</div><div class="bubble-paid-msg">Full content requires a subscription on the source site.</div></div>`;
       return;
