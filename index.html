@@ -61,9 +61,9 @@
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; cursor: pointer; transition: border-color 0.15s, transform 0.15s; position: relative; }
     .card:hover { border-color: var(--accent); transform: translateY(-2px); }
     .card:hover .card-heart { opacity: 1; }
-    .card-thumb-wrap { position: relative; width: 100%; aspect-ratio: 16/9; background: var(--surface); overflow: hidden; }
-    .card-thumb { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .card-thumb-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 1.5rem; }
+    .card-thumb-wrap { position: relative; width: 100%; background: var(--surface); overflow: hidden; }
+    .card-thumb { width: 100%; height: auto; display: block; max-height: 480px; object-fit: contain; background: #000; }
+    .card-thumb-placeholder { width: 100%; height: 160px; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 1.5rem; }
     .card-video-badge { position: absolute; top: 0.4rem; left: 0.4rem; background: rgba(0,0,0,0.65); border-radius: 4px; font-size: 0.6rem; color: var(--accent); padding: 0.15rem 0.4rem; pointer-events: none; }
     .card-heart { position: absolute; top: 0.4rem; right: 0.4rem; background: rgba(0,0,0,0.6); border: none; border-radius: 50%; width: 2rem; height: 2rem; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.85rem; opacity: 0; transition: opacity 0.15s, transform 0.15s; z-index: 2; }
     .card-heart:hover { transform: scale(1.2); }
@@ -112,11 +112,21 @@
     .bubble-resize svg { width: 14px; height: 14px; opacity: 0.4; }
     .bubble:hover .bubble-resize svg { opacity: 0.8; }
     .bubble-tags-panel { background: var(--surface); border-top: 1px solid var(--border); flex-shrink: 0; max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
-    .bubble-tags-panel.open { max-height: 200px; }
-    .bubble-tags-inner { padding: 0.6rem 0.8rem; overflow-y: auto; max-height: 200px; }
-    .bubble-tags-list { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .bubble-tags-panel.open { max-height: 280px; }
+    .bubble-tags-inner { padding: 0.6rem 0.8rem; overflow-y: auto; max-height: 280px; }
+    .bubble-tags-list { display: flex; flex-direction: column; gap: 0; }
+    .bubble-tag-section { width: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; margin-bottom: 0.5rem; }
+    .bubble-tag-section-label { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); opacity: 0.6; margin-right: 0.1rem; white-space: nowrap; flex-basis: 100%; margin-bottom: 0.15rem; }
     .bubble-tag { background: var(--card); border: 1px solid var(--border); border-radius: 20px; font-size: 0.62rem; color: var(--muted); padding: 0.18rem 0.65rem; cursor: pointer; transition: border-color 0.15s, color 0.15s; white-space: nowrap; }
     .bubble-tag:hover { border-color: var(--accent); color: var(--accent); }
+    .bubble-tag-artist { border-color: #7c5cbf; color: #a78bfa; font-weight: 500; }
+    .bubble-tag-artist:hover { background: rgba(167,139,250,0.12); border-color: #c4b5fd; color: #c4b5fd; }
+    .bubble-tag-uploader { border-color: #2563a8; color: #60a5fa; cursor: default; }
+    .bubble-tag-uploader:hover { border-color: #2563a8; color: #60a5fa; }
+    .bubble-tag-copyright { border-color: #9b2c2c; color: #f87171; }
+    .bubble-tag-copyright:hover { background: rgba(248,113,113,0.1); border-color: #f87171; }
+    .bubble-tag-character { border-color: #1a6b4a; color: #34d399; }
+    .bubble-tag-character:hover { background: rgba(52,211,153,0.1); border-color: #34d399; }
     .bubble-tags-loading { font-size: 0.68rem; color: var(--muted); padding: 0.25rem 0; }
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; }
     .modal-overlay.active { display: flex; }
@@ -335,6 +345,7 @@
     bubbleTagsBtn.classList.toggle('active-btn', tagsPanelOpen);
     if (tagsPanelOpen && !tagsLoaded) loadTags();
   }
+
   async function loadTags() {
     if (!currentBubbleItem) return;
     const postId = currentBubbleItem._sPostId;
@@ -348,14 +359,34 @@
       const res  = await fetch(`${PROXY}/?postid=${postId}`);
       const data = await res.json();
       tagsLoaded = true;
-      if (!data.tags || !data.tags.length) { bubbleTagsList.innerHTML = '<span class="bubble-tags-loading">No tags found</span>'; return; }
-      bubbleTagsList.innerHTML = data.tags.map(tag =>
-        `<span class="bubble-tag" onclick="searchFromTag('${tag.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}')">${tag}</span>`
-      ).join('');
+      const esc     = t => t.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      const makeTag = (tag, cls) => `<span class="bubble-tag ${cls}" onclick="searchFromTag('${esc(tag)}')">${tag}</span>`;
+      const section = (label, tags, cls) => tags.length
+        ? `<div class="bubble-tag-section"><span class="bubble-tag-section-label">${label}</span>${tags.map(t => makeTag(t, cls)).join('')}</div>`
+        : '';
+
+      if (data.allTags && data.allTags.length > 0) {
+        bubbleTagsList.innerHTML = `<div class="bubble-tag-section">${data.allTags.map(t => makeTag(t, '')).join('')}</div>`;
+        return;
+      }
+
+      const { artists = [], copyright = [], character = [], general = [], uploader = null } = data;
+      if (!artists.length && !copyright.length && !character.length && !general.length && !uploader) {
+        bubbleTagsList.innerHTML = '<span class="bubble-tags-loading">No tags found</span>';
+        return;
+      }
+
+      let html = section('Artist', artists, 'bubble-tag-artist');
+      if (uploader) html += `<div class="bubble-tag-section"><span class="bubble-tag-section-label">Uploader</span><span class="bubble-tag bubble-tag-uploader">${uploader}</span></div>`;
+      html += section('Copyright', copyright, 'bubble-tag-copyright');
+      html += section('Character', character, 'bubble-tag-character');
+      html += section('General', general, '');
+      bubbleTagsList.innerHTML = html;
     } catch {
       bubbleTagsList.innerHTML = '<span class="bubble-tags-loading">Failed to load tags</span>';
     }
   }
+
   function searchFromTag(tag) {
     searchInput.value = tag;
     closeBubble();
