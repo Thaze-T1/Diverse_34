@@ -102,10 +102,11 @@
     .bubble-paid-icon { font-size: 2rem; }
     .bubble-paid-msg { font-size: 0.72rem; color: var(--muted); line-height: 1.6; }
     .bubble-paid-tag { font-size: 0.62rem; background: #2a1f08; border: 1px solid var(--warn-border); border-radius: 20px; padding: 0.2rem 0.7rem; color: var(--warn-text); }
-    .bubble-actions { padding: 0.6rem 0.8rem; display: flex; gap: 0.5rem; flex-shrink: 0; background: var(--card); }
-    .bubble-visit { flex: 1; background: none; border: 1px solid var(--border); border-radius: 7px; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.68rem; padding: 0.45rem; cursor: pointer; transition: border-color 0.15s, color 0.15s; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.3rem; }
+    .bubble-actions { padding: 0.6rem 0.8rem; display: flex; gap: 0.5rem; flex-shrink: 0; background: var(--card); align-items: center; }
+    .bubble-visit { background: none; border: 1px solid var(--border); border-radius: 7px; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.68rem; padding: 0.45rem 0.75rem; cursor: pointer; transition: border-color 0.15s, color 0.15s; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.3rem; flex-shrink: 0; white-space: nowrap; }
     .bubble-visit:hover { border-color: var(--accent); color: var(--accent); }
-    .bubble-nav { background: none; border: 1px solid var(--border); border-radius: 7px; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.68rem; padding: 0.45rem 0.8rem; cursor: pointer; transition: border-color 0.15s, color 0.15s; }
+    .bubble-spacer { flex: 1; }
+    .bubble-nav { background: none; border: 1px solid var(--border); border-radius: 7px; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.68rem; padding: 0.45rem 0.8rem; cursor: pointer; transition: border-color 0.15s, color 0.15s; flex-shrink: 0; }
     .bubble-nav:hover { border-color: var(--accent); color: var(--accent); }
     .bubble-nav:disabled { opacity: 0.25; cursor: not-allowed; }
     .bubble-resize { position: absolute; bottom: 0; right: 0; width: 28px; height: 28px; cursor: se-resize; z-index: 10; display: flex; align-items: flex-end; justify-content: flex-end; padding: 4px; touch-action: none; }
@@ -218,7 +219,8 @@
   </div>
   <div class="bubble-actions">
     <button class="bubble-nav" id="bubblePrev" onclick="bubbleStep(-1)">←</button>
-    <a class="bubble-visit" id="bubbleVisitBtn" href="#" onclick="warnLeave(event, this.href)">↗ Visit Source</a>
+    <a class="bubble-visit" id="bubbleVisitBtn" href="#" onclick="warnLeave(event, this.href)">↗ Source</a>
+    <div class="bubble-spacer"></div>
     <button class="bubble-nav" id="bubbleNext" onclick="bubbleStep(1)">→</button>
   </div>
   <div class="bubble-resize" id="bubbleResize">
@@ -335,7 +337,6 @@
     if (!currentBubbleItem) return;
     const postId = currentBubbleItem._sPostId;
     const source = currentBubbleItem._sSource;
-    const artist = (currentBubbleItem._sArtist || '').toLowerCase().trim();
     if (source !== 'Rule34.xxx' || !postId) {
       bubbleTagsList.innerHTML = '<span class="bubble-tags-loading">Tags only available for Rule34.xxx posts</span>';
       tagsLoaded = true; return;
@@ -347,24 +348,21 @@
       tagsLoaded = true;
       const tags     = data.tags     || [];
       const uploader = data.uploader || null;
+      const artists  = new Set(data.artists || []);
       if (!tags.length && !uploader) {
         bubbleTagsList.innerHTML = '<span class="bubble-tags-loading">No tags found</span>';
         return;
       }
-      const artistTags = new Set(
-        artist ? tags.filter(t =>
-          t.toLowerCase().replace(/_/g, ' ') === artist.replace(/_/g, ' ') ||
-          t.toLowerCase() === artist
-        ) : []
-      );
       let html = '';
+      // 1. Uploader — blue, not clickable
       if (uploader) html += `<span class="bubble-tag bubble-tag-uploader">${uploader}</span>`;
-      artistTags.forEach(t => {
+      // 2. Artist tags — purple, clickable
+      tags.filter(t => artists.has(t)).forEach(t => {
         const esc = t.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
         html += `<span class="bubble-tag bubble-tag-artist" onclick="searchFromTag('${esc}')">${t}</span>`;
       });
-      tags.forEach(t => {
-        if (artistTags.has(t)) return;
+      // 3. All other tags — muted, clickable
+      tags.filter(t => !artists.has(t)).forEach(t => {
         const esc = t.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
         html += `<span class="bubble-tag" onclick="searchFromTag('${esc}')">${t}</span>`;
       });
