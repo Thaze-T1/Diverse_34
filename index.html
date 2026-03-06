@@ -88,10 +88,12 @@
     .bubble.fullscreen { top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100vw !important; height: 100vh !important; border-radius: 0; }
     .bubble-header { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.8rem; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; cursor: grab; user-select: none; touch-action: none; position: sticky; top: 0; z-index: 2; }
     .bubble-header:active { cursor: grabbing; }
-    .bubble-title { font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px; }
+    .bubble-title { font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
     .bubble-controls { display: flex; gap: 0.4rem; align-items: center; }
     .bubble-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.95rem; min-width: 2rem; min-height: 2rem; display: flex; align-items: center; justify-content: center; transition: color 0.15s; border-radius: 4px; }
     .bubble-btn:hover { color: var(--text); background: var(--border); }
+    .bubble-btn.active-btn { color: var(--accent); }
+    .bubble-btn.faved { color: #f87171; }
     .bubble-media { width: 100%; background: #000; flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; display: block; }
     .bubble-media img { width: 100%; height: auto; display: block; }
     .bubble-media video { width: 100%; height: 100%; display: block; object-fit: contain; }
@@ -109,6 +111,13 @@
     .bubble-resize { position: absolute; bottom: 0; right: 0; width: 28px; height: 28px; cursor: se-resize; z-index: 10; display: flex; align-items: flex-end; justify-content: flex-end; padding: 4px; touch-action: none; }
     .bubble-resize svg { width: 14px; height: 14px; opacity: 0.4; }
     .bubble:hover .bubble-resize svg { opacity: 0.8; }
+    .bubble-tags-panel { background: var(--surface); border-top: 1px solid var(--border); flex-shrink: 0; max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+    .bubble-tags-panel.open { max-height: 200px; }
+    .bubble-tags-inner { padding: 0.6rem 0.8rem; overflow-y: auto; max-height: 200px; }
+    .bubble-tags-list { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .bubble-tag { background: var(--card); border: 1px solid var(--border); border-radius: 20px; font-size: 0.62rem; color: var(--muted); padding: 0.18rem 0.65rem; cursor: pointer; transition: border-color 0.15s, color 0.15s; white-space: nowrap; }
+    .bubble-tag:hover { border-color: var(--accent); color: var(--accent); }
+    .bubble-tags-loading { font-size: 0.68rem; color: var(--muted); padding: 0.25rem 0; }
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; }
     .modal-overlay.active { display: flex; }
     .modal { background: var(--card); border: 1px solid var(--warn-border); border-radius: 16px; padding: 2rem; max-width: 380px; width: 90%; display: flex; flex-direction: column; gap: 1rem; }
@@ -187,15 +196,22 @@
   <div class="bubble-header" id="bubbleHeader">
     <span class="bubble-title" id="bubbleTitle">Preview</span>
     <div class="bubble-controls">
+      <button class="bubble-btn" id="bubbleFavBtn" onclick="toggleBubbleFav()" title="Favorite">🤍</button>
+      <button class="bubble-btn" id="bubbleTagsBtn" onclick="toggleTagsPanel()" title="Tags" style="display:none;">🏷</button>
       <button class="bubble-btn" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
       <button class="bubble-btn" onclick="closeBubble()" title="Close">✕</button>
     </div>
   </div>
   <div class="bubble-media" id="bubbleMedia"></div>
+  <div class="bubble-tags-panel" id="bubbleTagsPanel">
+    <div class="bubble-tags-inner">
+      <div class="bubble-tags-list" id="bubbleTagsList"></div>
+    </div>
+  </div>
   <div class="bubble-actions">
-    <button class="bubble-nav" id="bubblePrev" onclick="bubbleStep(-1)" title="← Previous">←</button>
+    <button class="bubble-nav" id="bubblePrev" onclick="bubbleStep(-1)">←</button>
     <a class="bubble-visit" id="bubbleVisitBtn" href="#" onclick="warnLeave(event, this.href)">↗ Visit Source</a>
-    <button class="bubble-nav" id="bubbleNext" onclick="bubbleStep(1)" title="Next →">→</button>
+    <button class="bubble-nav" id="bubbleNext" onclick="bubbleStep(1)">→</button>
   </div>
   <div class="bubble-resize" id="bubbleResize">
     <svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.5">
@@ -250,24 +266,28 @@
     togglesEl.appendChild(btn);
   });
 
-  const searchInput    = document.getElementById('searchInput');
-  const resultsEl      = document.getElementById('results');
-  const statusEl       = document.getElementById('status');
-  const paginationEl   = document.getElementById('pagination');
-  const prevBtn        = document.getElementById('prevBtn');
-  const nextBtn        = document.getElementById('nextBtn');
-  const pageInfoEl     = document.getElementById('pageInfo');
-  const heroEl         = document.getElementById('heroState');
-  const bubble         = document.getElementById('bubble');
-  const bubbleHeader   = document.getElementById('bubbleHeader');
-  const bubbleResize   = document.getElementById('bubbleResize');
-  const autocompleteEl = document.getElementById('autocomplete');
+  const searchInput     = document.getElementById('searchInput');
+  const resultsEl       = document.getElementById('results');
+  const statusEl        = document.getElementById('status');
+  const paginationEl    = document.getElementById('pagination');
+  const prevBtn         = document.getElementById('prevBtn');
+  const nextBtn         = document.getElementById('nextBtn');
+  const pageInfoEl      = document.getElementById('pageInfo');
+  const heroEl          = document.getElementById('heroState');
+  const bubble          = document.getElementById('bubble');
+  const bubbleHeader    = document.getElementById('bubbleHeader');
+  const bubbleResize    = document.getElementById('bubbleResize');
+  const autocompleteEl  = document.getElementById('autocomplete');
+  const bubbleTagsPanel = document.getElementById('bubbleTagsPanel');
+  const bubbleTagsList  = document.getElementById('bubbleTagsList');
+  const bubbleFavBtn    = document.getElementById('bubbleFavBtn');
+  const bubbleTagsBtn   = document.getElementById('bubbleTagsBtn');
 
   let activeFilter = 'all', currentPage = 1, currentQuery = null;
   let isFullscreen = false, activeMainTab = 'search';
   let acSelected = -1, acItems = [], acTimer = null, lastRecords = [];
-  let bubbleIndex = -1;
-  let filteredForBubble = [];
+  let bubbleIndex = -1, filteredForBubble = [];
+  let currentBubbleItem = null, tagsPanelOpen = false, tagsLoaded = false;
 
   function getStorage(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; } }
   function setStorage(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
@@ -283,6 +303,7 @@
       btn.classList.toggle('faved', nowFaved);
       btn.textContent = nowFaved ? '❤️' : '🤍';
     });
+    if (currentBubbleItem && currentBubbleItem._sProfileUrl === item._sProfileUrl) updateBubbleFavBtn();
     if (activeMainTab === 'favorites') renderFavorites();
   }
   function getHistory() { return getStorage('diverse_history'); }
@@ -295,6 +316,50 @@
     if (!q || !q.trim()) return;
     const hist = getSearchHistory().filter(h => h !== q);
     hist.unshift(q); setStorage('diverse_searches', hist.slice(0, 20));
+  }
+
+  function updateBubbleFavBtn() {
+    if (!currentBubbleItem) return;
+    const faved = isFaved(currentBubbleItem._sProfileUrl);
+    bubbleFavBtn.textContent = faved ? '❤️' : '🤍';
+    bubbleFavBtn.classList.toggle('faved', faved);
+  }
+  function toggleBubbleFav() {
+    if (!currentBubbleItem) return;
+    toggleFav(currentBubbleItem);
+  }
+
+  function toggleTagsPanel() {
+    tagsPanelOpen = !tagsPanelOpen;
+    bubbleTagsPanel.classList.toggle('open', tagsPanelOpen);
+    bubbleTagsBtn.classList.toggle('active-btn', tagsPanelOpen);
+    if (tagsPanelOpen && !tagsLoaded) loadTags();
+  }
+  async function loadTags() {
+    if (!currentBubbleItem) return;
+    const postId = currentBubbleItem._sPostId;
+    const source = currentBubbleItem._sSource;
+    if (source !== 'Rule34.xxx' || !postId) {
+      bubbleTagsList.innerHTML = '<span class="bubble-tags-loading">Tags only available for Rule34.xxx posts</span>';
+      tagsLoaded = true; return;
+    }
+    bubbleTagsList.innerHTML = '<span class="bubble-tags-loading">Loading tags...</span>';
+    try {
+      const res  = await fetch(`${PROXY}/?postid=${postId}`);
+      const data = await res.json();
+      tagsLoaded = true;
+      if (!data.tags || !data.tags.length) { bubbleTagsList.innerHTML = '<span class="bubble-tags-loading">No tags found</span>'; return; }
+      bubbleTagsList.innerHTML = data.tags.map(tag =>
+        `<span class="bubble-tag" onclick="searchFromTag('${tag.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}')">${tag}</span>`
+      ).join('');
+    } catch {
+      bubbleTagsList.innerHTML = '<span class="bubble-tags-loading">Failed to load tags</span>';
+    }
+  }
+  function searchFromTag(tag) {
+    searchInput.value = tag;
+    closeBubble();
+    handleSearch(1);
   }
 
   searchInput.addEventListener('input', () => {
@@ -502,20 +567,30 @@
   document.addEventListener('touchend', endInteraction, { passive: true });
 
   async function openBubble(item) {
-    const thumbUrl   = item._sThumb       || '';
-    const title      = item._sName        || 'Untitled';
-    const sourceUrl  = item._sProfileUrl  || '#';
-    const paid       = item._bPaid        || false;
-    const fullUrl    = item._sFullUrl     || null;
-    const fallback   = item._sFallbackUrl || null;
-    const isVideo    = item._sIsVideo     || false;
-    const mediaEl    = document.getElementById('bubbleMedia');
-    const titleEl    = document.getElementById('bubbleTitle');
-    const visitBtn   = document.getElementById('bubbleVisitBtn');
-    titleEl.textContent = title; visitBtn.href = sourceUrl;
+    currentBubbleItem = item;
+    tagsLoaded = false;
+    tagsPanelOpen = false;
+    bubbleTagsPanel.classList.remove('open');
+    bubbleTagsBtn.classList.remove('active-btn');
+    bubbleTagsList.innerHTML = '';
+    bubbleTagsBtn.style.display = item._sSource === 'Rule34.xxx' ? 'flex' : 'none';
+
+    const thumbUrl  = item._sThumb       || '';
+    const title     = item._sName        || 'Untitled';
+    const sourceUrl = item._sProfileUrl  || '#';
+    const paid      = item._bPaid        || false;
+    const fullUrl   = item._sFullUrl     || null;
+    const fallback  = item._sFallbackUrl || null;
+    const isVideo   = item._sIsVideo     || false;
+    const mediaEl   = document.getElementById('bubbleMedia');
+
+    document.getElementById('bubbleTitle').textContent = title;
+    document.getElementById('bubbleVisitBtn').href = sourceUrl;
     bubble.classList.add('active'); bubble.classList.remove('fullscreen');
     isFullscreen = false; bubble.style.cssText = 'bottom:2rem;right:2rem;width:520px;height:520px;';
     updateBubbleNav();
+    updateBubbleFavBtn();
+
     if (paid) {
       mediaEl.innerHTML = `<div class="bubble-paid"><div class="bubble-paid-icon">🔒</div><div class="bubble-paid-tag">Paid content</div><div class="bubble-paid-msg">Full content requires a subscription on the source site.</div></div>`;
       return;
@@ -524,19 +599,14 @@
       mediaEl.innerHTML = '';
       const video = document.createElement('video');
       video.src = proxyImg(fullUrl); video.controls = true; video.autoplay = true; video.loop = true;
-      mediaEl.appendChild(video);
-      return;
+      mediaEl.appendChild(video); return;
     }
     if (!isVideo && fullUrl) {
       mediaEl.innerHTML = '';
       const img = document.createElement('img');
       img.src = proxyImg(fullUrl); img.alt = title;
-      img.onerror = () => {
-        img.onerror = null;
-        img.src = fallback ? proxyImg(fallback) : proxyImg(thumbUrl);
-      };
-      mediaEl.appendChild(img);
-      return;
+      img.onerror = () => { img.onerror = null; img.src = fallback ? proxyImg(fallback) : proxyImg(thumbUrl); };
+      mediaEl.appendChild(img); return;
     }
     mediaEl.innerHTML = '<div class="bubble-loading">Loading...</div>';
     try {
@@ -549,12 +619,10 @@
         mediaEl.appendChild(video);
       } else if (data.type === 'image' && data.url) {
         const img = document.createElement('img');
-        img.src = proxyImg(data.url); img.alt = title;
-        mediaEl.appendChild(img);
+        img.src = proxyImg(data.url); img.alt = title; mediaEl.appendChild(img);
       } else {
         const img = document.createElement('img');
-        img.src = proxyImg(thumbUrl); img.alt = title;
-        mediaEl.appendChild(img);
+        img.src = proxyImg(thumbUrl); img.alt = title; mediaEl.appendChild(img);
       }
     } catch {
       mediaEl.innerHTML = '';
@@ -564,7 +632,16 @@
   }
 
   function toggleFullscreen() { isFullscreen = !isFullscreen; bubble.classList.toggle('fullscreen', isFullscreen); if (!isFullscreen) bubble.style.cssText = 'bottom:2rem;right:2rem;width:520px;height:520px;'; }
-  function closeBubble() { const v = document.getElementById('bubbleMedia').querySelector('video'); if (v) v.pause(); document.getElementById('bubbleMedia').innerHTML = ''; bubble.classList.remove('active', 'fullscreen'); bubble.style.cssText = 'bottom:2rem;right:2rem;width:520px;height:520px;'; isFullscreen = false; }
+  function closeBubble() {
+    const v = document.getElementById('bubbleMedia').querySelector('video');
+    if (v) v.pause();
+    document.getElementById('bubbleMedia').innerHTML = '';
+    bubble.classList.remove('active', 'fullscreen');
+    bubble.style.cssText = 'bottom:2rem;right:2rem;width:520px;height:520px;';
+    isFullscreen = false; tagsPanelOpen = false;
+    bubbleTagsPanel.classList.remove('open');
+    currentBubbleItem = null;
+  }
 
   document.addEventListener('keydown', e => {
     const bubbleOpen = bubble.classList.contains('active');
