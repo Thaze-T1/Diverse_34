@@ -496,15 +496,16 @@
   document.addEventListener('touchend', endInteraction, { passive: true });
 
   async function openBubble(item) {
-    const thumbUrl  = item._sThumb      || '';
-    const title     = item._sName       || 'Untitled';
-    const sourceUrl = item._sProfileUrl || '#';
-    const paid      = item._bPaid       || false;
-    const fullUrl   = item._sFullUrl    || null;
-    const isVideo   = item._sIsVideo    || false;
-    const mediaEl   = document.getElementById('bubbleMedia');
-    const titleEl   = document.getElementById('bubbleTitle');
-    const visitBtn  = document.getElementById('bubbleVisitBtn');
+    const thumbUrl   = item._sThumb       || '';
+    const title      = item._sName        || 'Untitled';
+    const sourceUrl  = item._sProfileUrl  || '#';
+    const paid       = item._bPaid        || false;
+    const fullUrl    = item._sFullUrl     || null;
+    const fallback   = item._sFallbackUrl || null;
+    const isVideo    = item._sIsVideo     || false;
+    const mediaEl    = document.getElementById('bubbleMedia');
+    const titleEl    = document.getElementById('bubbleTitle');
+    const visitBtn   = document.getElementById('bubbleVisitBtn');
     titleEl.textContent = title; visitBtn.href = sourceUrl;
     bubble.classList.add('active'); bubble.classList.remove('fullscreen');
     isFullscreen = false; bubble.style.cssText = 'bottom:2rem;right:2rem;width:520px;height:520px;';
@@ -524,7 +525,10 @@
       mediaEl.innerHTML = '';
       const img = document.createElement('img');
       img.src = proxyImg(fullUrl); img.alt = title;
-      img.onerror = () => { img.src = proxyImg(thumbUrl); img.onerror = null; };
+      img.onerror = () => {
+        img.onerror = null;
+        img.src = fallback ? proxyImg(fallback) : proxyImg(thumbUrl);
+      };
       mediaEl.appendChild(img);
       return;
     }
