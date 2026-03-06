@@ -57,11 +57,11 @@
     .hero { text-align: center; padding: 4rem 1rem; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 1rem; }
     .hero-hint { font-size: 0.72rem; line-height: 2; }
     .hero-hint code { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.1rem 0.4rem; color: var(--accent); font-size: 0.7rem; }
-    .results { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; animation: fadeUp 0.4s ease both; align-items: start; }
+    .results { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; animation: fadeUp 0.4s ease both; }
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; cursor: pointer; transition: border-color 0.15s, transform 0.15s; position: relative; }
     .card:hover { border-color: var(--accent); transform: translateY(-2px); }
     .card:hover .card-heart { opacity: 1; }
-    .card-thumb-wrap { position: relative; width: 100%; aspect-ratio: 1/1; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .card-thumb-wrap { position: relative; width: 100%; aspect-ratio: 1 / 1; background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center; }
     .card-thumb { width: 100%; height: 100%; object-fit: contain; display: block; }
     .card-thumb-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 1.5rem; }
     .card-video-badge { position: absolute; top: 0.4rem; left: 0.4rem; background: rgba(0,0,0,0.65); border-radius: 4px; font-size: 0.6rem; color: var(--accent); padding: 0.15rem 0.4rem; pointer-events: none; }
@@ -84,11 +84,11 @@
     .page-info { font-size: 0.72rem; color: var(--muted); }
     .footer { position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%); font-size: 0.62rem; color: #3a3a45; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; z-index: 1; }
     .bubble { position: fixed; bottom: 2rem; right: 2rem; width: 520px; min-width: 200px; min-height: 160px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: 0 16px 48px rgba(0,0,0,0.6); z-index: 100; display: none; flex-direction: column; }
-    .bubble.active { display: flex; }
+    .bubble.active { display: flex; cursor: grab; }
+    .bubble.active:active { cursor: grabbing; }
     .bubble.fullscreen { top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100vw !important; height: 100vh !important; border-radius: 0; }
-    .bubble-header { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.8rem; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; cursor: grab; user-select: none; touch-action: none; position: sticky; top: 0; z-index: 2; }
-    .bubble-header:active { cursor: grabbing; }
-    .bubble-title { font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px; }
+    .bubble-header { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.8rem; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; user-select: none; touch-action: none; position: sticky; top: 0; z-index: 2; }
+    .bubble-title { font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
     .bubble-controls { display: flex; gap: 0.4rem; align-items: center; }
     .bubble-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.95rem; min-width: 2rem; min-height: 2rem; display: flex; align-items: center; justify-content: center; transition: color 0.15s; border-radius: 4px; }
     .bubble-btn:hover { color: var(--text); background: var(--border); }
@@ -111,18 +111,19 @@
     .bubble-resize { position: absolute; bottom: 0; right: 0; width: 28px; height: 28px; cursor: se-resize; z-index: 10; display: flex; align-items: flex-end; justify-content: flex-end; padding: 4px; touch-action: none; }
     .bubble-resize svg { width: 14px; height: 14px; opacity: 0.4; }
     .bubble:hover .bubble-resize svg { opacity: 0.8; }
+    .bubble video, .bubble button, .bubble a, .bubble .bubble-tag { cursor: auto; }
+    .bubble video { cursor: default; }
+    .bubble button, .bubble a, .bubble .bubble-tag { cursor: pointer; }
+    .bubble .bubble-tag-uploader { cursor: default; }
     .bubble-tags-panel { background: var(--surface); border-top: 1px solid var(--border); flex-shrink: 0; max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
     .bubble-tags-panel.open { max-height: 220px; }
     .bubble-tags-inner { padding: 0.6rem 0.8rem; overflow-y: auto; max-height: 220px; }
     .bubble-tags-list { display: flex; flex-wrap: wrap; gap: 0.35rem; }
-    /* base tag */
     .bubble-tag { background: var(--card); border: 1px solid var(--border); border-radius: 20px; font-size: 0.62rem; color: var(--muted); padding: 0.18rem 0.65rem; cursor: pointer; transition: border-color 0.15s, color 0.15s; white-space: nowrap; }
     .bubble-tag:hover { border-color: var(--accent); color: var(--accent); }
-    /* artist — purple */
     .bubble-tag-artist { border-color: #7c5cbf; color: #c4b5fd; font-weight: 500; }
     .bubble-tag-artist:hover { background: rgba(167,139,250,0.15); border-color: #c4b5fd; color: #e9d5ff; }
-    /* uploader — blue, not clickable */
-    .bubble-tag-uploader { border-color: #1e4a8a; color: #60a5fa; cursor: default; }
+    .bubble-tag-uploader { border-color: #1e4a8a; color: #60a5fa; }
     .bubble-tag-uploader:hover { border-color: #1e4a8a; color: #60a5fa; background: var(--card); }
     .bubble-tags-loading { font-size: 0.68rem; color: var(--muted); padding: 0.5rem 0; }
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; }
@@ -238,7 +239,6 @@
 </div>
 <script>
   const PROXY = 'https://diverse-proxy.alpc493.workers.dev';
-
   const ALL_SOURCES = [
     { id: 'rule34xxx',  label: 'Rule34.xxx',  default: true  },
     { id: 'rule34xyz',  label: 'Rule34.xyz',  default: false },
@@ -251,7 +251,6 @@
     { id: 'xbooru',     label: 'Xbooru',      default: false },
     { id: 'rule34porn', label: 'Rule34.porn', default: false },
   ];
-
   const enabledSources = new Set(ALL_SOURCES.filter(s => s.default).map(s => s.id));
   const togglesEl = document.getElementById('sourceToggles');
   ALL_SOURCES.forEach(src => {
@@ -270,7 +269,6 @@
     };
     togglesEl.appendChild(btn);
   });
-
   const searchInput     = document.getElementById('searchInput');
   const resultsEl       = document.getElementById('results');
   const statusEl        = document.getElementById('status');
@@ -287,13 +285,11 @@
   const bubbleTagsList  = document.getElementById('bubbleTagsList');
   const bubbleFavBtn    = document.getElementById('bubbleFavBtn');
   const bubbleTagsBtn   = document.getElementById('bubbleTagsBtn');
-
   let activeFilter = 'all', currentPage = 1, currentQuery = null;
   let isFullscreen = false, activeMainTab = 'search';
   let acSelected = -1, acItems = [], acTimer = null, lastRecords = [];
   let bubbleIndex = -1, filteredForBubble = [];
   let currentBubbleItem = null, tagsPanelOpen = false, tagsLoaded = false;
-
   function getStorage(k) { try { return JSON.parse(localStorage.getItem(k)) || []; } catch { return []; } }
   function setStorage(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
   function getFavs() { return getStorage('diverse_favs'); }
@@ -322,7 +318,6 @@
     const h = getSearchHistory().filter(x => x !== q);
     h.unshift(q); setStorage('diverse_searches', h.slice(0, 20));
   }
-
   function updateBubbleFavBtn() {
     if (!currentBubbleItem) return;
     const faved = isFaved(currentBubbleItem._sProfileUrl);
@@ -330,20 +325,17 @@
     bubbleFavBtn.classList.toggle('faved', faved);
   }
   function toggleBubbleFav() { if (currentBubbleItem) toggleFav(currentBubbleItem); }
-
   function toggleTagsPanel() {
     tagsPanelOpen = !tagsPanelOpen;
     bubbleTagsPanel.classList.toggle('open', tagsPanelOpen);
     bubbleTagsBtn.classList.toggle('active-btn', tagsPanelOpen);
     if (tagsPanelOpen && !tagsLoaded) loadTags();
   }
-
   async function loadTags() {
     if (!currentBubbleItem) return;
-    const postId   = currentBubbleItem._sPostId;
-    const source   = currentBubbleItem._sSource;
-    const artist   = (currentBubbleItem._sArtist || '').toLowerCase().trim();
-
+    const postId = currentBubbleItem._sPostId;
+    const source = currentBubbleItem._sSource;
+    const artist = (currentBubbleItem._sArtist || '').toLowerCase().trim();
     if (source !== 'Rule34.xxx' || !postId) {
       bubbleTagsList.innerHTML = '<span class="bubble-tags-loading">Tags only available for Rule34.xxx posts</span>';
       tagsLoaded = true; return;
@@ -353,82 +345,68 @@
       const res  = await fetch(`${PROXY}/?postid=${postId}`);
       const data = await res.json();
       tagsLoaded = true;
-
       const tags     = data.tags     || [];
       const uploader = data.uploader || null;
-
       if (!tags.length && !uploader) {
         bubbleTagsList.innerHTML = '<span class="bubble-tags-loading">No tags found</span>';
         return;
       }
-
-      // Known artist tags: anything in the tag list that matches _sArtist from the card
-      // Rule34.xxx artist tags typically use underscores — normalise for comparison
       const artistTags = new Set(
-        artist ? tags.filter(t => t.toLowerCase().replace(/_/g,' ') === artist.replace(/_/g,' ') || t.toLowerCase() === artist) : []
+        artist ? tags.filter(t =>
+          t.toLowerCase().replace(/_/g, ' ') === artist.replace(/_/g, ' ') ||
+          t.toLowerCase() === artist
+        ) : []
       );
-
       let html = '';
-
-      // Uploader first (blue, not clickable)
-      if (uploader) {
-        html += `<span class="bubble-tag bubble-tag-uploader">${uploader}</span>`;
-      }
-
-      // Artist-matching tags (purple, clickable)
+      if (uploader) html += `<span class="bubble-tag bubble-tag-uploader">${uploader}</span>`;
       artistTags.forEach(t => {
-        const esc = t.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+        const esc = t.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
         html += `<span class="bubble-tag bubble-tag-artist" onclick="searchFromTag('${esc}')">${t}</span>`;
       });
-
-      // All other tags (default, clickable)
       tags.forEach(t => {
-        if (artistTags.has(t)) return; // already rendered above
-        const esc = t.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+        if (artistTags.has(t)) return;
+        const esc = t.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
         html += `<span class="bubble-tag" onclick="searchFromTag('${esc}')">${t}</span>`;
       });
-
       bubbleTagsList.innerHTML = html;
     } catch {
       bubbleTagsList.innerHTML = '<span class="bubble-tags-loading">Failed to load tags</span>';
       tagsLoaded = true;
     }
   }
-
   function searchFromTag(tag) {
     searchInput.value = tag;
     closeBubble();
     handleSearch(1);
   }
-
   searchInput.addEventListener('input', () => {
     clearTimeout(acTimer);
-    const lastTag = searchInput.value.split(',').pop().trim().replace(/^[-~]/,'').split('/').pop().trim();
+    const lastTag = searchInput.value.split(',').pop().trim().replace(/^[-~]/, '').split('/').pop().trim();
     if (!lastTag) { hideAc(); return; }
     acTimer = setTimeout(() => fetchAc(lastTag), 300);
   });
   async function fetchAc(val) {
     acSelected = -1; acItems = [];
-    const searches = getSearchHistory().filter(s => s.toLowerCase().includes(val.toLowerCase())).slice(0,3);
+    const searches = getSearchHistory().filter(s => s.toLowerCase().includes(val.toLowerCase())).slice(0, 3);
     let tags = [];
     try { const r = await fetch(`${PROXY}/?tag=${encodeURIComponent(val)}`); tags = await r.json(); } catch {}
-    const tagNames = Array.isArray(tags) ? tags.map(t => typeof t==='object' ? t.name : t) : [];
+    const tagNames = Array.isArray(tags) ? tags.map(t => typeof t === 'object' ? t.name : t) : [];
     acItems = [...searches, ...tagNames.filter(t => !searches.includes(t))];
-    renderAc(searches, Array.isArray(tags) ? tags.filter(t => !searches.includes(typeof t==='object' ? t.name : t)) : []);
+    renderAc(searches, Array.isArray(tags) ? tags.filter(t => !searches.includes(typeof t === 'object' ? t.name : t)) : []);
   }
   function renderAc(searches, tags) {
     if (!searches.length && !tags.length) { hideAc(); return; }
     let html = '';
     if (searches.length) {
       html += `<div class="autocomplete-section">Recent searches</div>`;
-      searches.forEach((s,i) => { html += `<div class="autocomplete-item" onclick="pickAc(${i})"><span>${s}</span></div>`; });
+      searches.forEach((s, i) => { html += `<div class="autocomplete-item" onclick="pickAc(${i})"><span>${s}</span></div>`; });
     }
     if (tags.length) {
       html += `<div class="autocomplete-section">Tags</div>`;
-      tags.forEach((t,i) => {
+      tags.forEach((t, i) => {
         const idx   = searches.length + i;
-        const name  = typeof t==='object' ? t.name : t;
-        const count = typeof t==='object' && t.count>0 ? `<span class="autocomplete-count">${t.count.toLocaleString()}</span>` : '';
+        const name  = typeof t === 'object' ? t.name : t;
+        const count = typeof t === 'object' && t.count > 0 ? `<span class="autocomplete-count">${t.count.toLocaleString()}</span>` : '';
         html += `<div class="autocomplete-item" onclick="pickAc(${idx})"><span>${name}</span>${count}</div>`;
       });
     }
@@ -438,19 +416,18 @@
   function hideAc() { autocompleteEl.classList.remove('active'); acSelected = -1; }
   function pickAc(idx) {
     const parts = searchInput.value.split(',');
-    parts[parts.length-1] = ' ' + acItems[idx];
+    parts[parts.length - 1] = ' ' + acItems[idx];
     searchInput.value = parts.join(',');
     hideAc();
   }
   searchInput.addEventListener('keydown', e => {
     const items = autocompleteEl.querySelectorAll('.autocomplete-item');
-    if (e.key==='ArrowDown') { e.preventDefault(); acSelected=Math.min(acSelected+1,items.length-1); items.forEach((el,i)=>el.classList.toggle('selected',i===acSelected)); }
-    else if (e.key==='ArrowUp') { e.preventDefault(); acSelected=Math.max(acSelected-1,-1); items.forEach((el,i)=>el.classList.toggle('selected',i===acSelected)); }
-    else if (e.key==='Enter') { if (acSelected>=0&&acItems[acSelected]) { e.preventDefault(); pickAc(acSelected); } else { hideAc(); handleSearch(); } }
-    else if (e.key==='Escape') hideAc();
+    if (e.key === 'ArrowDown') { e.preventDefault(); acSelected = Math.min(acSelected + 1, items.length - 1); items.forEach((el, i) => el.classList.toggle('selected', i === acSelected)); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); acSelected = Math.max(acSelected - 1, -1); items.forEach((el, i) => el.classList.toggle('selected', i === acSelected)); }
+    else if (e.key === 'Enter') { if (acSelected >= 0 && acItems[acSelected]) { e.preventDefault(); pickAc(acSelected); } else { hideAc(); handleSearch(); } }
+    else if (e.key === 'Escape') hideAc();
   });
-  document.addEventListener('click', e => { if (!autocompleteEl.contains(e.target) && e.target!==searchInput) hideAc(); });
-
+  document.addEventListener('click', e => { if (!autocompleteEl.contains(e.target) && e.target !== searchInput) hideAc(); });
   resultsEl.addEventListener('click', e => {
     const heart = e.target.closest('.card-heart');
     if (heart) { e.stopPropagation(); toggleFav(JSON.parse(decodeURIComponent(heart.dataset.item))); return; }
@@ -458,240 +435,245 @@
     if (card) {
       const item = JSON.parse(decodeURIComponent(card.dataset.item));
       addHistory(item);
-      const idx = filteredForBubble.findIndex(r => r._sProfileUrl===item._sProfileUrl);
-      bubbleIndex = idx>=0 ? idx : 0;
+      const idx = filteredForBubble.findIndex(r => r._sProfileUrl === item._sProfileUrl);
+      bubbleIndex = idx >= 0 ? idx : 0;
       openBubble(item);
     }
   });
-
   function bubbleStep(dir) {
-    const ni = bubbleIndex+dir;
-    if (ni<0||ni>=filteredForBubble.length) return;
+    const ni = bubbleIndex + dir;
+    if (ni < 0 || ni >= filteredForBubble.length) return;
     bubbleIndex = ni;
     addHistory(filteredForBubble[ni]);
     openBubble(filteredForBubble[ni]);
   }
   function updateBubbleNav() {
-    document.getElementById('bubblePrev').disabled = bubbleIndex<=0;
-    document.getElementById('bubbleNext').disabled = bubbleIndex>=filteredForBubble.length-1;
+    document.getElementById('bubblePrev').disabled = bubbleIndex <= 0;
+    document.getElementById('bubbleNext').disabled = bubbleIndex >= filteredForBubble.length - 1;
   }
-
   function setMainTab(tab, el) {
     activeMainTab = tab;
-    document.querySelectorAll('.main-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
-    paginationEl.style.display='none'; statusEl.textContent=''; heroEl.style.display='none';
-    if (tab==='search') {
-      if (currentQuery===null&&!lastRecords.length) { heroEl.style.display='block'; resultsEl.innerHTML=''; }
-      else if (lastRecords.length) { statusEl.textContent=`Page ${currentPage} — ${lastRecords.length} results`; renderCards(lastRecords); paginationEl.style.display='flex'; }
+    paginationEl.style.display = 'none'; statusEl.textContent = ''; heroEl.style.display = 'none';
+    if (tab === 'search') {
+      if (currentQuery === null && !lastRecords.length) { heroEl.style.display = 'block'; resultsEl.innerHTML = ''; }
+      else if (lastRecords.length) { statusEl.textContent = `Page ${currentPage} — ${lastRecords.length} results`; renderCards(lastRecords); paginationEl.style.display = 'flex'; }
     }
-    else if (tab==='favorites') renderFavorites();
-    else if (tab==='history')   renderHistoryTab();
+    else if (tab === 'favorites') renderFavorites();
+    else if (tab === 'history')   renderHistoryTab();
   }
   function renderFavorites() {
-    heroEl.style.display='none'; resultsEl.innerHTML='';
-    const favs=getFavs();
-    if (!favs.length) { resultsEl.innerHTML=`<div class="empty-state"><span>❤️</span>No favorites yet!</div>`; return; }
-    statusEl.textContent=`${favs.length} favorites`; renderCards(favs);
+    heroEl.style.display = 'none'; resultsEl.innerHTML = '';
+    const favs = getFavs();
+    if (!favs.length) { resultsEl.innerHTML = `<div class="empty-state"><span>❤️</span>No favorites yet!</div>`; return; }
+    statusEl.textContent = `${favs.length} favorites`; renderCards(favs);
   }
   function renderHistoryTab() {
-    heroEl.style.display='none'; resultsEl.innerHTML='';
-    const hist=getHistory();
-    if (!hist.length) { resultsEl.innerHTML=`<div class="empty-state"><span>🕒</span>No history yet!</div>`; return; }
-    statusEl.textContent=`${hist.length} viewed posts`; renderCards(hist);
+    heroEl.style.display = 'none'; resultsEl.innerHTML = '';
+    const hist = getHistory();
+    if (!hist.length) { resultsEl.innerHTML = `<div class="empty-state"><span>🕒</span>No history yet!</div>`; return; }
+    statusEl.textContent = `${hist.length} viewed posts`; renderCards(hist);
   }
   function setFilter(filter, el) {
-    activeFilter=filter;
-    document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+    activeFilter = filter;
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
     if (lastRecords.length) renderCards(lastRecords);
   }
-
-  async function handleSearch(page=1) {
-    if (page===1) {
-      const raw=searchInput.value;
-      currentQuery=raw.trim()==='' ? null : raw;
+  async function handleSearch(page = 1) {
+    if (page === 1) {
+      const raw = searchInput.value;
+      currentQuery = raw.trim() === '' ? null : raw;
       if (currentQuery) addSearchHistory(currentQuery);
     }
-    currentPage=page;
-    document.querySelectorAll('.main-tab').forEach(t=>t.classList.remove('active'));
+    currentPage = page;
+    document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
     document.querySelector('.main-tab').classList.add('active');
-    activeMainTab='search'; heroEl.style.display='none';
-    resultsEl.innerHTML=''; paginationEl.style.display='none';
-    statusEl.textContent=currentQuery ? 'Searching...' : 'Loading latest posts...';
+    activeMainTab = 'search'; heroEl.style.display = 'none';
+    resultsEl.innerHTML = ''; paginationEl.style.display = 'none';
+    statusEl.textContent = currentQuery ? 'Searching...' : 'Loading latest posts...';
     try {
-      const qParam=currentQuery ? encodeURIComponent(currentQuery) : '';
-      const responses=await Promise.all(
-        [...enabledSources].map(source=>
+      const qParam = currentQuery ? encodeURIComponent(currentQuery) : '';
+      const responses = await Promise.all(
+        [...enabledSources].map(source =>
           fetch(`${PROXY}/?q=${qParam}&source=${source}&page=${page}`)
-            .then(r=>r.json()).catch(()=>({_aRecords:[]}))
+            .then(r => r.json()).catch(() => ({ _aRecords: [] }))
         )
       );
-      const records=responses.flatMap(r=>r._aRecords||[]);
-      lastRecords=records;
+      const records = responses.flatMap(r => r._aRecords || []);
+      lastRecords = records;
       if (!records.length) {
-        statusEl.textContent=page>1 ? 'No more results!' : 'No results found.';
-        if (page>1) { paginationEl.style.display='flex'; prevBtn.disabled=false; nextBtn.disabled=true; pageInfoEl.textContent=`Page ${page}`; }
+        statusEl.textContent = page > 1 ? 'No more results!' : 'No results found.';
+        if (page > 1) { paginationEl.style.display = 'flex'; prevBtn.disabled = false; nextBtn.disabled = true; pageInfoEl.textContent = `Page ${page}`; }
         return;
       }
-      statusEl.textContent=currentQuery ? `Page ${page} — ${records.length} results` : `Latest posts — page ${page}`;
+      statusEl.textContent = currentQuery ? `Page ${page} — ${records.length} results` : `Latest posts — page ${page}`;
       renderCards(records);
-      paginationEl.style.display='flex'; pageInfoEl.textContent=`Page ${page}`;
-      prevBtn.disabled=page<=1; nextBtn.disabled=false;
-      resultsEl.scrollIntoView({behavior:'smooth'});
-    } catch { statusEl.textContent='Something went wrong.'; }
+      paginationEl.style.display = 'flex'; pageInfoEl.textContent = `Page ${page}`;
+      prevBtn.disabled = page <= 1; nextBtn.disabled = false;
+      resultsEl.scrollIntoView({ behavior: 'smooth' });
+    } catch { statusEl.textContent = 'Something went wrong.'; }
   }
-  function changePage(dir) { handleSearch(currentPage+dir); }
+  function changePage(dir) { handleSearch(currentPage + dir); }
   function proxyImg(url) { return `${PROXY}/?img=${encodeURIComponent(url)}`; }
-
   function renderCards(records) {
-    resultsEl.innerHTML='';
-    const seen=new Set();
-    const filtered=activeFilter==='all' ? records
-      : activeFilter==='video' ? records.filter(r=>r._sIsVideo)
-      : records.filter(r=>!r._sIsVideo);
-    filteredForBubble=filtered;
+    resultsEl.innerHTML = '';
+    const seen = new Set();
+    const filtered = activeFilter === 'all' ? records
+      : activeFilter === 'video' ? records.filter(r => r._sIsVideo)
+      : records.filter(r => !r._sIsVideo);
+    filteredForBubble = filtered;
     if (!filtered.length) {
-      resultsEl.innerHTML=`<div class="empty-state"><span>🎞</span>No ${activeFilter==='video'?'videos':'images'} on this page — try Next →</div>`;
+      resultsEl.innerHTML = `<div class="empty-state"><span>🎞</span>No ${activeFilter === 'video' ? 'videos' : 'images'} on this page — try Next →</div>`;
       return;
     }
-    filtered.forEach(item=>{
-      const thumb=item._sThumb||'';
-      const fn=thumb.split('/').pop().replace(/\.[^.]+$/,'').replace(/^thumbnail_/,'');
-      if (fn&&fn.length>8) { if (seen.has(fn)) return; seen.add(fn); }
-      const sourceUrl=item._sProfileUrl||'#';
-      const faved=isFaved(sourceUrl);
-      const card=document.createElement('div');
-      card.className='card';
-      card.dataset.item=encodeURIComponent(JSON.stringify(item));
-      card.innerHTML=`
+    filtered.forEach(item => {
+      const thumb = item._sThumb || '';
+      const fn = thumb.split('/').pop().replace(/\.[^.]+$/, '').replace(/^thumbnail_/, '');
+      if (fn && fn.length > 8) { if (seen.has(fn)) return; seen.add(fn); }
+      const sourceUrl = item._sProfileUrl || '#';
+      const faved = isFaved(sourceUrl);
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.dataset.item = encodeURIComponent(JSON.stringify(item));
+      card.innerHTML = `
         <div class="card-thumb-wrap">
-          ${thumb
-            ? `<img class="card-thumb" src="${proxyImg(thumb)}" loading="lazy" onerror="this.onerror=null;this.style.opacity='0.3'">`
-            : `<div class="card-thumb-placeholder">🖼</div>`}
-          ${item._sIsVideo?`<span class="card-video-badge">▶ Video</span>`:''}
-          <button class="card-heart ${faved?'faved':''}" data-url="${sourceUrl}" data-item="${encodeURIComponent(JSON.stringify(item))}">${faved?'❤️':'🤍'}</button>
+          ${thumb ? `<img class="card-thumb" src="${proxyImg(thumb)}" loading="lazy" onerror="this.onerror=null;this.style.opacity='0.3'">` : `<div class="card-thumb-placeholder">🖼</div>`}
+          ${item._sIsVideo ? `<span class="card-video-badge">▶ Video</span>` : ''}
+          <button class="card-heart ${faved ? 'faved' : ''}" data-url="${sourceUrl}" data-item="${encodeURIComponent(JSON.stringify(item))}">${faved ? '❤️' : '🤍'}</button>
         </div>
         <div class="card-info">
           <div class="card-info-left">
-            <span class="card-source">${item._sSource||''}</span>
-            ${item._sArtist?`<span class="card-artist">@${item._sArtist}</span>`:''}
+            <span class="card-source">${item._sSource || ''}</span>
+            ${item._sArtist ? `<span class="card-artist">@${item._sArtist}</span>` : ''}
           </div>
-          ${!item._sIsVideo?`<span class="card-type">Image</span>`:''}
+          ${!item._sIsVideo ? `<span class="card-type">Image</span>` : ''}
         </div>`;
       resultsEl.appendChild(card);
     });
   }
-
-  let dragging=false,dragOffX=0,dragOffY=0,resizing=false,resizeStartX=0,resizeStartY=0,resizeStartW=0,resizeStartH=0;
-  function startDrag(cx,cy){if(isFullscreen)return;dragging=true;const r=bubble.getBoundingClientRect();dragOffX=cx-r.left;dragOffY=cy-r.top;bubble.style.transition='none';}
-  function moveDrag(cx,cy){if(!dragging)return;const mx=window.innerWidth-bubble.offsetWidth,my=window.innerHeight-bubble.offsetHeight;bubble.style.left=`${Math.max(0,Math.min(mx,cx-dragOffX))}px`;bubble.style.top=`${Math.max(0,Math.min(my,cy-dragOffY))}px`;bubble.style.right='auto';bubble.style.bottom='auto';}
-  function startResize(cx,cy){if(isFullscreen)return;resizing=true;resizeStartX=cx;resizeStartY=cy;resizeStartW=bubble.offsetWidth;resizeStartH=bubble.offsetHeight;}
-  function moveResize(cx,cy){if(!resizing)return;bubble.style.width=`${Math.max(200,resizeStartW+(cx-resizeStartX))}px`;bubble.style.height=`${Math.max(160,resizeStartH+(cy-resizeStartY))}px`;}
-  function endInteraction(){dragging=false;resizing=false;}
-  bubbleHeader.addEventListener('mousedown',e=>{startDrag(e.clientX,e.clientY);e.preventDefault();});
-  bubbleResize.addEventListener('mousedown',e=>{startResize(e.clientX,e.clientY);e.preventDefault();});
-  document.addEventListener('mousemove',e=>{moveDrag(e.clientX,e.clientY);moveResize(e.clientX,e.clientY);});
-  document.addEventListener('mouseup',endInteraction);
-  bubbleHeader.addEventListener('touchstart',e=>{startDrag(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
-  bubbleResize.addEventListener('touchstart',e=>{startResize(e.touches[0].clientX,e.touches[0].clientY);e.preventDefault();},{passive:false});
-  document.addEventListener('touchmove',e=>{if(dragging||resizing){moveDrag(e.touches[0].clientX,e.touches[0].clientY);moveResize(e.touches[0].clientX,e.touches[0].clientY);}},{passive:true});
-  document.addEventListener('touchend',endInteraction,{passive:true});
-
+  let dragging = false, dragOffX = 0, dragOffY = 0, resizing = false, resizeStartX = 0, resizeStartY = 0, resizeStartW = 0, resizeStartH = 0;
+  function startDrag(cx, cy) { if (isFullscreen) return; dragging = true; const r = bubble.getBoundingClientRect(); dragOffX = cx - r.left; dragOffY = cy - r.top; bubble.style.transition = 'none'; }
+  function moveDrag(cx, cy) { if (!dragging) return; const mx = window.innerWidth - bubble.offsetWidth, my = window.innerHeight - bubble.offsetHeight; bubble.style.left = `${Math.max(0, Math.min(mx, cx - dragOffX))}px`; bubble.style.top = `${Math.max(0, Math.min(my, cy - dragOffY))}px`; bubble.style.right = 'auto'; bubble.style.bottom = 'auto'; }
+  function startResize(cx, cy) { if (isFullscreen) return; resizing = true; resizeStartX = cx; resizeStartY = cy; resizeStartW = bubble.offsetWidth; resizeStartH = bubble.offsetHeight; }
+  function moveResize(cx, cy) { if (!resizing) return; bubble.style.width = `${Math.max(200, resizeStartW + (cx - resizeStartX))}px`; bubble.style.height = `${Math.max(160, resizeStartH + (cy - resizeStartY))}px`; }
+  function endInteraction() { dragging = false; resizing = false; }
+  const DRAG_SKIP = new Set(['BUTTON', 'A', 'INPUT', 'TEXTAREA', 'SELECT']);
+  function isDragTarget(e) {
+    if (bubbleResize.contains(e.target)) return false;
+    let el = e.target;
+    while (el && el !== bubble) {
+      if (DRAG_SKIP.has(el.tagName)) return false;
+      if (el.tagName === 'VIDEO') return false;
+      el = el.parentElement;
+    }
+    return true;
+  }
+  bubble.addEventListener('mousedown', e => {
+    if (!isDragTarget(e)) return;
+    startDrag(e.clientX, e.clientY);
+    e.preventDefault();
+  });
+  bubbleResize.addEventListener('mousedown', e => { startResize(e.clientX, e.clientY); e.preventDefault(); });
+  document.addEventListener('mousemove', e => { moveDrag(e.clientX, e.clientY); moveResize(e.clientX, e.clientY); });
+  document.addEventListener('mouseup', endInteraction);
+  bubble.addEventListener('touchstart', e => {
+    if (!isDragTarget(e)) return;
+    startDrag(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
+  bubbleResize.addEventListener('touchstart', e => { startResize(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }, { passive: false });
+  document.addEventListener('touchmove', e => { if (dragging || resizing) { moveDrag(e.touches[0].clientX, e.touches[0].clientY); moveResize(e.touches[0].clientX, e.touches[0].clientY); } }, { passive: true });
+  document.addEventListener('touchend', endInteraction, { passive: true });
   async function openBubble(item) {
-    currentBubbleItem=item;
-    tagsLoaded=false; tagsPanelOpen=false;
+    currentBubbleItem = item;
+    tagsLoaded = false; tagsPanelOpen = false;
     bubbleTagsPanel.classList.remove('open');
     bubbleTagsBtn.classList.remove('active-btn');
-    bubbleTagsList.innerHTML='';
-    bubbleTagsBtn.style.display=item._sSource==='Rule34.xxx'?'flex':'none';
-
-    const mediaEl=document.getElementById('bubbleMedia');
-    const thumbUrl=item._sThumb||'';
-    const title=item._sName||'Untitled';
-    const srcUrl=item._sProfileUrl||'#';
-    const fullUrl=item._sFullUrl||null;
-    const fallback=item._sFallbackUrl||null;
-    const isVideo=item._sIsVideo||false;
-    document.getElementById('bubbleTitle').textContent=title;
-    document.getElementById('bubbleVisitBtn').href=srcUrl;
+    bubbleTagsList.innerHTML = '';
+    bubbleTagsBtn.style.display = item._sSource === 'Rule34.xxx' ? 'flex' : 'none';
+    const mediaEl  = document.getElementById('bubbleMedia');
+    const thumbUrl = item._sThumb || '';
+    const title    = item._sName || 'Untitled';
+    const srcUrl   = item._sProfileUrl || '#';
+    const fullUrl  = item._sFullUrl || null;
+    const fallback = item._sFallbackUrl || null;
+    const isVideo  = item._sIsVideo || false;
+    document.getElementById('bubbleTitle').textContent = title;
+    document.getElementById('bubbleVisitBtn').href = srcUrl;
     bubble.classList.add('active'); bubble.classList.remove('fullscreen');
-    isFullscreen=false; bubble.style.cssText='bottom:2rem;right:2rem;width:520px;height:520px;';
+    isFullscreen = false; bubble.style.cssText = 'bottom:2rem;right:2rem;width:520px;height:520px;';
     updateBubbleNav(); updateBubbleFavBtn();
-
     if (item._bPaid) {
-      mediaEl.innerHTML=`<div class="bubble-paid"><div class="bubble-paid-icon">🔒</div><div class="bubble-paid-tag">Paid content</div><div class="bubble-paid-msg">Full content requires a subscription on the source site.</div></div>`;
+      mediaEl.innerHTML = `<div class="bubble-paid"><div class="bubble-paid-icon">🔒</div><div class="bubble-paid-tag">Paid content</div><div class="bubble-paid-msg">Full content requires a subscription on the source site.</div></div>`;
       return;
     }
-    if (isVideo&&fullUrl) {
-      mediaEl.innerHTML='';
-      const v=document.createElement('video');
-      v.src=proxyImg(fullUrl); v.controls=true; v.autoplay=true; v.loop=true;
+    if (isVideo && fullUrl) {
+      mediaEl.innerHTML = '';
+      const v = document.createElement('video');
+      v.src = proxyImg(fullUrl); v.controls = true; v.autoplay = true; v.loop = true;
       mediaEl.appendChild(v); return;
     }
-    if (!isVideo&&fullUrl) {
-      mediaEl.innerHTML='';
-      const img=document.createElement('img');
-      img.src=proxyImg(fullUrl); img.alt=title;
-      img.onerror=()=>{img.onerror=null;img.src=fallback?proxyImg(fallback):proxyImg(thumbUrl);};
+    if (!isVideo && fullUrl) {
+      mediaEl.innerHTML = '';
+      const img = document.createElement('img');
+      img.src = proxyImg(fullUrl); img.alt = title;
+      img.onerror = () => { img.onerror = null; img.src = fallback ? proxyImg(fallback) : proxyImg(thumbUrl); };
       mediaEl.appendChild(img); return;
     }
-    mediaEl.innerHTML='<div class="bubble-loading">Loading…</div>';
+    mediaEl.innerHTML = '<div class="bubble-loading">Loading...</div>';
     try {
-      const res=await fetch(`${PROXY}/?post=${encodeURIComponent(srcUrl)}`);
-      const data=await res.json();
-      mediaEl.innerHTML='';
-      if (data.type==='video') {
-        const v=document.createElement('video');
-        v.src=proxyImg(data.url); v.controls=true; v.autoplay=true; v.loop=true;
+      const res  = await fetch(`${PROXY}/?post=${encodeURIComponent(srcUrl)}`);
+      const data = await res.json();
+      mediaEl.innerHTML = '';
+      if (data.type === 'video') {
+        const v = document.createElement('video');
+        v.src = proxyImg(data.url); v.controls = true; v.autoplay = true; v.loop = true;
         mediaEl.appendChild(v);
-      } else if (data.type==='image'&&data.url) {
-        const img=document.createElement('img');
-        img.src=proxyImg(data.url); img.alt=title; mediaEl.appendChild(img);
+      } else if (data.type === 'image' && data.url) {
+        const img = document.createElement('img');
+        img.src = proxyImg(data.url); img.alt = title; mediaEl.appendChild(img);
       } else {
-        const img=document.createElement('img');
-        img.src=proxyImg(thumbUrl); img.alt=title; mediaEl.appendChild(img);
+        const img = document.createElement('img');
+        img.src = proxyImg(thumbUrl); img.alt = title; mediaEl.appendChild(img);
       }
     } catch {
-      mediaEl.innerHTML='';
-      const img=document.createElement('img');
-      img.src=proxyImg(thumbUrl); img.alt=title; mediaEl.appendChild(img);
+      mediaEl.innerHTML = '';
+      const img = document.createElement('img');
+      img.src = proxyImg(thumbUrl); img.alt = title; mediaEl.appendChild(img);
     }
   }
-
   function toggleFullscreen() {
-    isFullscreen=!isFullscreen;
-    bubble.classList.toggle('fullscreen',isFullscreen);
-    if (!isFullscreen) bubble.style.cssText='bottom:2rem;right:2rem;width:520px;height:520px;';
+    isFullscreen = !isFullscreen;
+    bubble.classList.toggle('fullscreen', isFullscreen);
+    if (!isFullscreen) bubble.style.cssText = 'bottom:2rem;right:2rem;width:520px;height:520px;';
   }
   function closeBubble() {
-    const v=document.getElementById('bubbleMedia').querySelector('video');
+    const v = document.getElementById('bubbleMedia').querySelector('video');
     if (v) v.pause();
-    document.getElementById('bubbleMedia').innerHTML='';
-    bubble.classList.remove('active','fullscreen');
-    bubble.style.cssText='bottom:2rem;right:2rem;width:520px;height:520px;';
-    isFullscreen=false; tagsPanelOpen=false;
+    document.getElementById('bubbleMedia').innerHTML = '';
+    bubble.classList.remove('active', 'fullscreen');
+    bubble.style.cssText = 'bottom:2rem;right:2rem;width:520px;height:520px;';
+    isFullscreen = false; tagsPanelOpen = false;
     bubbleTagsPanel.classList.remove('open');
-    currentBubbleItem=null;
+    currentBubbleItem = null;
   }
-
-  document.addEventListener('keydown', e=>{
-    const open=bubble.classList.contains('active');
-    const inInput=document.activeElement===searchInput;
-    if (e.key==='Escape') { if (isFullscreen) toggleFullscreen(); else if (open) closeBubble(); return; }
+  document.addEventListener('keydown', e => {
+    const open    = bubble.classList.contains('active');
+    const inInput = document.activeElement === searchInput;
+    if (e.key === 'Escape') { if (isFullscreen) toggleFullscreen(); else if (open) closeBubble(); return; }
     if (inInput) return;
-    if (e.key==='9') { e.preventDefault(); changePage(-1); return; }
-    if (e.key==='0') { e.preventDefault(); changePage(1);  return; }
+    if (e.key === '9') { e.preventDefault(); changePage(-1); return; }
+    if (e.key === '0') { e.preventDefault(); changePage(1);  return; }
     if (open) {
-      if      (e.key==='ArrowRight') { e.preventDefault(); bubbleStep(1); }
-      else if (e.key==='ArrowLeft')  { e.preventDefault(); bubbleStep(-1); }
+      if      (e.key === 'ArrowRight') { e.preventDefault(); bubbleStep(1); }
+      else if (e.key === 'ArrowLeft')  { e.preventDefault(); bubbleStep(-1); }
     }
   });
-
-  let pendingUrl=null;
-  function warnLeave(e,url){e.preventDefault();pendingUrl=url;document.getElementById('leaveModal').classList.add('active');document.getElementById('modalConfirm').onclick=()=>{window.open(pendingUrl,'_blank');closeModal();};}
-  function closeModal(){document.getElementById('leaveModal').classList.remove('active');pendingUrl=null;}
-  document.getElementById('leaveModal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+  let pendingUrl = null;
+  function warnLeave(e, url) { e.preventDefault(); pendingUrl = url; document.getElementById('leaveModal').classList.add('active'); document.getElementById('modalConfirm').onclick = () => { window.open(pendingUrl, '_blank'); closeModal(); }; }
+  function closeModal() { document.getElementById('leaveModal').classList.remove('active'); pendingUrl = null; }
+  document.getElementById('leaveModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
 </script>
 </body>
 </html>
