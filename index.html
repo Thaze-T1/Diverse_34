@@ -353,24 +353,46 @@
     if (!currentBubbleItem) return;
     const postId = currentBubbleItem._sPostId;
     const src    = currentBubbleItem._sSource;
+
     if (src !== 'Rule34.xxx' || !postId) {
       bubbleTagsInner.innerHTML = '<span class="bubble-tags-loading">Tags only available for Rule34.xxx posts</span>';
       tagsLoaded = true; return;
     }
-    bubbleTagsInner.innerHTML = '<span class="bubble-tags-loading">Loading tags…</span>';
+
+    // immediately show what we already have from the search result while we fetch typed tags
+    const existingTags = currentBubbleItem._sAllTags || [];
+    const existingUploader = currentBubbleItem._sArtist || null;
+    if (existingTags.length) {
+      let html = '';
+      if (existingUploader) html += `<div class="tag-group"><div class="tag-group-label">Uploader</div><div class="tag-group-pills">${pill(existingUploader,'bubble-tag-uploader',false)}</div></div>`;
+      html += group('Tags', existingTags, '', true);
+      bubbleTagsInner.innerHTML = html + '<div class="bubble-tags-loading" id="tagsLoadingMsg" style="margin-top:0.4rem">Fetching artist & category info…</div>';
+    } else {
+      bubbleTagsInner.innerHTML = '<span class="bubble-tags-loading">Loading tags…</span>';
+    }
+
     try {
       const res  = await fetch(`${PROXY}/?postid=${postId}`);
       const data = await res.json();
       tagsLoaded = true;
+
+      // if tag_info came back empty, keep the flat list we already showed
       if (data.allTags && data.allTags.length) {
-        bubbleTagsInner.innerHTML = `<div class="tag-group"><div class="tag-group-label">Tags</div><div class="tag-group-pills">${data.allTags.map(t => pill(t,'',true)).join('')}</div></div>`;
+        const uploader = currentBubbleItem._sArtist || null;
+        let html = '';
+        if (uploader) html += `<div class="tag-group"><div class="tag-group-label">Uploader</div><div class="tag-group-pills">${pill(uploader,'bubble-tag-uploader',false)}</div></div>`;
+        html += group('Tags', data.allTags, '', true);
+        bubbleTagsInner.innerHTML = html;
         return;
       }
+
       const { artists=[], copyright=[], character=[], general=[], uploader=null } = data;
-      if (!artists.length && !copyright.length && !character.length && !general.length && !uploader) {
+      if (!artists.length && !copyright.length && !character.length && !general.length && !uploader && !existingTags.length) {
         bubbleTagsInner.innerHTML = '<span class="bubble-tags-loading">No tags found</span>';
         return;
       }
+
+      // we have typed data — render the full categorized view
       let html = '';
       html += group('Artist', artists, 'bubble-tag-artist', true);
       if (uploader) html += `<div class="tag-group"><div class="tag-group-label">Uploader</div><div class="tag-group-pills">${pill(uploader,'bubble-tag-uploader',false)}</div></div>`;
@@ -379,7 +401,10 @@
       html += group('General', general, '', true);
       bubbleTagsInner.innerHTML = html;
     } catch {
-      bubbleTagsInner.innerHTML = '<span class="bubble-tags-loading">Failed to load tags</span>';
+      // on error, leave whatever we already rendered
+      const msg = document.getElementById('tagsLoadingMsg');
+      if (msg) msg.textContent = 'Could not load category info';
+      tagsLoaded = true;
     }
   }
 
