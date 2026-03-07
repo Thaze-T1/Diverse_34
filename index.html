@@ -83,7 +83,8 @@
     .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
     .page-info { font-size: 0.72rem; color: var(--muted); }
     .footer { position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%); font-size: 0.62rem; color: #3a3a45; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; z-index: 1; }
-    .bubble { position: fixed; bottom: 2rem; right: 2rem; width: 520px; min-width: 200px; min-height: 160px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: 0 16px 48px rgba(0,0,0,0.6); z-index: 100; display: none; flex-direction: column; }
+    /* ── Bubble ── */
+    .bubble { position: fixed; bottom: 2rem; left: 2rem; width: 520px; min-width: 200px; min-height: 160px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: 0 16px 48px rgba(0,0,0,0.6); z-index: 100; display: none; flex-direction: column; }
     .bubble.active { display: flex; cursor: grab; }
     .bubble.active:active { cursor: grabbing; }
     .bubble.fullscreen { top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100vw !important; height: 100vh !important; border-radius: 0; }
@@ -109,6 +110,9 @@
     .bubble-nav { background: none; border: 1px solid var(--border); border-radius: 7px; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.68rem; padding: 0.45rem 0.8rem; cursor: pointer; transition: border-color 0.15s, color 0.15s; flex-shrink: 0; }
     .bubble-nav:hover { border-color: var(--accent); color: var(--accent); }
     .bubble-nav:disabled { opacity: 0.25; cursor: not-allowed; }
+    .bubble-fav-btn { background: none; border: 1px solid var(--border); border-radius: 7px; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.78rem; padding: 0.45rem 0.6rem; cursor: pointer; transition: border-color 0.15s, color 0.15s; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .bubble-fav-btn:hover { border-color: #f87171; }
+    .bubble-fav-btn.faved { color: #f87171; border-color: #f87171; }
     .bubble-resize { position: absolute; bottom: 0; right: 0; width: 28px; height: 28px; cursor: se-resize; z-index: 10; display: flex; align-items: flex-end; justify-content: flex-end; padding: 4px; touch-action: none; }
     .bubble-resize svg { width: 14px; height: 14px; opacity: 0.4; }
     .bubble:hover .bubble-resize svg { opacity: 0.8; }
@@ -116,6 +120,7 @@
     .bubble video { cursor: default; }
     .bubble button, .bubble a, .bubble .bubble-tag { cursor: pointer; }
     .bubble .bubble-tag-uploader { cursor: default; }
+    /* ── Tags panel ── */
     .bubble-tags-panel { background: var(--surface); border-top: 1px solid var(--border); flex-shrink: 0; max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
     .bubble-tags-panel.open { max-height: 220px; }
     .bubble-tags-inner { padding: 0.6rem 0.8rem; overflow-y: auto; max-height: 220px; }
@@ -127,6 +132,7 @@
     .bubble-tag-uploader { border-color: #1e4a8a; color: #60a5fa; }
     .bubble-tag-uploader:hover { border-color: #1e4a8a; color: #60a5fa; background: var(--card); }
     .bubble-tags-loading { font-size: 0.68rem; color: var(--muted); padding: 0.5rem 0; }
+    /* ── Modal ── */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; }
     .modal-overlay.active { display: flex; }
     .modal { background: var(--card); border: 1px solid var(--warn-border); border-radius: 16px; padding: 2rem; max-width: 380px; width: 90%; display: flex; flex-direction: column; gap: 1rem; }
@@ -201,11 +207,11 @@
   </div>
 </div>
 <div class="footer">Diverse — content discovery gateway</div>
+
 <div class="bubble" id="bubble">
   <div class="bubble-header" id="bubbleHeader">
     <span class="bubble-title" id="bubbleTitle">Preview</span>
     <div class="bubble-controls">
-      <button class="bubble-btn" id="bubbleFavBtn" onclick="toggleBubbleFav()" title="Favorite">🤍</button>
       <button class="bubble-btn" id="bubbleTagsBtn" onclick="toggleTagsPanel()" title="Tags" style="display:none;">🏷 Tags</button>
       <button class="bubble-btn" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
       <button class="bubble-btn" onclick="closeBubble()" title="Close">✕</button>
@@ -220,6 +226,7 @@
   <div class="bubble-actions">
     <button class="bubble-nav" id="bubblePrev" onclick="bubbleStep(-1)">←</button>
     <a class="bubble-visit" id="bubbleVisitBtn" href="#" onclick="warnLeave(event, this.href)">↗ Source</a>
+    <button class="bubble-fav-btn" id="bubbleFavBtn" onclick="toggleBubbleFav()" title="Favorite">🤍</button>
     <div class="bubble-spacer"></div>
     <button class="bubble-nav" id="bubbleNext" onclick="bubbleStep(1)">→</button>
   </div>
@@ -229,6 +236,7 @@
     </svg>
   </div>
 </div>
+
 <div class="modal-overlay" id="leaveModal">
   <div class="modal">
     <h2>⚠️ You're leaving Diverse</h2>
@@ -239,6 +247,7 @@
     </div>
   </div>
 </div>
+
 <script>
   const PROXY = 'https://diverse-proxy.alpc493.workers.dev';
   const ALL_SOURCES = [
@@ -271,6 +280,7 @@
     };
     togglesEl.appendChild(btn);
   });
+
   const searchInput     = document.getElementById('searchInput');
   const resultsEl       = document.getElementById('results');
   const statusEl        = document.getElementById('status');
@@ -287,11 +297,13 @@
   const bubbleTagsList  = document.getElementById('bubbleTagsList');
   const bubbleFavBtn    = document.getElementById('bubbleFavBtn');
   const bubbleTagsBtn   = document.getElementById('bubbleTagsBtn');
+
   let activeFilter = 'all', currentPage = 1, currentQuery = null;
   let isFullscreen = false, activeMainTab = 'search';
   let acSelected = -1, acItems = [], acTimer = null, lastRecords = [];
   let bubbleIndex = -1, filteredForBubble = [];
   let currentBubbleItem = null, tagsPanelOpen = false, tagsLoaded = false;
+
   function getStorage(k) { try { return JSON.parse(localStorage.getItem(k)) || []; } catch { return []; } }
   function setStorage(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
   function getFavs() { return getStorage('diverse_favs'); }
@@ -327,12 +339,14 @@
     bubbleFavBtn.classList.toggle('faved', faved);
   }
   function toggleBubbleFav() { if (currentBubbleItem) toggleFav(currentBubbleItem); }
+
   function toggleTagsPanel() {
     tagsPanelOpen = !tagsPanelOpen;
     bubbleTagsPanel.classList.toggle('open', tagsPanelOpen);
     bubbleTagsBtn.classList.toggle('active-btn', tagsPanelOpen);
     if (tagsPanelOpen && !tagsLoaded) loadTags();
   }
+
   async function loadTags() {
     if (!currentBubbleItem) return;
     const postId = currentBubbleItem._sPostId;
@@ -354,14 +368,11 @@
         return;
       }
       let html = '';
-      // 1. Uploader — blue, not clickable
       if (uploader) html += `<span class="bubble-tag bubble-tag-uploader">${uploader}</span>`;
-      // 2. Artist tags — purple, clickable
       tags.filter(t => artists.has(t)).forEach(t => {
         const esc = t.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
         html += `<span class="bubble-tag bubble-tag-artist" onclick="searchFromTag('${esc}')">${t}</span>`;
       });
-      // 3. All other tags — muted, clickable
       tags.filter(t => !artists.has(t)).forEach(t => {
         const esc = t.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
         html += `<span class="bubble-tag" onclick="searchFromTag('${esc}')">${t}</span>`;
@@ -372,11 +383,13 @@
       tagsLoaded = true;
     }
   }
+
   function searchFromTag(tag) {
     searchInput.value = tag;
     closeBubble();
     handleSearch(1);
   }
+
   searchInput.addEventListener('input', () => {
     clearTimeout(acTimer);
     const lastTag = searchInput.value.split(',').pop().trim().replace(/^[-~]/, '').split('/').pop().trim();
@@ -426,6 +439,14 @@
     else if (e.key === 'Escape') hideAc();
   });
   document.addEventListener('click', e => { if (!autocompleteEl.contains(e.target) && e.target !== searchInput) hideAc(); });
+
+  // Close bubble on outside click
+  document.addEventListener('click', e => {
+    if (bubble.classList.contains('active') && !bubble.contains(e.target)) {
+      closeBubble();
+    }
+  });
+
   resultsEl.addEventListener('click', e => {
     const heart = e.target.closest('.card-heart');
     if (heart) { e.stopPropagation(); toggleFav(JSON.parse(decodeURIComponent(heart.dataset.item))); return; }
@@ -438,6 +459,7 @@
       openBubble(item);
     }
   });
+
   function bubbleStep(dir) {
     const ni = bubbleIndex + dir;
     if (ni < 0 || ni >= filteredForBubble.length) return;
@@ -449,6 +471,7 @@
     document.getElementById('bubblePrev').disabled = bubbleIndex <= 0;
     document.getElementById('bubbleNext').disabled = bubbleIndex >= filteredForBubble.length - 1;
   }
+
   function setMainTab(tab, el) {
     activeMainTab = tab;
     document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
@@ -479,6 +502,7 @@
     el.classList.add('active');
     if (lastRecords.length) renderCards(lastRecords);
   }
+
   async function handleSearch(page = 1) {
     if (page === 1) {
       const raw = searchInput.value;
@@ -515,6 +539,7 @@
   }
   function changePage(dir) { handleSearch(currentPage + dir); }
   function proxyImg(url) { return `${PROXY}/?img=${encodeURIComponent(url)}`; }
+
   function renderCards(records) {
     resultsEl.innerHTML = '';
     const seen = new Set();
@@ -551,12 +576,15 @@
       resultsEl.appendChild(card);
     });
   }
+
+  // Drag & resize
   let dragging = false, dragOffX = 0, dragOffY = 0, resizing = false, resizeStartX = 0, resizeStartY = 0, resizeStartW = 0, resizeStartH = 0;
   function startDrag(cx, cy) { if (isFullscreen) return; dragging = true; const r = bubble.getBoundingClientRect(); dragOffX = cx - r.left; dragOffY = cy - r.top; bubble.style.transition = 'none'; }
   function moveDrag(cx, cy) { if (!dragging) return; const mx = window.innerWidth - bubble.offsetWidth, my = window.innerHeight - bubble.offsetHeight; bubble.style.left = `${Math.max(0, Math.min(mx, cx - dragOffX))}px`; bubble.style.top = `${Math.max(0, Math.min(my, cy - dragOffY))}px`; bubble.style.right = 'auto'; bubble.style.bottom = 'auto'; }
   function startResize(cx, cy) { if (isFullscreen) return; resizing = true; resizeStartX = cx; resizeStartY = cy; resizeStartW = bubble.offsetWidth; resizeStartH = bubble.offsetHeight; }
   function moveResize(cx, cy) { if (!resizing) return; bubble.style.width = `${Math.max(200, resizeStartW + (cx - resizeStartX))}px`; bubble.style.height = `${Math.max(160, resizeStartH + (cy - resizeStartY))}px`; }
   function endInteraction() { dragging = false; resizing = false; }
+
   const DRAG_SKIP = new Set(['BUTTON', 'A', 'INPUT', 'TEXTAREA', 'SELECT']);
   function isDragTarget(e) {
     if (bubbleResize.contains(e.target)) return false;
@@ -583,6 +611,7 @@
   bubbleResize.addEventListener('touchstart', e => { startResize(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }, { passive: false });
   document.addEventListener('touchmove', e => { if (dragging || resizing) { moveDrag(e.touches[0].clientX, e.touches[0].clientY); moveResize(e.touches[0].clientX, e.touches[0].clientY); } }, { passive: true });
   document.addEventListener('touchend', endInteraction, { passive: true });
+
   async function openBubble(item) {
     currentBubbleItem = item;
     tagsLoaded = false; tagsPanelOpen = false;
@@ -600,7 +629,7 @@
     document.getElementById('bubbleTitle').textContent = title;
     document.getElementById('bubbleVisitBtn').href = srcUrl;
     bubble.classList.add('active'); bubble.classList.remove('fullscreen');
-    isFullscreen = false; bubble.style.cssText = 'bottom:2rem;right:2rem;width:520px;height:520px;';
+    isFullscreen = false; bubble.style.cssText = 'bottom:2rem;left:2rem;width:520px;height:520px;';
     updateBubbleNav(); updateBubbleFavBtn();
     if (item._bPaid) {
       mediaEl.innerHTML = `<div class="bubble-paid"><div class="bubble-paid-icon">🔒</div><div class="bubble-paid-tag">Paid content</div><div class="bubble-paid-msg">Full content requires a subscription on the source site.</div></div>`;
@@ -641,21 +670,23 @@
       img.src = proxyImg(thumbUrl); img.alt = title; mediaEl.appendChild(img);
     }
   }
+
   function toggleFullscreen() {
     isFullscreen = !isFullscreen;
     bubble.classList.toggle('fullscreen', isFullscreen);
-    if (!isFullscreen) bubble.style.cssText = 'bottom:2rem;right:2rem;width:520px;height:520px;';
+    if (!isFullscreen) bubble.style.cssText = 'bottom:2rem;left:2rem;width:520px;height:520px;';
   }
   function closeBubble() {
     const v = document.getElementById('bubbleMedia').querySelector('video');
     if (v) v.pause();
     document.getElementById('bubbleMedia').innerHTML = '';
     bubble.classList.remove('active', 'fullscreen');
-    bubble.style.cssText = 'bottom:2rem;right:2rem;width:520px;height:520px;';
+    bubble.style.cssText = 'bottom:2rem;left:2rem;width:520px;height:520px;';
     isFullscreen = false; tagsPanelOpen = false;
     bubbleTagsPanel.classList.remove('open');
     currentBubbleItem = null;
   }
+
   document.addEventListener('keydown', e => {
     const open    = bubble.classList.contains('active');
     const inInput = document.activeElement === searchInput;
@@ -668,6 +699,7 @@
       else if (e.key === 'ArrowLeft')  { e.preventDefault(); bubbleStep(-1); }
     }
   });
+
   let pendingUrl = null;
   function warnLeave(e, url) { e.preventDefault(); pendingUrl = url; document.getElementById('leaveModal').classList.add('active'); document.getElementById('modalConfirm').onclick = () => { window.open(pendingUrl, '_blank'); closeModal(); }; }
   function closeModal() { document.getElementById('leaveModal').classList.remove('active'); pendingUrl = null; }
