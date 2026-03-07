@@ -83,7 +83,6 @@
     .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
     .page-info { font-size: 0.72rem; color: var(--muted); }
     .footer { position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%); font-size: 0.62rem; color: #3a3a45; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; z-index: 1; }
-    /* ── Bubble ── */
     .bubble { position: fixed; bottom: 2rem; left: 2rem; width: 520px; min-width: 200px; min-height: 160px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: 0 16px 48px rgba(0,0,0,0.6); z-index: 100; display: none; flex-direction: column; }
     .bubble.active { display: flex; cursor: grab; }
     .bubble.active:active { cursor: grabbing; }
@@ -94,7 +93,6 @@
     .bubble-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.95rem; min-width: 2rem; min-height: 2rem; display: flex; align-items: center; justify-content: center; transition: color 0.15s; border-radius: 4px; }
     .bubble-btn:hover { color: var(--text); background: var(--border); }
     .bubble-btn.active-btn { color: var(--accent); }
-    .bubble-btn.faved { color: #f87171; }
     .bubble-media { width: 100%; background: #000; flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; display: block; }
     .bubble-media img { width: 100%; height: auto; display: block; }
     .bubble-media video { width: 100%; height: 100%; display: block; object-fit: contain; }
@@ -120,7 +118,6 @@
     .bubble video { cursor: default; }
     .bubble button, .bubble a, .bubble .bubble-tag { cursor: pointer; }
     .bubble .bubble-tag-uploader { cursor: default; }
-    /* ── Tags panel ── */
     .bubble-tags-panel { background: var(--surface); border-top: 1px solid var(--border); flex-shrink: 0; max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
     .bubble-tags-panel.open { max-height: 220px; }
     .bubble-tags-inner { padding: 0.6rem 0.8rem; overflow-y: auto; max-height: 220px; }
@@ -132,7 +129,6 @@
     .bubble-tag-uploader { border-color: #1e4a8a; color: #60a5fa; }
     .bubble-tag-uploader:hover { border-color: #1e4a8a; color: #60a5fa; background: var(--card); }
     .bubble-tags-loading { font-size: 0.68rem; color: var(--muted); padding: 0.5rem 0; }
-    /* ── Modal ── */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; }
     .modal-overlay.active { display: flex; }
     .modal { background: var(--card); border: 1px solid var(--warn-border); border-radius: 16px; padding: 2rem; max-width: 380px; width: 90%; display: flex; flex-direction: column; gap: 1rem; }
@@ -303,6 +299,7 @@
   let acSelected = -1, acItems = [], acTimer = null, lastRecords = [];
   let bubbleIndex = -1, filteredForBubble = [];
   let currentBubbleItem = null, tagsPanelOpen = false, tagsLoaded = false;
+  let bubbleJustOpened = false;
 
   function getStorage(k) { try { return JSON.parse(localStorage.getItem(k)) || []; } catch { return []; } }
   function setStorage(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
@@ -360,7 +357,7 @@
       const res  = await fetch(`${PROXY}/?postid=${postId}`);
       const data = await res.json();
       tagsLoaded = true;
-      const tags     = data.tags     || [];
+      const tags    = data.tags    || [];
       const uploader = data.uploader || null;
       const artists  = new Set(data.artists || []);
       if (!tags.length && !uploader) {
@@ -440,11 +437,10 @@
   });
   document.addEventListener('click', e => { if (!autocompleteEl.contains(e.target) && e.target !== searchInput) hideAc(); });
 
-  // Close bubble on outside click
+  // Close bubble on outside click — guard prevents the opening click from immediately closing it
   document.addEventListener('click', e => {
-    if (bubble.classList.contains('active') && !bubble.contains(e.target)) {
-      closeBubble();
-    }
+    if (bubbleJustOpened) { bubbleJustOpened = false; return; }
+    if (bubble.classList.contains('active') && !bubble.contains(e.target)) closeBubble();
   });
 
   resultsEl.addEventListener('click', e => {
@@ -577,7 +573,6 @@
     });
   }
 
-  // Drag & resize
   let dragging = false, dragOffX = 0, dragOffY = 0, resizing = false, resizeStartX = 0, resizeStartY = 0, resizeStartW = 0, resizeStartH = 0;
   function startDrag(cx, cy) { if (isFullscreen) return; dragging = true; const r = bubble.getBoundingClientRect(); dragOffX = cx - r.left; dragOffY = cy - r.top; bubble.style.transition = 'none'; }
   function moveDrag(cx, cy) { if (!dragging) return; const mx = window.innerWidth - bubble.offsetWidth, my = window.innerHeight - bubble.offsetHeight; bubble.style.left = `${Math.max(0, Math.min(mx, cx - dragOffX))}px`; bubble.style.top = `${Math.max(0, Math.min(my, cy - dragOffY))}px`; bubble.style.right = 'auto'; bubble.style.bottom = 'auto'; }
@@ -613,6 +608,7 @@
   document.addEventListener('touchend', endInteraction, { passive: true });
 
   async function openBubble(item) {
+    bubbleJustOpened = true;
     currentBubbleItem = item;
     tagsLoaded = false; tagsPanelOpen = false;
     bubbleTagsPanel.classList.remove('open');
