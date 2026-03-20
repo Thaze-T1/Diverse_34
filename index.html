@@ -300,6 +300,9 @@
   let bubbleIndex = -1, filteredForBubble = [];
   let currentBubbleItem = null, tagsPanelOpen = false, tagsLoaded = false;
   let bubbleJustOpened = false;
+  let lastR34Id = null;
+  // Stack of before_id values so Prev page works correctly
+  const r34IdStack = [];
 
   function getStorage(k) { try { return JSON.parse(localStorage.getItem(k)) || []; } catch { return []; } }
   function setStorage(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
@@ -437,7 +440,6 @@
   });
   document.addEventListener('click', e => { if (!autocompleteEl.contains(e.target) && e.target !== searchInput) hideAc(); });
 
-  // Close bubble on outside click — guard prevents opening click from immediately closing it
   document.addEventListener('click', e => {
     if (bubbleJustOpened) { bubbleJustOpened = false; return; }
     if (bubble.classList.contains('active') && !bubble.contains(e.target)) closeBubble();
@@ -504,6 +506,9 @@
       const raw = searchInput.value;
       currentQuery = raw.trim() === '' ? null : raw;
       if (currentQuery) addSearchHistory(currentQuery);
+      // Reset cursor stack on new search
+      lastR34Id = null;
+      r34IdStack.length = 0;
     }
     currentPage = page;
     document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
@@ -514,11 +519,20 @@
     try {
       const qParam = currentQuery ? encodeURIComponent(currentQuery) : '';
       const responses = await Promise.all(
-        [...enabledSources].map(source =>
-          fetch(`${PROXY}/?q=${qParam}&source=${source}&page=${page}`)
-            .then(r => r.json()).catch(() => ({ _aRecords: [] }))
-        )
+        [...enabledSources].map(source => {
+          let url = `${PROXY}/?q=${qParam}&source=${source}&page=${page}`;
+          if (source === 'rule34xxx' && page > 1 && lastR34Id) {
+            url += `&before_id=${lastR34Id}`;
+          }
+          return fetch(url).then(r => r.json()).catch(() => ({ _aRecords: [] }));
+        })
       );
+      // Extract and store the last ID for cursor pagination
+      const r34Response = responses.find((r, i) => [...enabledSources][i] === 'rule34xxx');
+      if (r34Response && r34Response._sLastId) {
+        r34IdStack.push(lastR34Id);
+        lastR34Id = r34Response._sLastId;
+      }
       const records = responses.flatMap(r => r._aRecords || []);
       lastRecords = records;
       if (!records.length) {
@@ -533,7 +547,15 @@
       resultsEl.scrollIntoView({ behavior: 'smooth' });
     } catch { statusEl.textContent = 'Something went wrong.'; }
   }
-  function changePage(dir) { handleSearch(currentPage + dir); }
+
+  function changePage(dir) {
+    if (dir === -1 && currentPage > 1) {
+      // Going back — pop the stack to restore previous before_id
+      lastR34Id = r34IdStack.pop() || null;
+    }
+    handleSearch(currentPage + dir);
+  }
+
   function proxyImg(url) { return `${PROXY}/?img=${encodeURIComponent(url)}`; }
 
   function renderCards(records) {
@@ -588,18 +610,11 @@
     }
     return true;
   }
-  bubble.addEventListener('mousedown', e => {
-    if (!isDragTarget(e)) return;
-    startDrag(e.clientX, e.clientY);
-    e.preventDefault();
-  });
+  bubble.addEventListener('mousedown', e => { if (!isDragTarget(e)) return; startDrag(e.clientX, e.clientY); e.preventDefault(); });
   bubbleResize.addEventListener('mousedown', e => { startResize(e.clientX, e.clientY); e.preventDefault(); });
   document.addEventListener('mousemove', e => { moveDrag(e.clientX, e.clientY); moveResize(e.clientX, e.clientY); });
   document.addEventListener('mouseup', endInteraction);
-  bubble.addEventListener('touchstart', e => {
-    if (!isDragTarget(e)) return;
-    startDrag(e.touches[0].clientX, e.touches[0].clientY);
-  }, { passive: true });
+  bubble.addEventListener('touchstart', e => { if (!isDragTarget(e)) return; startDrag(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
   bubbleResize.addEventListener('touchstart', e => { startResize(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }, { passive: false });
   document.addEventListener('touchmove', e => { if (dragging || resizing) { moveDrag(e.touches[0].clientX, e.touches[0].clientY); moveResize(e.touches[0].clientX, e.touches[0].clientY); } }, { passive: true });
   document.addEventListener('touchend', endInteraction, { passive: true });
