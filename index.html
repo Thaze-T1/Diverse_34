@@ -169,9 +169,9 @@
     </div>
     <div class="autocomplete" id="autocomplete"></div>
     <div class="filter-row">
-      <button class="filter-tab active" onclick="setFilter('all', this)">All</button>
-      <button class="filter-tab" onclick="setFilter('video', this)">Video</button>
-      <button class="filter-tab" onclick="setFilter('picture', this)">Picture</button>
+      <button class="filter-tab active" id="filterAll" onclick="setFilter('all', this)">All</button>
+      <button class="filter-tab" id="filterVideo" onclick="setFilter('video', this)">Video</button>
+      <button class="filter-tab" id="filterPicture" onclick="setFilter('picture', this)">Picture</button>
     </div>
     <div class="source-toggles" id="sourceToggles">
       <span class="source-label">Sources:</span>
@@ -273,6 +273,7 @@
     };
     togglesEl.appendChild(btn);
   });
+
   const searchInput     = document.getElementById('searchInput');
   const resultsEl       = document.getElementById('results');
   const statusEl        = document.getElementById('status');
@@ -289,12 +290,19 @@
   const bubbleTagsList  = document.getElementById('bubbleTagsList');
   const bubbleFavBtn    = document.getElementById('bubbleFavBtn');
   const bubbleTagsBtn   = document.getElementById('bubbleTagsBtn');
-  let activeFilter = 'all', currentPage = 1, currentQuery = null;
+
+  // Video/image keywords that should be treated as client-side filters
+  // instead of being sent to the API as tags (breaks pagination)
+  const VIDEO_KEYWORDS   = new Set(['video', 'animated', 'animation', 'webm']);
+  const PICTURE_KEYWORDS = new Set(['image', 'photo', 'picture', 'static']);
+
+  let activeFilter = 'all', currentPage = 1, currentQuery = null, currentApiQuery = null;
   let isFullscreen = false, activeMainTab = 'search';
   let acSelected = -1, acItems = [], acTimer = null, lastRecords = [];
   let bubbleIndex = -1, filteredForBubble = [];
   let currentBubbleItem = null, tagsPanelOpen = false, tagsLoaded = false;
   let bubbleJustOpened = false;
+
   function getStorage(k) { try { return JSON.parse(localStorage.getItem(k)) || []; } catch { return []; } }
   function setStorage(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
   function getFavs() { return getStorage('diverse_favs'); }
@@ -330,12 +338,14 @@
     bubbleFavBtn.classList.toggle('faved', faved);
   }
   function toggleBubbleFav() { if (currentBubbleItem) toggleFav(currentBubbleItem); }
+
   function toggleTagsPanel() {
     tagsPanelOpen = !tagsPanelOpen;
     bubbleTagsPanel.classList.toggle('open', tagsPanelOpen);
     bubbleTagsBtn.classList.toggle('active-btn', tagsPanelOpen);
     if (tagsPanelOpen && !tagsLoaded) loadTags();
   }
+
   async function loadTags() {
     if (!currentBubbleItem) return;
     const postId = currentBubbleItem._sPostId;
@@ -372,11 +382,13 @@
       tagsLoaded = true;
     }
   }
+
   function searchFromTag(tag) {
     searchInput.value = tag;
     closeBubble();
     handleSearch(1);
   }
+
   searchInput.addEventListener('input', () => {
     clearTimeout(acTimer);
     const lastTag = searchInput.value.split(',').pop().trim().replace(/^[-~]/, '').split('/').pop().trim();
@@ -426,10 +438,12 @@
     else if (e.key === 'Escape') hideAc();
   });
   document.addEventListener('click', e => { if (!autocompleteEl.contains(e.target) && e.target !== searchInput) hideAc(); });
+
   document.addEventListener('click', e => {
     if (bubbleJustOpened) { bubbleJustOpened = false; return; }
     if (bubble.classList.contains('active') && !bubble.contains(e.target)) closeBubble();
   });
+
   resultsEl.addEventListener('click', e => {
     const heart = e.target.closest('.card-heart');
     if (heart) { e.stopPropagation(); toggleFav(JSON.parse(decodeURIComponent(heart.dataset.item))); return; }
@@ -442,6 +456,7 @@
       openBubble(item);
     }
   });
+
   function bubbleStep(dir) {
     const ni = bubbleIndex + dir;
     if (ni < 0 || ni >= filteredForBubble.length) return;
@@ -453,6 +468,7 @@
     document.getElementById('bubblePrev').disabled = bubbleIndex <= 0;
     document.getElementById('bubbleNext').disabled = bubbleIndex >= filteredForBubble.length - 1;
   }
+
   function setMainTab(tab, el) {
     activeMainTab = tab;
     document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
@@ -483,20 +499,52 @@
     el.classList.add('active');
     if (lastRecords.length) renderCards(lastRecords);
   }
+
+  function activateFilterTab(filter) {
+    activeFilter = filter;
+    document.getElementById('filterAll').classList.toggle('active', filter === 'all');
+    document.getElementById('filterVideo').classList.toggle('active', filter === 'video');
+    document.getElementById('filterPicture').classList.toggle('active', filter === 'picture');
+  }
+
   async function handleSearch(page = 1) {
     if (page === 1) {
       const raw = searchInput.value;
       currentQuery = raw.trim() === '' ? null : raw;
       if (currentQuery) addSearchHistory(currentQuery);
+
+      // Parse out video/picture keywords and treat them as client-side filters
+      // so they don't break pagination on Rule34.xxx
+      let impliedFilter = null;
+      if (currentQuery) {
+        const parts = currentQuery.split(',').map(p => p.trim());
+        const remaining = parts.filter(p => {
+          const lower = p.toLowerCase();
+          if (VIDEO_KEYWORDS.has(lower))   { impliedFilter = 'video';   return false; }
+          if (PICTURE_KEYWORDS.has(lower)) { impliedFilter = 'picture'; return false; }
+          return true;
+        });
+        currentApiQuery = remaining.length > 0 ? remaining.join(', ') : null;
+      } else {
+        currentApiQuery = null;
+      }
+
+      // Activate the implied filter if found, otherwise reset to All
+      if (impliedFilter) {
+        activateFilterTab(impliedFilter);
+      } else {
+        activateFilterTab('all');
+      }
     }
+
     currentPage = page;
     document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
     document.querySelector('.main-tab').classList.add('active');
     activeMainTab = 'search'; heroEl.style.display = 'none';
     resultsEl.innerHTML = ''; paginationEl.style.display = 'none';
-    statusEl.textContent = currentQuery ? 'Searching...' : 'Loading latest posts...';
+    statusEl.textContent = currentApiQuery ? 'Searching...' : 'Loading latest posts...';
     try {
-      const qParam = currentQuery ? encodeURIComponent(currentQuery) : '';
+      const qParam = currentApiQuery ? encodeURIComponent(currentApiQuery) : '';
       const responses = await Promise.all(
         [...enabledSources].map(source =>
           fetch(`${PROXY}/?q=${qParam}&source=${source}&page=${page}`)
@@ -510,15 +558,17 @@
         if (page > 1) { paginationEl.style.display = 'flex'; prevBtn.disabled = false; nextBtn.disabled = true; pageInfoEl.textContent = `Page ${page}`; }
         return;
       }
-      statusEl.textContent = currentQuery ? `Page ${page} — ${records.length} results` : `Latest posts — page ${page}`;
+      statusEl.textContent = currentApiQuery ? `Page ${page} — ${records.length} results` : `Latest posts — page ${page}`;
       renderCards(records);
       paginationEl.style.display = 'flex'; pageInfoEl.textContent = `Page ${page}`;
       prevBtn.disabled = page <= 1; nextBtn.disabled = false;
       resultsEl.scrollIntoView({ behavior: 'smooth' });
     } catch { statusEl.textContent = 'Something went wrong.'; }
   }
+
   function changePage(dir) { handleSearch(currentPage + dir); }
   function proxyImg(url) { return `${PROXY}/?img=${encodeURIComponent(url)}`; }
+
   function renderCards(records) {
     resultsEl.innerHTML = '';
     const filtered = activeFilter === 'all' ? records
@@ -552,12 +602,14 @@
       resultsEl.appendChild(card);
     });
   }
+
   let dragging = false, dragOffX = 0, dragOffY = 0, resizing = false, resizeStartX = 0, resizeStartY = 0, resizeStartW = 0, resizeStartH = 0;
   function startDrag(cx, cy) { if (isFullscreen) return; dragging = true; const r = bubble.getBoundingClientRect(); dragOffX = cx - r.left; dragOffY = cy - r.top; bubble.style.transition = 'none'; }
   function moveDrag(cx, cy) { if (!dragging) return; const mx = window.innerWidth - bubble.offsetWidth, my = window.innerHeight - bubble.offsetHeight; bubble.style.left = `${Math.max(0, Math.min(mx, cx - dragOffX))}px`; bubble.style.top = `${Math.max(0, Math.min(my, cy - dragOffY))}px`; bubble.style.right = 'auto'; bubble.style.bottom = 'auto'; }
   function startResize(cx, cy) { if (isFullscreen) return; resizing = true; resizeStartX = cx; resizeStartY = cy; resizeStartW = bubble.offsetWidth; resizeStartH = bubble.offsetHeight; }
   function moveResize(cx, cy) { if (!resizing) return; bubble.style.width = `${Math.max(200, resizeStartW + (cx - resizeStartX))}px`; bubble.style.height = `${Math.max(160, resizeStartH + (cy - resizeStartY))}px`; }
   function endInteraction() { dragging = false; resizing = false; }
+
   const DRAG_SKIP = new Set(['BUTTON', 'A', 'INPUT', 'TEXTAREA', 'SELECT']);
   function isDragTarget(e) {
     if (bubbleResize.contains(e.target)) return false;
@@ -577,6 +629,7 @@
   bubbleResize.addEventListener('touchstart', e => { startResize(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }, { passive: false });
   document.addEventListener('touchmove', e => { if (dragging || resizing) { moveDrag(e.touches[0].clientX, e.touches[0].clientY); moveResize(e.touches[0].clientX, e.touches[0].clientY); } }, { passive: true });
   document.addEventListener('touchend', endInteraction, { passive: true });
+
   async function openBubble(item) {
     bubbleJustOpened = true;
     currentBubbleItem = item;
@@ -636,6 +689,7 @@
       img.src = proxyImg(thumbUrl); img.alt = title; mediaEl.appendChild(img);
     }
   }
+
   function toggleFullscreen() {
     isFullscreen = !isFullscreen;
     bubble.classList.toggle('fullscreen', isFullscreen);
@@ -651,6 +705,7 @@
     bubbleTagsPanel.classList.remove('open');
     currentBubbleItem = null;
   }
+
   document.addEventListener('keydown', e => {
     const open    = bubble.classList.contains('active');
     const inInput = document.activeElement === searchInput;
@@ -663,6 +718,7 @@
       else if (e.key === 'ArrowLeft')  { e.preventDefault(); bubbleStep(-1); }
     }
   });
+
   let pendingUrl = null;
   function warnLeave(e, url) { e.preventDefault(); pendingUrl = url; document.getElementById('leaveModal').classList.add('active'); document.getElementById('modalConfirm').onclick = () => { window.open(pendingUrl, '_blank'); closeModal(); }; }
   function closeModal() { document.getElementById('leaveModal').classList.remove('active'); pendingUrl = null; }
