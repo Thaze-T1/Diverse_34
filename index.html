@@ -203,7 +203,6 @@
   </div>
 </div>
 <div class="footer">Diverse — content discovery gateway</div>
-
 <div class="bubble" id="bubble">
   <div class="bubble-header" id="bubbleHeader">
     <span class="bubble-title" id="bubbleTitle">Preview</span>
@@ -232,7 +231,6 @@
     </svg>
   </div>
 </div>
-
 <div class="modal-overlay" id="leaveModal">
   <div class="modal">
     <h2>⚠️ You're leaving Diverse</h2>
@@ -243,7 +241,6 @@
     </div>
   </div>
 </div>
-
 <script>
   const PROXY = 'https://diverse-proxy.alpc493.workers.dev';
   const ALL_SOURCES = [
@@ -276,7 +273,6 @@
     };
     togglesEl.appendChild(btn);
   });
-
   const searchInput     = document.getElementById('searchInput');
   const resultsEl       = document.getElementById('results');
   const statusEl        = document.getElementById('status');
@@ -293,19 +289,12 @@
   const bubbleTagsList  = document.getElementById('bubbleTagsList');
   const bubbleFavBtn    = document.getElementById('bubbleFavBtn');
   const bubbleTagsBtn   = document.getElementById('bubbleTagsBtn');
-
   let activeFilter = 'all', currentPage = 1, currentQuery = null;
   let isFullscreen = false, activeMainTab = 'search';
   let acSelected = -1, acItems = [], acTimer = null, lastRecords = [];
   let bubbleIndex = -1, filteredForBubble = [];
   let currentBubbleItem = null, tagsPanelOpen = false, tagsLoaded = false;
   let bubbleJustOpened = false;
-
-  // Cursor-based pagination for Rule34.xxx
-  // Maps page number -> the before_id needed to fetch that page
-  // Page 1 always uses null (no cursor = newest posts)
-  const r34PageCursors = { 1: null };
-
   function getStorage(k) { try { return JSON.parse(localStorage.getItem(k)) || []; } catch { return []; } }
   function setStorage(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
   function getFavs() { return getStorage('diverse_favs'); }
@@ -341,14 +330,12 @@
     bubbleFavBtn.classList.toggle('faved', faved);
   }
   function toggleBubbleFav() { if (currentBubbleItem) toggleFav(currentBubbleItem); }
-
   function toggleTagsPanel() {
     tagsPanelOpen = !tagsPanelOpen;
     bubbleTagsPanel.classList.toggle('open', tagsPanelOpen);
     bubbleTagsBtn.classList.toggle('active-btn', tagsPanelOpen);
     if (tagsPanelOpen && !tagsLoaded) loadTags();
   }
-
   async function loadTags() {
     if (!currentBubbleItem) return;
     const postId = currentBubbleItem._sPostId;
@@ -385,13 +372,11 @@
       tagsLoaded = true;
     }
   }
-
   function searchFromTag(tag) {
     searchInput.value = tag;
     closeBubble();
     handleSearch(1);
   }
-
   searchInput.addEventListener('input', () => {
     clearTimeout(acTimer);
     const lastTag = searchInput.value.split(',').pop().trim().replace(/^[-~]/, '').split('/').pop().trim();
@@ -441,12 +426,10 @@
     else if (e.key === 'Escape') hideAc();
   });
   document.addEventListener('click', e => { if (!autocompleteEl.contains(e.target) && e.target !== searchInput) hideAc(); });
-
   document.addEventListener('click', e => {
     if (bubbleJustOpened) { bubbleJustOpened = false; return; }
     if (bubble.classList.contains('active') && !bubble.contains(e.target)) closeBubble();
   });
-
   resultsEl.addEventListener('click', e => {
     const heart = e.target.closest('.card-heart');
     if (heart) { e.stopPropagation(); toggleFav(JSON.parse(decodeURIComponent(heart.dataset.item))); return; }
@@ -459,7 +442,6 @@
       openBubble(item);
     }
   });
-
   function bubbleStep(dir) {
     const ni = bubbleIndex + dir;
     if (ni < 0 || ni >= filteredForBubble.length) return;
@@ -471,7 +453,6 @@
     document.getElementById('bubblePrev').disabled = bubbleIndex <= 0;
     document.getElementById('bubbleNext').disabled = bubbleIndex >= filteredForBubble.length - 1;
   }
-
   function setMainTab(tab, el) {
     activeMainTab = tab;
     document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
@@ -502,15 +483,11 @@
     el.classList.add('active');
     if (lastRecords.length) renderCards(lastRecords);
   }
-
   async function handleSearch(page = 1) {
     if (page === 1) {
       const raw = searchInput.value;
       currentQuery = raw.trim() === '' ? null : raw;
       if (currentQuery) addSearchHistory(currentQuery);
-      // Reset cursor map on new search
-      Object.keys(r34PageCursors).forEach(k => delete r34PageCursors[k]);
-      r34PageCursors[1] = null;
     }
     currentPage = page;
     document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
@@ -520,22 +497,12 @@
     statusEl.textContent = currentQuery ? 'Searching...' : 'Loading latest posts...';
     try {
       const qParam = currentQuery ? encodeURIComponent(currentQuery) : '';
-      const sourceList = [...enabledSources];
-      const cursorForThisPage = r34PageCursors[page] !== undefined ? r34PageCursors[page] : null;
       const responses = await Promise.all(
-        sourceList.map(source => {
-          let url = `${PROXY}/?q=${qParam}&source=${source}&page=${page}`;
-          if (source === 'rule34xxx' && cursorForThisPage) {
-            url += `&before_id=${cursorForThisPage}`;
-          }
-          return fetch(url).then(r => r.json()).catch(() => ({ _aRecords: [] }));
-        })
+        [...enabledSources].map(source =>
+          fetch(`${PROXY}/?q=${qParam}&source=${source}&page=${page}`)
+            .then(r => r.json()).catch(() => ({ _aRecords: [] }))
+        )
       );
-      // Store cursor for next page
-      const r34Idx = sourceList.indexOf('rule34xxx');
-      if (r34Idx !== -1 && responses[r34Idx] && responses[r34Idx]._sLastId) {
-        r34PageCursors[page + 1] = responses[r34Idx]._sLastId;
-      }
       const records = responses.flatMap(r => r._aRecords || []);
       lastRecords = records;
       if (!records.length) {
@@ -550,10 +517,8 @@
       resultsEl.scrollIntoView({ behavior: 'smooth' });
     } catch { statusEl.textContent = 'Something went wrong.'; }
   }
-
   function changePage(dir) { handleSearch(currentPage + dir); }
   function proxyImg(url) { return `${PROXY}/?img=${encodeURIComponent(url)}`; }
-
   function renderCards(records) {
     resultsEl.innerHTML = '';
     const filtered = activeFilter === 'all' ? records
@@ -587,14 +552,12 @@
       resultsEl.appendChild(card);
     });
   }
-
   let dragging = false, dragOffX = 0, dragOffY = 0, resizing = false, resizeStartX = 0, resizeStartY = 0, resizeStartW = 0, resizeStartH = 0;
   function startDrag(cx, cy) { if (isFullscreen) return; dragging = true; const r = bubble.getBoundingClientRect(); dragOffX = cx - r.left; dragOffY = cy - r.top; bubble.style.transition = 'none'; }
   function moveDrag(cx, cy) { if (!dragging) return; const mx = window.innerWidth - bubble.offsetWidth, my = window.innerHeight - bubble.offsetHeight; bubble.style.left = `${Math.max(0, Math.min(mx, cx - dragOffX))}px`; bubble.style.top = `${Math.max(0, Math.min(my, cy - dragOffY))}px`; bubble.style.right = 'auto'; bubble.style.bottom = 'auto'; }
   function startResize(cx, cy) { if (isFullscreen) return; resizing = true; resizeStartX = cx; resizeStartY = cy; resizeStartW = bubble.offsetWidth; resizeStartH = bubble.offsetHeight; }
   function moveResize(cx, cy) { if (!resizing) return; bubble.style.width = `${Math.max(200, resizeStartW + (cx - resizeStartX))}px`; bubble.style.height = `${Math.max(160, resizeStartH + (cy - resizeStartY))}px`; }
   function endInteraction() { dragging = false; resizing = false; }
-
   const DRAG_SKIP = new Set(['BUTTON', 'A', 'INPUT', 'TEXTAREA', 'SELECT']);
   function isDragTarget(e) {
     if (bubbleResize.contains(e.target)) return false;
@@ -614,7 +577,6 @@
   bubbleResize.addEventListener('touchstart', e => { startResize(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }, { passive: false });
   document.addEventListener('touchmove', e => { if (dragging || resizing) { moveDrag(e.touches[0].clientX, e.touches[0].clientY); moveResize(e.touches[0].clientX, e.touches[0].clientY); } }, { passive: true });
   document.addEventListener('touchend', endInteraction, { passive: true });
-
   async function openBubble(item) {
     bubbleJustOpened = true;
     currentBubbleItem = item;
@@ -674,7 +636,6 @@
       img.src = proxyImg(thumbUrl); img.alt = title; mediaEl.appendChild(img);
     }
   }
-
   function toggleFullscreen() {
     isFullscreen = !isFullscreen;
     bubble.classList.toggle('fullscreen', isFullscreen);
@@ -690,7 +651,6 @@
     bubbleTagsPanel.classList.remove('open');
     currentBubbleItem = null;
   }
-
   document.addEventListener('keydown', e => {
     const open    = bubble.classList.contains('active');
     const inInput = document.activeElement === searchInput;
@@ -703,7 +663,6 @@
       else if (e.key === 'ArrowLeft')  { e.preventDefault(); bubbleStep(-1); }
     }
   });
-
   let pendingUrl = null;
   function warnLeave(e, url) { e.preventDefault(); pendingUrl = url; document.getElementById('leaveModal').classList.add('active'); document.getElementById('modalConfirm').onclick = () => { window.open(pendingUrl, '_blank'); closeModal(); }; }
   function closeModal() { document.getElementById('leaveModal').classList.remove('active'); pendingUrl = null; }
